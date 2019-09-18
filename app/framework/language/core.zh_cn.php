@@ -99,7 +99,7 @@ return array(
     'error_webservice_operation'=>'在 {0} 类中没有找到服务接口。',
     'error_webservice_soap'=>'服务器环境不支持 SOAP 。',
 
-    'error_cache_CORE_CACHE_CONFIG'=>'请在/framework/com/global/constants.core.php文件中对CORE_CACHE_CONFIG常量进行配置。',
+    'error_cache_CORE_CACHE_CONFIG'=>'请在/framework/cn/global/constants.core.php文件中对CORE_CACHE_CONFIG常量进行配置。',
     'error_cache_cache_type'=>'不支持的核心缓存类型【{0}】',
 
     'error_main_redis_connect'=>'主Redis服务器【{0}:{1}】连接失败。',

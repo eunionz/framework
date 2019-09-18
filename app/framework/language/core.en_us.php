@@ -99,7 +99,7 @@ return array(
     'error_webservice_operation'=>'Did not find a service interface in class {0}.',
     'error_webservice_soap'=>'server environment not support SOAP.',
 
-    'error_cache_CORE_CACHE_CONFIG'=>'Please set CORE_CACHE_CONFIG constrant in /framework/com/global/constants.core.php file.',
+    'error_cache_CORE_CACHE_CONFIG'=>'Please set CORE_CACHE_CONFIG constrant in /framework/cn/global/constants.core.php file.',
     'error_cache_cache_type'=>'not support core cache type[{0}].',
 
     'error_main_redis_connect'=>'Master redis server[{0}:{1}] connect fial.',
