@@ -28,6 +28,7 @@
   },
   "autoload": {
     "psr-4": {
+      
       "GPBMetadata\\": "app/package/grpc/GPBMetadata",
       "Grpc\\": "app/package/grpc/Grpc"
     },
