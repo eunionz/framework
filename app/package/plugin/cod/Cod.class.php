@@ -18,7 +18,7 @@ defined('APP_IN') or exit('Access Denied');
  * Class Cod
  * @package plugin\cod
  */
-class Cod extends \com\eunionz\core\Plugin {
+class Cod extends \cn\eunionz\core\Plugin {
 
     public function get_code($order, $payment) {
         return array('result' => true);

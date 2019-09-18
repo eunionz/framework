@@ -18,7 +18,7 @@ defined('APP_IN') or exit('Access Denied');
  * FtpCkfinder 支持类
  *
  */
-class FtpCkfinder extends \com\eunionz\core\Plugin
+class FtpCkfinder extends \cn\eunionz\core\Plugin
 {
 
     private $off;                          // 返回操作状态(成功/失败)

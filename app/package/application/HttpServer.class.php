@@ -15,7 +15,7 @@ namespace package\application;
  * Class Application
  * @package package\application
  */
-class HttpServer extends \com\eunionz\core\Server
+class HttpServer extends \cn\eunionz\core\Server
 {
 
 

@@ -14,7 +14,7 @@ namespace package\plugin\filter;
 defined('APP_IN') or exit('Access Denied');
 
 
-class Filter extends \com\eunionz\core\Plugin
+class Filter extends \cn\eunionz\core\Plugin
 {
 
     private $APP_BASE_DATA_NOT_FILTER_FIELD_NAMES;

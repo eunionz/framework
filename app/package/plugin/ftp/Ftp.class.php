@@ -18,7 +18,7 @@ defined('APP_IN') or exit('Access Denied');
  * Ftp Plugin
  *
  */
-class Ftp extends \com\eunionz\core\Plugin
+class Ftp extends \cn\eunionz\core\Plugin
 {
     private $off;                          // 返回操作状态(成功/失败)
     private $conn_id=null;                // FTP连接

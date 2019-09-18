@@ -13,7 +13,7 @@ namespace package\plugin\validation;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Validation extends \com\eunionz\core\Plugin
+class Validation extends \cn\eunionz\core\Plugin
 {
     /**
      * 数字验证

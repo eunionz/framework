@@ -16,7 +16,7 @@ defined('APP_IN') or exit('Access Denied');
  * 通用缓存类，工具类
  * Class Cache
  */
-class Cache extends \com\eunionz\core\Plugin
+class Cache extends \cn\eunionz\core\Plugin
 {
 
     private $is_cache=true;//是否缓存

@@ -16,7 +16,7 @@ defined('APP_IN') or exit('Access Denied');
  * 通用插件类，工具类
  * Class Common Plugin
  */
-class Common extends \com\eunionz\core\Plugin
+class Common extends \cn\eunionz\core\Plugin
 {
 
     public function hmac($data, $key){

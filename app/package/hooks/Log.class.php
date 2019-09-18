@@ -9,7 +9,7 @@
 namespace package\hooks;
 
 defined('APP_IN') or exit('Access Denied');
-class Log extends \com\eunionz\core\Kernel{
+class Log extends \cn\eunionz\core\Kernel{
 
     public function before_launch($param1, $param2)
     {

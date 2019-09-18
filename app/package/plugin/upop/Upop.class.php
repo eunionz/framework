@@ -14,7 +14,7 @@ namespace package\plugin\upop;
 defined('APP_IN') or exit('Access Denied');
 
 
-class Upop extends \com\eunionz\core\Plugin {
+class Upop extends \cn\eunionz\core\Plugin {
     /**
      * 生成支付代码
      * @param   array $order 订单信息

@@ -2,7 +2,7 @@
 
 namespace package\application;
 
-use com\eunionz\core\Kernel;
+use cn\eunionz\core\Kernel;
 
 /**
  * Udp 客户端类
@@ -58,7 +58,7 @@ class UdpClient extends Kernel
         $this->udp_timeout = isset($udp_config['timeout']) ? $udp_config['timeout'] : 0.5;
         $this->udp_client = new \Swoole\Coroutine\Client(SWOOLE_SOCK_UDP);
         if (!$this->udp_client->connect($this->udp_host, $this->udp_port, $this->udp_timeout)) {
-            throw new \com\eunionz\exception\BaseException($this->getLang('error_udp_client_connect_fail', array($this->udp_host . ':' . $this->udp_port)), 50000);
+            throw new \cn\eunionz\exception\BaseException($this->getLang('error_udp_client_connect_fail', array($this->udp_host . ':' . $this->udp_port)), 50000);
         }
     }
 

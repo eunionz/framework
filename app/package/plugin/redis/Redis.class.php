@@ -16,7 +16,7 @@ defined('APP_IN') or exit('Access Denied');
  * Redis，工具类
  * Class Redis
  */
-class Redis extends \com\eunionz\core\Plugin
+class Redis extends \cn\eunionz\core\Plugin
 {
 
     private $host='127.0.0.1';//redis主机

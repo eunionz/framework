@@ -10,7 +10,7 @@ namespace package\plugin\token;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Token extends \com\eunionz\core\Plugin
+class Token extends \cn\eunionz\core\Plugin
 {
 
     /**

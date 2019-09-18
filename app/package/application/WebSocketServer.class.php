@@ -15,7 +15,7 @@ namespace package\application;
  * Class WebSocketServer
  * @package package\application
  */
-class WebSocketServer extends \com\eunionz\core\Server
+class WebSocketServer extends \cn\eunionz\core\Server
 {
 
     public function onMessage($server, $frame, $cfg)

@@ -12,7 +12,7 @@ namespace package\plugin\yeepay;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Yeepay extends \com\eunionz\core\Plugin {
+class Yeepay extends \cn\eunionz\core\Plugin {
 
     /**
      * 商户编号

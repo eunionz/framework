@@ -18,7 +18,7 @@ defined('APP_IN') or exit('Access Denied');
  * Class Mysqldump
  * @package plugin\mysqldump
  */
-class Mysqldump extends \com\eunionz\core\Plugin
+class Mysqldump extends \cn\eunionz\core\Plugin
 {
 
     public $is_debug=true;

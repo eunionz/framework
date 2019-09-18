@@ -3,7 +3,7 @@ namespace package\plugin\apidoc;
 defined('APP_IN') or exit('Access Denied');
 include_once("DocParser.php");
 include_once("helper.php");
-class Apidoc extends \com\eunionz\core\Plugin
+class Apidoc extends \cn\eunionz\core\Plugin
 {
     protected  $config = [
         'title'=>'APi接口文档',

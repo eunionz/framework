@@ -13,7 +13,7 @@ namespace package\plugin\wxpay3;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Wxpay3 extends \com\eunionz\core\Plugin
+class Wxpay3 extends \cn\eunionz\core\Plugin
 {
 
 

@@ -14,7 +14,7 @@ namespace package\controller\task;
  * @package package\controller\task
  * @RPC_CLASS
  */
-class Home extends \com\eunionz\core\Controller
+class Home extends \cn\eunionz\core\Controller
 {
 
     public function getProcessName()

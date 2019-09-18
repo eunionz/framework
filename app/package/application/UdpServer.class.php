@@ -2,17 +2,17 @@
 
 namespace package\application;
 
-use com\eunionz\core\Context;
-use com\eunionz\core\I18n;
-use com\eunionz\core\Request;
-use com\eunionz\core\Session;
+use cn\eunionz\core\Context;
+use cn\eunionz\core\I18n;
+use cn\eunionz\core\Request;
+use cn\eunionz\core\Session;
 
 /**
  * Udp 服务器类
  * Class UdpServer
  * @package package\application
  */
-class UdpServer extends \com\eunionz\core\Server
+class UdpServer extends \cn\eunionz\core\Server
 {
     public function onPacket($server, $data, $client_info, $cfg)
     {

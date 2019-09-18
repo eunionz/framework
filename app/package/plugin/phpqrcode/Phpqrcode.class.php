@@ -13,7 +13,7 @@ namespace package\plugin\phpqrcode;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Phpqrcode extends \com\eunionz\core\Plugin
+class Phpqrcode extends \cn\eunionz\core\Plugin
 {
     public function __construct()
     {

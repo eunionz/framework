@@ -20,7 +20,7 @@ defined('APP_IN') or exit('Access Denied');
  * @package plugin\phpmailer
  */
  require_once('idna_convert.class.php');
-class Myphpmailer extends \com\eunionz\core\Plugin
+class Myphpmailer extends \cn\eunionz\core\Plugin
 {
 
     // 实例句柄

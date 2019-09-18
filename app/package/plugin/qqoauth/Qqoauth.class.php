@@ -14,7 +14,7 @@ namespace package\plugin\qqoauth;
 defined('APP_IN') or exit('Access Denied');
 
 
-class Qqoauth extends \com\eunionz\core\Plugin
+class Qqoauth extends \cn\eunionz\core\Plugin
 {
     private $qc;
 

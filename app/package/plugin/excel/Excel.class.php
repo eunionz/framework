@@ -12,7 +12,7 @@ namespace package\plugin\excel;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Excel extends \com\eunionz\core\Plugin
+class Excel extends \cn\eunionz\core\Plugin
 {
     public function __construct()
     {

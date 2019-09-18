@@ -28,7 +28,7 @@ defined('APP_IN') or exit('Access Denied');
  * @todo Add option to give out last line as footer (bold text)
  * @todo Add option to write to file
  */
-class Phpexcel extends \com\eunionz\core\Plugin
+class Phpexcel extends \cn\eunionz\core\Plugin
 {
 
 	/**

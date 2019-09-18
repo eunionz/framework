@@ -13,7 +13,7 @@ namespace package\plugin\weibooauth;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Weibooauth extends \com\eunionz\core\Plugin
+class Weibooauth extends \cn\eunionz\core\Plugin
 {
     private $weibo;
 

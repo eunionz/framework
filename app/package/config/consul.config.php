@@ -1,8 +1,8 @@
 <?php
 ///////////////////////////////////////////////////////////////////////////////
 ///////    Eunionz PHP Framework rabbitmq config                        ///////
-///////    All copyright at Eunionz.com                                ///////
-///////    Email : master@Eunionz.com                                  ///////
+///////    All copyright at Eunionz.cn                                ///////
+///////    Email : master@Eunionz.cn                                  ///////
 ///////    create at 2015-04-30  上午9:47                               ///////
 ///////////////////////////////////////////////////////////////////////////////
 

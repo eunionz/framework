@@ -14,7 +14,7 @@
 
 namespace package\model;
 
-use com\eunionz\core\Model;
+use cn\eunionz\core\Model;
 
 class sessions extends Model
 {

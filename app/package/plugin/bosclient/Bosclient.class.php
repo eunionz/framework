@@ -13,7 +13,7 @@ defined('APP_IN') or exit('Access Denied');
 
 
 
-class Bosclient extends \com\eunionz\core\Plugin
+class Bosclient extends \cn\eunionz\core\Plugin
 {
     /**
      * 百度云存储配置

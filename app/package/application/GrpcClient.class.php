@@ -2,8 +2,8 @@
 
 namespace package\application;
 
-use com\eunionz\component\grpc\BaseStub;
-use com\eunionz\core\Kernel;
+use cn\eunionz\component\grpc\BaseStub;
+use cn\eunionz\core\Kernel;
 
 /**
  * GrpcClient 客户端类
@@ -33,7 +33,7 @@ class GrpcClient extends Kernel
 
     /**
      * 协程 RPC 客户端对像
-     * \com\eunionz\component\grpc\BaseStub
+     * \cn\eunionz\component\grpc\BaseStub
      * @var null
      */
     private $grpc_client = null;

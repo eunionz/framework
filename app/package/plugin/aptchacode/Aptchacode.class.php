@@ -11,7 +11,7 @@ namespace package\plugin\aptchacode;
 
 
 defined('APP_IN') or exit('Access Denied');
-class Aptchacode extends \com\eunionz\core\Plugin
+class Aptchacode extends \cn\eunionz\core\Plugin
 {
     public function imageVerify($tmp='verifycode'){
         // 初始化SESSION

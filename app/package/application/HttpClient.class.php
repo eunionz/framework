@@ -2,7 +2,7 @@
 
 namespace package\application;
 
-use com\eunionz\core\Kernel;
+use cn\eunionz\core\Kernel;
 
 /**
  * Http 客户端类
@@ -52,7 +52,7 @@ class HttpClient extends Kernel
     /**
      * HttpClient客户端构造函数
      * @param string $http_config_name http服务器配置名称，如果为空获取http.config.php中的 'http_service_default' 配置
-     * @throws \com\eunionz\exception\FileNotFoundException
+     * @throws \cn\eunionz\exception\FileNotFoundException
      */
     public function __construct($http_host = '', $http_port = '', $is_ssl = false, $http_timeout = 0.5)
     {
@@ -134,7 +134,7 @@ class HttpClient extends Kernel
      * @param array $add_headers 附加头部信息
      * @param array $files 是否上传文件，格式：  array(array('name'=> 表单中文件域名称,'path'=>文件物理路径))
      * @return mixed
-     * @throws \com\eunionz\exception\FileNotFoundException
+     * @throws \cn\eunionz\exception\FileNotFoundException
      */
     public function http_post($url, $params = array(), $is_admin = false, $add_headers = array(), $files = array())
     {

@@ -8,14 +8,14 @@
 
 namespace package\controller\websocket;
 
-use com\eunionz\core\Controller;
+use cn\eunionz\core\Controller;
 
 /**
  * Class Home
  * @package package\controller\websocket
  * @WEBSOCKET_CLASS
  */
-class Home extends \com\eunionz\core\Controller
+class Home extends \cn\eunionz\core\Controller
 {
     public $accept_data = null;
     public $header = null;

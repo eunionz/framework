@@ -18,7 +18,7 @@ defined('APP_IN') or exit('Access Denied');
  * Ftp Plugin
  *
  */
-class Db extends \com\eunionz\core\Plugin
+class Db extends \cn\eunionz\core\Plugin
 {
 
     private $wheres=array();

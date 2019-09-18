@@ -13,7 +13,7 @@ namespace package\plugin\wordsplit;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Wordsplit extends \com\eunionz\core\Plugin
+class Wordsplit extends \cn\eunionz\core\Plugin
 {
     /**
      * 中文分词方法

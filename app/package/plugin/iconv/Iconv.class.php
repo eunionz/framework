@@ -11,7 +11,7 @@ namespace package\plugin\iconv;
 defined('APP_IN') or exit('Access Denied');
 
 
-class Iconv extends \com\eunionz\core\Plugin {
+class Iconv extends \cn\eunionz\core\Plugin {
 	/**
 	 * 存放 GB <-> UNICODE 对照表的内容
 	 * @变量类型

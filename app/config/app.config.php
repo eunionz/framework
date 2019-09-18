@@ -2,8 +2,8 @@
 declare(strict_types=1);
 ///////////////////////////////////////////////////////////////////////////////
 ///////    Eunionz PHP Framework global core config                    ///////
-///////    All copyright at Eunionz.com                                ///////
-///////    Email : master@Eunionz.com                                  ///////
+///////    All copyright at Eunionz.cn                                ///////
+///////    Email : master@Eunionz.cn                                  ///////
 ///////    create at 2015-04-30  上午9:47                               ///////
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +32,7 @@ return array(
     'APP_CROSS_DOMAIN_ALLOW_HEADERS' =>  "frontsessionsid,adminsessionsid,clienttype,clientversion,clientplatform,reverseproxyforward,wapdomain,nowxoauth,token,appid,openid,originhost,time",  //跨域访问时，允许访问的头部名称
 
     //根据请求域名HTTP_HOST设置shop_id的回调方法，格式：字符串全局函数或array("类","方法")
-    'APP_SET_SHOP_ID_BY_HTTP_HOST_CALLBACK' => array("com\\eunionz\\core\\Context","get_shop_id"),
+    'APP_SET_SHOP_ID_BY_HTTP_HOST_CALLBACK' => array("cn\\eunionz\\core\\Context","get_shop_id"),
     //特别的0店铺对应的文件夹名称
     'APP_SHOP_ID_ZERO_FOLDER_NAME' => "service",
 

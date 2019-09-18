@@ -17,7 +17,7 @@ defined('APP_IN') or exit('Access Denied');
  * Created by liulin
  **/
 
-class Xsmarty_insert extends \com\eunionz\core\Plugin
+class Xsmarty_insert extends \cn\eunionz\core\Plugin
 {
 
     private $smarty=null;

@@ -24,7 +24,7 @@ defined('APP_IN') or exit('Access Denied');
  * Class Cod
  * @package plugin\cod
  */
-class Kdniao extends \com\eunionz\core\Plugin
+class Kdniao extends \cn\eunionz\core\Plugin
 {
     private $_EBussinessID;
     private $_AppKey;

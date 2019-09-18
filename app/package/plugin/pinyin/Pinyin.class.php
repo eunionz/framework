@@ -20,7 +20,7 @@ defined('APP_IN') or exit('Access Denied');
  *
  * php将汉字转换为拼音和得到词语首字母
  */
-class Pinyin extends \com\eunionz\core\Plugin{
+class Pinyin extends \cn\eunionz\core\Plugin{
     private $_outEncoding = "GB2312//IGNORE";
 
     public function getPinyin($str,$pix=' ',$code = 'gb2312'){

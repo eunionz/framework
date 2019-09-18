@@ -13,7 +13,7 @@ namespace package\plugin\wxpay;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Wxpay extends \com\eunionz\core\Plugin {
+class Wxpay extends \cn\eunionz\core\Plugin {
 
     /**
      * 微信支付APP_ID

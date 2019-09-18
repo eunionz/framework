@@ -13,7 +13,7 @@ namespace package\plugin\filter;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Jpush extends \com\eunionz\core\Plugin
+class Jpush extends \cn\eunionz\core\Plugin
 {
     /**
      * 模拟post进行url请求

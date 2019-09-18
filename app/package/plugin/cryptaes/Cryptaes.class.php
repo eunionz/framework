@@ -14,7 +14,7 @@ defined('APP_IN') or exit('Access Denied');
 /**
  * Class CryptAES 128 - CBC 加密解密类
  */
-class Cryptaes extends \com\eunionz\core\Plugin{
+class Cryptaes extends \cn\eunionz\core\Plugin{
     protected $key = '';
     protected $iv = '';
     public function __construct(){

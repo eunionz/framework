@@ -11,7 +11,7 @@ namespace package\plugin\logistics;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Logistics extends \com\eunionz\core\Plugin
+class Logistics extends \cn\eunionz\core\Plugin
 {
     /*
      * {

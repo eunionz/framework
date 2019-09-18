@@ -12,7 +12,7 @@ namespace package\plugin\curl;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Curl extends \com\eunionz\core\Plugin
+class Curl extends \cn\eunionz\core\Plugin
 {
 
     protected $url;         // url参数

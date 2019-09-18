@@ -17,7 +17,7 @@ defined('APP_IN') or exit('Access Denied');
  * Created by liulin
  **/
 
-class Version_limit extends \com\eunionz\core\Plugin
+class Version_limit extends \cn\eunionz\core\Plugin
 {
     public $message = '';
 

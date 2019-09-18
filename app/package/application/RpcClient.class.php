@@ -2,7 +2,7 @@
 
 namespace package\application;
 
-use com\eunionz\core\Kernel;
+use cn\eunionz\core\Kernel;
 
 /**
  * Rpc 客户端类
@@ -76,7 +76,7 @@ class RpcClient extends Kernel
         }
         $this->rpc_client = new \Swoole\Coroutine\Client(SWOOLE_SOCK_TCP);
         if (!$this->rpc_client->connect($this->rpc_host, $this->rpc_port, $this->rpc_timeout)) {
-            throw new \com\eunionz\exception\BaseException($this->getLang('error_rpc_client_connect_fail', array($this->rpc_host . ':' . $this->rpc_port)), 50000);
+            throw new \cn\eunionz\exception\BaseException($this->getLang('error_rpc_client_connect_fail', array($this->rpc_host . ':' . $this->rpc_port)), 50000);
         }
     }
 

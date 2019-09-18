@@ -14,7 +14,7 @@ namespace package\plugin\page;
 defined('APP_IN') or exit('Access Denied');
 
 
-class Page extends \com\eunionz\core\Plugin
+class Page extends \cn\eunionz\core\Plugin
 {
     // 实例
     static protected $_instance;

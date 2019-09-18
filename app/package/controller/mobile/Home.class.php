@@ -8,7 +8,7 @@
 
 namespace package\controller\mobile;
 
-use com\eunionz\core\Controller;
+use cn\eunionz\core\Controller;
 use package\application\RpcClient;
 use Symfony\Component\Yaml\Yaml;
 
@@ -17,7 +17,7 @@ use Symfony\Component\Yaml\Yaml;
  * @package package\controller\mobile
  * @RPC_CLASS
  */
-class Home extends \com\eunionz\core\Controller
+class Home extends \cn\eunionz\core\Controller
 {
 
     /**

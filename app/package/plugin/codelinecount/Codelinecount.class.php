@@ -23,7 +23,7 @@ defined('APP_IN') or exit('Access Denied');
  * 3、目录过滤：
  * 匹配的规则是从目录名的全名匹配
  */
-class Codelinecount extends \com\eunionz\core\Plugin{
+class Codelinecount extends \cn\eunionz\core\Plugin{
     /**
      * 统计的后缀
      */

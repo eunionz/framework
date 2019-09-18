@@ -13,7 +13,7 @@ namespace package\plugin\sortclass;
 
 defined('APP_IN') or exit('Access Denied');
 
-class SortClass extends \com\eunionz\core\Plugin{
+class SortClass extends \cn\eunionz\core\Plugin{
     /**
      * 对数据库查询出来的二维数组中某个字段进行升序排序
      * @param        $preData   要排序的二维数组

@@ -8,11 +8,11 @@
 
 namespace package\controller\home;
 
-use com\eunionz\component\amqpConsumer\AmqpConsumer;
-use com\eunionz\component\consul\Consul;
-use com\eunionz\component\elasticsearch\Elasticsearch;
-use com\eunionz\component\grpc\Parser;
-use com\eunionz\core\Controller;
+use cn\eunionz\component\amqpConsumer\AmqpConsumer;
+use cn\eunionz\component\consul\Consul;
+use cn\eunionz\component\elasticsearch\Elasticsearch;
+use cn\eunionz\component\grpc\Parser;
+use cn\eunionz\core\Controller;
 use Elasticsearch\ClientBuilder;
 use Grpc\HiReply;
 use Grpc\HiUser;
@@ -34,7 +34,7 @@ use Symfony\Component\Yaml\Yaml;
  * @package package\controller\home
  * @RPC_CLASS
  */
-class Home extends \com\eunionz\core\Controller
+class Home extends \cn\eunionz\core\Controller
 {
 
     /**

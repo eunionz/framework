@@ -14,7 +14,7 @@ namespace package\plugin\weixinoauth;
 defined('APP_IN') or exit('Access Denied');
 
 
-class Weixinoauth extends \com\eunionz\core\Plugin
+class Weixinoauth extends \cn\eunionz\core\Plugin
 {
 
     public $appid = '';//微信公众号APPID

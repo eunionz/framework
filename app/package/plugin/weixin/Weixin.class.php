@@ -14,7 +14,7 @@ namespace package\plugin\weixin;
 defined('APP_IN') or exit('Access Denied');
 
 
-class Weixin extends \com\eunionz\core\Plugin
+class Weixin extends \cn\eunionz\core\Plugin
 {
 
     public $token = '';//token,访问令牌

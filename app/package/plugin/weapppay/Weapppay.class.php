@@ -13,7 +13,7 @@ namespace package\plugin\weapppay;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Weapppay extends \com\eunionz\core\Plugin {
+class Weapppay extends \cn\eunionz\core\Plugin {
 
     /**
      * 微信支付APP_ID

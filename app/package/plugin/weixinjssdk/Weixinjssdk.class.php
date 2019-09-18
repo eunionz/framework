@@ -14,7 +14,7 @@ namespace package\plugin\weixinjssdk;
 defined('APP_IN') or exit('Access Denied');
 
 
-class Weixinjssdk extends \com\eunionz\core\Plugin
+class Weixinjssdk extends \cn\eunionz\core\Plugin
 {
 
     private $appId;

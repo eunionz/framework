@@ -18,7 +18,7 @@ defined('APP_IN') or exit('Access Denied');
  * Alipay_quick_mobile
  **/
 
-class Alipay_quick_mobile extends \com\eunionz\core\Plugin
+class Alipay_quick_mobile extends \cn\eunionz\core\Plugin
 {
 
     private $alipay_partner="";                        //合作身份者ID，以 2088 开头由 16 位纯数字组成的字符串。请参考“7.1 如何获得PID与密钥”。

@@ -14,7 +14,7 @@ namespace package\plugin\sms;
 defined('APP_IN') or exit('Access Denied');
 
 
-class Sms extends \com\eunionz\core\Plugin
+class Sms extends \cn\eunionz\core\Plugin
 {
 
     private $default_signature='【万商云集】';

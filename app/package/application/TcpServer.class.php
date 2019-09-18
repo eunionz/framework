@@ -2,17 +2,17 @@
 
 namespace package\application;
 
-use com\eunionz\core\Context;
-use com\eunionz\core\I18n;
-use com\eunionz\core\Request;
-use com\eunionz\core\Session;
+use cn\eunionz\core\Context;
+use cn\eunionz\core\I18n;
+use cn\eunionz\core\Request;
+use cn\eunionz\core\Session;
 
 /**
  * Tcp 服务器类
  * Class TcpServer
  * @package package\application
  */
-class TcpServer extends \com\eunionz\core\Server
+class TcpServer extends \cn\eunionz\core\Server
 {
     public function onReceive($server, $fd, $reactor_id, $data, $cfg)
     {

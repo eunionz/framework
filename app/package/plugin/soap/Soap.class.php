@@ -13,7 +13,7 @@ namespace package\plugin\soap;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Soap extends \com\eunionz\core\Plugin
+class Soap extends \cn\eunionz\core\Plugin
 {
 
 //   //print_r($this->P('soap')->query('http://www.webxml.com.cn/WebServices/ChinaStockWebService.asmx','getStockInfoByCode',array('theStockCode'=>'sh000001')));

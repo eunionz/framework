@@ -2,8 +2,8 @@
 declare(strict_types=1);
 ///////////////////////////////////////////////////////////////////////////////
 ///////    Eunionz PHP Framework        EunionzPHP框架                ///////
-///////    All copyright at Eunionz.com                                ///////
-///////    Email : master@Eunionz.com                                  ///////
+///////    All copyright at Eunionz.cn                                ///////
+///////    Email : master@Eunionz.cn                                  ///////
 ///////    create at 2015-04-30                                         ///////
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -21,7 +21,7 @@ define('APP_PROGRAM_NAME', 'app');
 define('APP_PACKAGE_BASE_PATH', APP_REAL_PATH . APP_PROGRAM_NAME . APP_DS);
 
 //包含全局函数以及注册类加载器
-require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'com' . APP_DS . 'eunionz' . APP_DS . 'global' . APP_DS . 'functions.core.php';
-require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'com' . APP_DS . 'eunionz' . APP_DS . 'core' . APP_DS . 'Kernel.class.php';
-require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'com' . APP_DS . 'eunionz' . APP_DS . 'core' . APP_DS . 'Launcher.class.php';
-new \com\eunionz\core\Launcher();
+require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'cn' . APP_DS . 'eunionz' . APP_DS . 'global' . APP_DS . 'functions.core.php';
+require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'cn' . APP_DS . 'eunionz' . APP_DS . 'core' . APP_DS . 'Kernel.class.php';
+require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'cn' . APP_DS . 'eunionz' . APP_DS . 'core' . APP_DS . 'Launcher.class.php';
+new \cn\eunionz\core\Launcher();

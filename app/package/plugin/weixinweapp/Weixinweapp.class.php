@@ -13,7 +13,7 @@ namespace package\plugin\weixinweapp;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Weixinweapp extends \com\eunionz\core\Plugin {
+class Weixinweapp extends \cn\eunionz\core\Plugin {
 	function __construct(){
 		
 	}

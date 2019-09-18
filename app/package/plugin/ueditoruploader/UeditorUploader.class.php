@@ -10,7 +10,7 @@ namespace package\plugin\ueditoruploader;
 
 defined('APP_IN') or exit('Access Denied');
 
-class UeditorUploader extends \com\eunionz\core\Plugin
+class UeditorUploader extends \cn\eunionz\core\Plugin
 {
 
     private $fileField; //文件域名

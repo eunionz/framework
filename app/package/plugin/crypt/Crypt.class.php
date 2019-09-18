@@ -14,7 +14,7 @@ defined('APP_IN') or exit('Access Denied');
 /**
  * Class Crypt 加密解密类
  */
-class Crypt extends \com\eunionz\core\Plugin{
+class Crypt extends \cn\eunionz\core\Plugin{
     private $crypt_key='Ajd$29*34_16BkA';//密钥
     public function __construct(){
         $this->crypt_key= $this->getConfig('app',"APP_KEY");

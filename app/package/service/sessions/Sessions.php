@@ -9,7 +9,7 @@
 namespace package\service\sessions;
 
 
-use com\eunionz\core\Service;
+use cn\eunionz\core\Service;
 
 class Sessions extends Service
 {

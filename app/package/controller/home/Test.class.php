@@ -9,7 +9,7 @@
 namespace package\controller\home;
 
 
-use com\eunionz\core\Controller;
+use cn\eunionz\core\Controller;
 
 class Test extends Controller
 {

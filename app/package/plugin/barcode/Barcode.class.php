@@ -12,7 +12,7 @@ namespace package\plugin\barcode;
 defined('APP_IN') or exit('Access Denied');
 
 
-class Barcode extends \com\eunionz\core\Plugin
+class Barcode extends \cn\eunionz\core\Plugin
 {
 	var $codebar='BCGcode128';
 	public function __construct()

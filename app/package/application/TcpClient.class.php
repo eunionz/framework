@@ -2,7 +2,7 @@
 
 namespace package\application;
 
-use com\eunionz\core\Kernel;
+use cn\eunionz\core\Kernel;
 
 /**
  * Tcp 客户端类
@@ -58,7 +58,7 @@ class TcpClient extends Kernel
         $this->tcp_timeout = isset($tcp_config['timeout']) ? $tcp_config['timeout'] : 0.5;
         $this->tcp_client = new \Swoole\Coroutine\Client(SWOOLE_SOCK_TCP);
         if (!$this->tcp_client->connect($this->tcp_host, $this->tcp_port, $this->tcp_timeout)) {
-            throw new \com\eunionz\exception\BaseException($this->getLang('error_tcp_client_connect_fail', array($this->tcp_host . ':' . $this->tcp_port)), 50000);
+            throw new \cn\eunionz\exception\BaseException($this->getLang('error_tcp_client_connect_fail', array($this->tcp_host . ':' . $this->tcp_port)), 50000);
         }
     }
 

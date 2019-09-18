@@ -2,21 +2,21 @@
 
 namespace package\application;
 
-use com\eunionz\component\grpcParser\GrpcParser;
-use com\eunionz\core\Context;
-use com\eunionz\core\I18n;
-use com\eunionz\core\Request;
-use com\eunionz\core\Response;
-use com\eunionz\core\Session;
-use com\eunionz\exception\ControllerNotFoundException;
-use com\eunionz\exception\MethodNotFoundException;
+use cn\eunionz\component\grpcParser\GrpcParser;
+use cn\eunionz\core\Context;
+use cn\eunionz\core\I18n;
+use cn\eunionz\core\Request;
+use cn\eunionz\core\Response;
+use cn\eunionz\core\Session;
+use cn\eunionz\exception\ControllerNotFoundException;
+use cn\eunionz\exception\MethodNotFoundException;
 
 /**
  * Grpc 服务器类
  * Class GrpcServer
  * @package package\application
  */
-class GrpcServer extends \com\eunionz\core\Server
+class GrpcServer extends \cn\eunionz\core\Server
 {
 //    /**
 //     * 主服务器/其它监听服务器有http/https请求时触发该事件

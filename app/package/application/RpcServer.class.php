@@ -2,17 +2,17 @@
 
 namespace package\application;
 
-use com\eunionz\core\Context;
-use com\eunionz\core\I18n;
-use com\eunionz\core\Request;
-use com\eunionz\core\Session;
+use cn\eunionz\core\Context;
+use cn\eunionz\core\I18n;
+use cn\eunionz\core\Request;
+use cn\eunionz\core\Session;
 
 /**
  * Rpc 服务器类
  * Class RpcServer
  * @package package\application
  */
-class RpcServer extends \com\eunionz\core\Server
+class RpcServer extends \cn\eunionz\core\Server
 {
 
     /**
@@ -59,8 +59,8 @@ class RpcServer extends \com\eunionz\core\Server
             'header' => [],
         ];
 
-        require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'com' . APP_DS . 'eunionz' . APP_DS . 'core' . APP_DS . 'ClassAutoLoader.class.php';
-        spl_autoload_register(array('\com\eunionz\core\ClassAutoLoader', 'autoload'));
+        require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'cn' . APP_DS . 'eunionz' . APP_DS . 'core' . APP_DS . 'ClassAutoLoader.class.php';
+        spl_autoload_register(array('\cn\eunionz\core\ClassAutoLoader', 'autoload'));
 
         $ctx = new Context();
         $ctx->setIsRpcCall(true);

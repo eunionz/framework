@@ -14,7 +14,7 @@ namespace package\plugin\zip;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Zip extends \com\eunionz\core\Plugin
+class Zip extends \cn\eunionz\core\Plugin
 {
     function Zip($dir, $zipfilename)
     {

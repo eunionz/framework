@@ -14,7 +14,7 @@ namespace package\plugin\paging;
 defined('APP_IN') or exit('Access Denied');
 
 
-class Paging extends \com\eunionz\core\Plugin
+class Paging extends \cn\eunionz\core\Plugin
 {
     // 实例
     static protected $_instance;

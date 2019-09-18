@@ -12,7 +12,7 @@ namespace package\plugin\alipay;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Alipay extends \com\eunionz\core\Plugin {
+class Alipay extends \cn\eunionz\core\Plugin {
     /**
      * 生成支付代码
      * @param   array $order 订单信息
