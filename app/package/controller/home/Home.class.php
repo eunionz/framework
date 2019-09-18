@@ -916,4 +916,9 @@ class Home extends \com\eunionz\core\Controller
         }
     }
 
+    public function _p(){
+        $this->write(" <meta charset=\"utf-8\">");
+        $this->write($this->loadPlugin('common')->getWeekDay(0));
+    }
+
 }
