@@ -4,14 +4,14 @@
   "version" : "1.0.0",
   "type" : "project",
   "keywords" : ["swoole", "eunionz", "php", "framework"],
-  "homepage" : "http://www.eunionz.com/",
+  "homepage" : "http://www.eunionz.cn/",
   "time" : "2019-07-05",
   "license": "MIT",
   "authors": [
     {
       "name": "liulin",
       "email": "84611913@qq.com",
-      "homepage": "http://www.eunionz.com",
+      "homepage": "http://www.eunionz.cn",
       "role": "Developer"
     }
   ],
