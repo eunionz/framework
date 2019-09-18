@@ -22,8 +22,6 @@
   "require": {
     "php": ">=7.3",
     "monolog/monolog": "1.24.*",
-    "illuminate/support": "5.8.*",
-    "illuminate/database": "5.8.*",
     "google/protobuf": "^3.9",
     "php-amqplib/php-amqplib": "2.9.*",
     "elasticsearch/elasticsearch": "7.2.*"
