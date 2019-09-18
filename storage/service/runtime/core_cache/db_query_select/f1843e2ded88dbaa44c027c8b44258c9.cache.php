@@ -1,0 +1,1 @@
+s:47:"SELECT  `short_url`.`id` FROM `short_url`      ";

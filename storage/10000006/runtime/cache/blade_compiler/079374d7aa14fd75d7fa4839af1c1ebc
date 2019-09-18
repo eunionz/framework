@@ -1,0 +1,7 @@
+<meta charset="utf-8">
+<?php echo e($time); ?> 子页面
+<hr/>
+<?php echo $html; ?>
+
+<hr/>
+

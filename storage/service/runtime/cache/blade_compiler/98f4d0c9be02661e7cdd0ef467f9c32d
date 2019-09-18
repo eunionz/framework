@@ -1,0 +1,37 @@
+34343434
+<hr/>
+-==0
+<?php echo e($SITE_URL); ?>
+
+<hr/>
+<?php echo e($APP_PATH); ?>
+
+<hr/>
+<?php echo e(APP_PATH); ?>
+
+<hr/>
+<?php echo e($SHOP_VERSION); ?>
+
+<hr/>
+<?php echo e($APP_THEME_PATH); ?>
+
+<hr/>
+<a href="<?php echo e($APP_THEME_PATH); ?>/js/jquery-1.9.1.min.js" target="_blank">js</a>
+<?php echo e($APP_THEME_REALPATH); ?>
+
+<hr/>
+<?php echo e($APP_URL); ?>
+
+<hr/>
+<?php echo e($APP_DEVENV); ?>
+
+<hr/>
+<?php echo e($APP_DS); ?>
+
+<hr/>
+<?php echo e($Router['path']); ?>
+
+<hr/>
+<?php
+ print_r($Langs);
+?>

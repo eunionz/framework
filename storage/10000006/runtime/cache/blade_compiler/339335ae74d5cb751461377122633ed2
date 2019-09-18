@@ -1,0 +1,113 @@
+
+<?php $__env->startSection('title'); ?>
+<?php echo $core->getLang('app_404_error_title'); ?>
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
+
+<hr/>
+页面执行时间：__PAGE_EXECUTE_SECONDS__ 秒
+数据库查询次数：__PAGE_EXECUTE_QUERYS__
+<hr/>
+fddf - test_var: <?php echo e($test_var); ?><hr/>
+<?php echo e($APP_THEME_PATH); ?><hr/>
+<?php echo e($APP_THEME_REALPATH); ?><hr/>
+<?php echo e($page); ?>
+
+<hr/>
+<?php echo e($all_langs['test']); ?>
+
+<hr/>
+<?php echo e($SESSION['login_user'][0]); ?>
+
+<hr/>
+<?php /*
+clientversion=<?php echo e(isset($GET['clientversion']) ? $GET['clientversion'] : 0); ?>
+
+
+*/ ?>
+<hr/>
+
+<hr/>
+<?php if(isset($GET['clientversion']) && $GET['clientversion']): ?> <?php echo e($GET['clientversion']); ?> <?php else: ?> 0 <?php endif; ?>
+<hr/>
+<?php $__currentLoopData = $GET; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $val): $__env->incrementLoopIndices(); $loop = $__env->getFirstLoop(); ?>
+    <?php echo e($key); ?> = <?php echo e($val); ?> <br/>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getFirstLoop(); ?>
+<hr/>
+<hr/>
+<?php $__currentLoopData = $arr; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $val): $__env->incrementLoopIndices(); $loop = $__env->getFirstLoop(); ?>
+    <?php echo e($key); ?> =>
+    <?php $__currentLoopData = $val; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $k => $v): $__env->incrementLoopIndices(); $loop = $__env->getFirstLoop(); ?>
+        <?php echo e($k); ?> = <?php echo e($v); ?>
+
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getFirstLoop(); ?>
+    <br/>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getFirstLoop(); ?>
+<hr/>
+<?php for($i = 0; $i < count($arr1); $i++): ?>
+    <?php echo e($i); ?> =>
+    <?php for($j = 0; $j < count($arr1[$i]); $j++): ?>
+        <?php echo e($j); ?> => <?php echo e($arr1[$i][$j]); ?>
+
+    <?php endfor; ?>
+    <br/>
+<?php endfor; ?>
+<hr/>
+<?php $i=0;?>
+<?php while($i<count($arr1)): ?>
+    <?php $j=0;?>
+    <?php while($j<count($arr1[$i])): ?>
+        <?php echo e($i); ?> => <?php echo e($arr1[$i][$j]); ?>
+
+        <?php $j++;?>
+    <?php endwhile; ?>
+    <?php $i++;?>
+    <br/>
+<?php endwhile; ?>
+<hr/>
+APP_PACKAGE_BASE_PATH = <?php echo e(APP_PACKAGE_BASE_PATH); ?>
+
+<hr/>
+<?php echo $__env->make('home/home/a', ['aaa'=>APP_PACKAGE_BASE_PATH], array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
+<hr/>
+<?PHP
+    print_r($SESSION);
+    print_r($COOKIE);
+print_r($SERVER);
+print_r($HEADER);
+print_r($GET);
+print_r($POST);
+print_r($REQUEST);
+print_r($FILES);
+?>
+
+<hr/>
+<?php echo $core->getLang('error_webservice_operation','333'); ?>
+<hr/>
+<script type="text/javascript">
+    var js_headers = <?php echo $js_headers; ?>;
+    var all_langs = <?php echo $js_all_langs; ?>;
+    // alert(all_langs.test);
+</script>
+<script type="text/javascript" src="<?php echo e(APP_PATH); ?>www/js/websocket.js"></script>
+
+<script type="text/javascript">
+    var wsuri = "ws://192.168.1.135:9999/websocket/home/index/44/6.shtml?a=44&b=44";
+    EunionzWebsocket.onmessage=function (e) {
+        alert('接收到的数据为：' + e.data);
+    };
+    EunionzWebsocket.init(wsuri);
+    function send() {
+        var msg = document.getElementById('message').value;
+        EunionzWebsocket.send(msg);
+    };
+
+</script>
+<div id="sse">
+    <input type="text" id="message">
+    <a href="javascript:send()">发送数据</a>
+</div>
+<?php $__env->stopSection(); ?>
+
+
+<?php echo $__env->make('layout.web', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>

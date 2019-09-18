@@ -1,0 +1,24 @@
+<?php $__env->startSection('content'); ?>
+<!--
+<?php echo $core->getLang('error_exception_title'); ?><?php echo e($Exception['title']); ?><br/>
+<?php echo $core->getLang('error_exception_message'); ?><?php echo e($Exception['message']); ?><br/>
+<?php echo $core->getLang('error_exception_code'); ?><?php echo e($Exception['code']); ?><br/>
+<?php echo $core->getLang('error_exception_file'); ?><?php echo e($Exception['file']); ?><br/>
+<?php echo $core->getLang('error_exception_line'); ?><?php echo e($Exception['line']); ?><br/>
+<?php echo $core->getLang('error_exception_trace'); ?><?php echo e($Exception['trace']); ?><br/>
+-->
+<style type="text/css">
+    .error_wen{color:#adadad;line-height:32px;font-weight:bold;}
+    .error_icon{padding-top:100px;}
+    .error_icon .iconfont{font-size:80px;color:#fcab2b;}
+    .error_wen a{color:#4972ff;}
+</style>
+<p class="error_icon text-center"><i class="icon iconfont icon-iconjinggao01"></i></p>
+<div class="error_wen text-center">
+    <?php echo $core->getLang('app_404_error_content'); ?>
+    <a href="/admin/home/index.html">>><?php echo $core->getLang('app_404_error_title','',$_SESSION['CLIENT_TYPE']); ?></a>
+</div>
+<?php $__env->stopSection(); ?>
+
+
+<?php echo $__env->make('layout.error_web', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>

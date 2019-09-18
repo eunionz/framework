@@ -1,0 +1,1 @@
+s:65:"SELECT  AVG(`short_url`.`id`*1.0) AS `num` FROM `short_url`      ";

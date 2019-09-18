@@ -1,0 +1,43 @@
+
+<?php $__env->startSection('title'); ?>
+<?php echo $core->getLang('app_404_error_title'); ?>
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
+fddf - test_var: <?php echo e($test_var); ?><hr/>
+<?php echo e($APP_THEME_PATH); ?><hr/>
+<?php echo e($APP_THEME_REALPATH); ?><hr/>
+<?php echo e($page); ?>
+
+<hr/>
+<?php echo e($all_langs['test']); ?>
+
+<hr/>
+<?php echo e($SESSION['login_user'][0]); ?>
+
+<hr/>
+clientversion=<?php echo e($GET['clientversion']??0); ?>
+
+<hr/>
+<?php if(isset($GET['clientversion']) && $GET['clientversion']): ?> <?php echo e($GET['clientversion']); ?> <?php else: ?> 0 <?php endif; ?>
+<hr/>
+<?PHP
+    print_r($SESSION);
+    print_r($COOKIE);
+print_r($SERVER);
+print_r($HEADER);
+print_r($GET);
+print_r($POST);
+print_r($REQUEST);
+print_r($FILES);
+?>
+<hr/>
+<?php echo $core->getLang('error_webservice_operation','333'); ?>
+<hr/>
+<script type="text/javascript">
+    var all_langs = <?php echo $js_all_langs; ?>;
+    // alert(all_langs.test);
+</script>
+<?php $__env->stopSection(); ?>
+
+
+<?php echo $__env->make('layout.web', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>

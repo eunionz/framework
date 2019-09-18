@@ -1,19 +1,44 @@
 {
   "name": "eunionz/framework",
-  "type": "library",
-  "keywords": [
-    "php",
-    "swoole",
-    "eunionz"
+  "description":"This is a php framework base swoole.",
+  "version" : "1.0.0",
+  "type" : "project",
+  "keywords" : ["swoole", "eunionz", "php", "framework"],
+  "homepage" : "http://www.eunionz.com/",
+  "time" : "2019-07-05",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "liulin",
+      "email": "84611913@qq.com",
+      "homepage": "http://www.eunionz.com",
+      "role": "Developer"
+    }
   ],
-  "description": "eunionz php framework",
-  "license": "Apache-2.0",
+  "support": {
+    "email": "84611913@qq.com",
+    "irc": "irc://irc.freenode.org/composer"
+  },
   "require": {
-    "php": ">=7.0"
+    "php": ">=7.3",
+    "monolog/monolog": "1.24.*",
+    "illuminate/support": "5.8.*",
+    "illuminate/database": "5.8.*",
+    "google/protobuf": "^3.9",
+    "php-amqplib/php-amqplib": "2.9.*",
+    "elasticsearch/elasticsearch": "7.2.*"
   },
   "autoload": {
     "psr-4": {
-      "Eunionz\\": "src/Eunionz/"
+      "GPBMetadata\\": "app/package/grpc/GPBMetadata",
+      "Grpc\\": "app/package/grpc/Grpc"
+    },
+    "files": []
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://mirrors.aliyun.com/composer/"
     }
   }
 }

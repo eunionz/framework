@@ -1,0 +1,1 @@
+a:1:{i:0;a:5:{s:2:"id";s:1:"1";s:9:"short_url";s:7:"PYhDvh4";s:8:"long_url";s:80:"http://service.abcd3.com/users/distribution/campaign_distribution?distrobuter_id";s:11:"url_created";s:19:"0000-00-00 00:00:00";s:11:"url_updated";s:19:"0000-00-00 00:00:00";}}

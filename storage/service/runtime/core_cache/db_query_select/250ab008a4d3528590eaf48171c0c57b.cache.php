@@ -1,0 +1,1 @@
+s:78:"SELECT  (SELECT COUNT(*) FROM FROM `short_url`) AS `id` FROM `short_url`      ";

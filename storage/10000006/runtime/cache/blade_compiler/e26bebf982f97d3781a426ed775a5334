@@ -1,0 +1,16 @@
+a.tpl.php
+
+<hr/>
+<?php if(isset($GET['clientversion']) && $GET['clientversion']): ?> <?php echo e($GET['clientversion']); ?> <?php else: ?> 0 <?php endif; ?>
+<hr/>
+<?php echo e($aaa); ?>
+
+=======<br/>
+<?php echo e($APP_VERSION); ?><br/>
+<?php echo e(APP_PATH); ?><br/>
+<?php echo e($APP_THEME); ?><br/>
+<?php echo e($APP_THEME_PATH); ?><br/>
+<?php echo e($APP_THEME_PATH_NO_CDN); ?><br/>
+<?php echo e($APP_THEME_REALPATH); ?>
+
+=======<br/>
