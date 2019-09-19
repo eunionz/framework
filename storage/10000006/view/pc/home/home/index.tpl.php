@@ -84,7 +84,7 @@ print_r($FILES);
 <script type="text/javascript" src="{{APP_PATH}}www/js/websocket.js"></script>
 
 <script type="text/javascript">
-    var wsuri = "ws://192.168.1.135:9999/websocket/home/index/44/6.shtml?a=44&b=44";
+    var wsuri = "ws://192.168.1.194:9999/websocket/home/index/44/6.shtml?a=44&b=44";
     EunionzWebsocket.onmessage=function (e) {
         alert('接收到的数据为：' + e.data);
     };

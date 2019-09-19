@@ -903,7 +903,7 @@ class Home extends \cn\eunionz\core\Controller
     {
         $request = new HiUser();
         $request->setName("aa 3444 dd" . $this->get('aaa'));
-        $grpcClient = new GrpcClient("192.168.1.135", 8888);
+        $grpcClient = new GrpcClient("192.168.1.194", 8888);
         if ($grpcClient) {
             $grpcClient->start();
             list($reply, $status) = $grpcClient->sayHello("/grpc.hi", $request, HiReply::class);

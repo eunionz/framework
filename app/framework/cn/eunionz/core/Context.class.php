@@ -293,7 +293,7 @@ class Context extends Kernel
     public function get_shop_id($domain = null)
     {
         if (!empty($domain)) {
-            if ($domain == '192.168.1.135' || $domain == '192.168.1.135:8443') {
+            if ($domain == '192.168.1.194' || $domain == '192.168.1.194:8443') {
                 return 10000006;//10006;//10000006;//$this->getConfig('app','SHOP_ID');
             }
             return 10006;//10006;//10000006;//$this->getConfig('app','SHOP_ID');

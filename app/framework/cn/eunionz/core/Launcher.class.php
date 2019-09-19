@@ -119,16 +119,14 @@ class Launcher extends \cn\eunionz\core\Kernel
             );
             return;
         } elseif ($action == 'start') {
+            $app_constants_file = APP_PACKAGE_BASE_PATH . 'package' . APP_DS . 'constants' . APP_DS . 'app.constants.php';
+            if (is_file($app_constants_file)) {
+                require_once $app_constants_file;
+            }
             $server_index = (isset($_SERVER['argv']) && isset($_SERVER['argv'][2])) ? $_SERVER['argv'][2] : "";
             if ($server_index) {
                 //仅启动某个服务器
                 try {
-
-                    $app_constants_file = APP_PACKAGE_BASE_PATH . 'package' . APP_DS . 'constants' . APP_DS . 'app.constants.php';
-                    if (is_file($app_constants_file)) {
-                        require_once $app_constants_file;
-                    }
-
                     $server_cfgs = getConfig('server', 'server_cfgs');
 
                     if (empty($server_cfgs) || !is_array($server_cfgs)) {
@@ -141,6 +139,11 @@ class Launcher extends \cn\eunionz\core\Kernel
 
                     if (!in_array(strtolower($main_server_cfg['server_type']), $this->support_server_types)) {
                         self::consoleln("不支持的服务器类型【" . $server_index . "(" . $main_server_cfg['server_type'] . ")】，系统支持的服务器类型列表为：" . implode(',', $this->support_server_types), APP_ERROR);
+                        return;
+                    }
+
+                    if (!$main_server_cfg['enable']) {
+                        consoleln("  服务器已禁用 ，启动失败", APP_ERROR);
                         return;
                     }
 
@@ -159,7 +162,6 @@ class Launcher extends \cn\eunionz\core\Kernel
                         $main_server_params = getConfig('server', 'main_server_params');
                         $main_server_set_params = array_merge($main_server_params, $main_server_cfg['server_params']);
                         self::$_swoole_main_server->set($main_server_set_params);
-
 
                     } elseif (strtolower($main_server_cfg['server_type']) == 'https') {
                         self::$_swoole_main_server = new \Swoole\Http\Server($main_server_cfg['host'], $main_server_cfg['port'], $main_server_cfg['mode'], $main_server_cfg['sock_type']);
@@ -402,6 +404,34 @@ class Launcher extends \cn\eunionz\core\Kernel
                     }
 
                     consoleln($this->console_line);
+
+
+                    if (self::$_swoole_main_server && isset($main_server_cfg['microservice']) && $main_server_cfg['microservice'] && isset($main_server_cfg['microservice']['enable']) && $main_server_cfg['microservice']['enable']) {
+                        $consul = new Consul();
+                        $consul_cfg = getConfig('consul');
+
+
+                        if (isset($main_server_cfg['microservice']) && isset($main_server_cfg['microservice']['service_id']) && $main_server_cfg['microservice']['service_id']) {
+                            $consul->service_deregister($main_server_cfg['microservice']['service_id']);
+                        }
+
+                        //注册微服务开始
+                        $rs = $consul->service_register(
+                            $main_server_cfg['microservice']['service_id'],
+                            $main_server_cfg['microservice']['service_name'],
+                            $main_server_cfg['microservice']['service_address'],
+                            $main_server_cfg['microservice']['service_port'],
+                            $main_server_cfg['microservice']['service_tags'],
+                            $main_server_cfg['microservice']['service_metas'],
+                            $main_server_cfg['microservice']['service_health_check'],
+                            $main_server_cfg['microservice']['service_weights']
+                        );
+                        if ($rs) {
+                            consoleln(date('Y-m-d H:i:s') . "  注册微服务【Name = " . $main_server_cfg['microservice']['service_name'] . " , ID = " . $main_server_cfg['microservice']['service_id'] . " , IP = " . $main_server_cfg['microservice']['service_address'] . " , PORT = " . $main_server_cfg['microservice']['service_port'] . "】到服务注册中心【" . $consul_cfg['host'] . ':' . $consul_cfg['port'] . "】成功");
+                        }
+                        self::consoleln($this->console_line);
+                    }
+
                     self::$_swoole_main_server->start();
 
                     if (isset($main_server_cfg['on_end']) && $main_server_cfg['on_end']) {
@@ -421,11 +451,6 @@ class Launcher extends \cn\eunionz\core\Kernel
             } else {
                 //启动所有服务器
                 try {
-                    $app_constants_file = APP_PACKAGE_BASE_PATH . 'package' . APP_DS . 'constants' . APP_DS . 'app.constants.php';
-                    if (is_file($app_constants_file)) {
-                        require_once $app_constants_file;
-                    }
-
                     $server_cfgs = getConfig('server', 'server_cfgs');
                     if (empty($server_cfgs) || !is_array($server_cfgs)) {
                         throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_server_config'));
@@ -450,12 +475,15 @@ class Launcher extends \cn\eunionz\core\Kernel
                     cli_set_process_title($server_process_name);
                     file_put_contents($server_pid_file, $pid);
 
+                    self::$_swoole_main_server = new \Swoole\WebSocket\Server($main_server_cfg['host'], $main_server_cfg['port'], $main_server_cfg['mode'], $main_server_cfg['sock_type']);
+                    if (!self::$_swoole_main_server) {
+                        throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_main_server_create_failure'));
+                    }
+                    consoleln(date('Y-m-d H:i:s') . "  主服务器【main(" . $main_server_cfg['server_type'] . ")】启动：  Host: " . $main_server_cfg['host'] . " Port: " . $main_server_cfg['port']);
+
 
                     foreach ($server_cfgs as $index => $cfg) {
-                        if ($index == 'main') {
-                            self::$_swoole_main_server = new \Swoole\WebSocket\Server($cfg['host'], $cfg['port'], $cfg['mode'], $cfg['sock_type']);
-                            consoleln(date('Y-m-d H:i:s') . "  主服务器【" . $index . "(" . $main_server_cfg['server_type'] . ")】启动：  Host: " . $cfg['host'] . " Port: " . $cfg['port']);
-                        } else {
+                        if ($index != 'main') {
                             if (self::$_swoole_main_server && $cfg['enable'] && (in_array($cfg['server_type'], ['http', 'https', 'rpc', 'grpc', 'tcp', 'websocket', 'udp']))) {
                                 self::$_swoole_other_servers[$index] = self::$_swoole_main_server->listen($cfg['host'], $cfg['port'], $cfg['sock_type']);
                                 consoleln(date('Y-m-d H:i:s') . "  其它服务器【" . $index . "(" . $cfg['server_type'] . ")启动：Host: " . $cfg['host'] . " Port: " . $cfg['port']);
@@ -468,7 +496,8 @@ class Launcher extends \cn\eunionz\core\Kernel
                     $main_server_params = getConfig('server', 'main_server_params');
                     $main_server_set_params = array_merge($main_server_params, $main_server_cfg['server_params']);
 
-                    self::$_swoole_main_server->set($main_server_set_params);
+                    //self::$_swoole_main_server->set($main_server_set_params);
+
                     foreach ($server_cfgs as $index => $cfg) {
                         if ($index != 'main') {
                             $service_params = $main_server_params;
@@ -812,11 +841,15 @@ class Launcher extends \cn\eunionz\core\Kernel
 
 
                     foreach ($server_cfgs as $index => $cfg) {
-                        if(isset($cfg['microservice']) && isset($cfg['microservice']['service_id']) && $cfg['microservice']['service_id']){
-                            $consul->service_deregister($cfg['microservice']['service_id']);
+                        if (isset($cfg['microservice']) && $cfg['microservice'] && isset($cfg['microservice']['enable']) && $cfg['microservice']['enable']) {
+                            if (isset($cfg['microservice']) && isset($cfg['microservice']['service_id']) && $cfg['microservice']['service_id']) {
+                                $consul->service_deregister($cfg['microservice']['service_id']);
+                            }
                         }
                     }
                     //注册微服务开始
+                    //是否有微服务注册
+                    $is_microservice_register = false;
                     foreach ($server_cfgs as $index => $cfg) {
                         if (empty($server_index) || ($server_index == $index)) {
                             if ($index == 'main' && self::$_swoole_main_server && isset($cfg['microservice']) && $cfg['microservice'] && isset($cfg['microservice']['enable']) && $cfg['microservice']['enable']) {
@@ -831,6 +864,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                                     $cfg['microservice']['service_weights']
                                 );
                                 if ($rs) {
+                                    $is_microservice_register = true;
                                     consoleln(date('Y-m-d H:i:s') . "  注册微服务【Name = " . $cfg['microservice']['service_name'] . " , ID = " . $cfg['microservice']['service_id'] . " , IP = " . $cfg['microservice']['service_address'] . " , PORT = " . $cfg['microservice']['service_port'] . "】到服务注册中心【" . $consul_cfg['host'] . ':' . $consul_cfg['port'] . "】成功");
                                 }
                             } else {
@@ -846,13 +880,16 @@ class Launcher extends \cn\eunionz\core\Kernel
                                         $cfg['microservice']['service_weights']
                                     );
                                     if ($rs) {
+                                        $is_microservice_register = true;
                                         consoleln(date('Y-m-d H:i:s') . "  注册微服务【Name = " . $cfg['microservice']['service_name'] . " , ID = " . $cfg['microservice']['service_id'] . " , IP = " . $cfg['microservice']['service_address'] . " , PORT = " . $cfg['microservice']['service_port'] . "】到服务注册中心【" . $consul_cfg['host'] . ':' . $consul_cfg['port'] . "】成功");
                                     }
                                 }
                             }
                         }
                     }
-                    self::consoleln($this->console_line);
+                    if($is_microservice_register){
+                        self::consoleln($this->console_line);
+                    }
 
                     self::$_swoole_main_server->start();
 

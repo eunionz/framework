@@ -23,7 +23,7 @@ return array(
      *    )
      */
     'tcp_service_default' => array(
-        'host' => '192.168.1.135',
+        'host' => '192.168.1.194',
         'port' => 9998,
         'timeout' => 1,
     ),

@@ -264,7 +264,7 @@ return array(
                 'service_id' => 'ms_usercenter_https_1',       //微服务ID
                 'service_name' => 'ms_usercenter',       //微服务名称
                 'service_address' => '192.168.1.135',    //微服务IP地址
-                'service_port' => 8443,                    //微服务端口
+                'service_port' => 443,                    //微服务端口
                 'service_tags' => ['https'],              //微服务标签
                 'service_metas' => ['version' => "1.0"],      //微服务元数据
                 'service_health_check' => [              //微服务心跳检查配置
@@ -295,7 +295,7 @@ return array(
              * 服务器配置启用/禁用
              * true--启用  false--禁用
              */
-            'enable' => false,
+            'enable' => true,
 
             /**
              * 服务器监听主机
@@ -312,7 +312,7 @@ return array(
              * 监听小于1024端口需要root权限
              * 如果此端口被占用server->start时会失败
              */
-            'port' => 8443,
+            'port' => 443,
 
             /**
              * 是否支持 https 协议
@@ -482,12 +482,12 @@ return array(
                 /**
                  * 同上
                  */
-                'ssl_cert_file' => APP_REAL_PATH . 'ssl/xizangjiancai.cn.crt',
+                'ssl_cert_file' => APP_REAL_PATH . 'ssl/server.crt',
 
                 /**
                  * 同上
                  */
-                'ssl_key_file' => APP_REAL_PATH . 'ssl/xizangjiancai.cn.key',
+                'ssl_key_file' => APP_REAL_PATH . 'ssl/server.key',
             ),
         ),
         /**
@@ -2095,12 +2095,12 @@ return array(
          * DER转PEM格式
          * openssl x509 -in cert.crt -inform der -outform pem -out cert.pem
          */
-        'ssl_cert_file' => APP_REAL_PATH . 'ssl/server.crt',
+//        'ssl_cert_file' => APP_REAL_PATH . 'ssl/server.crt',
 
         /**
          * 同上
          */
-        'ssl_key_file' => APP_REAL_PATH . 'ssl/server.key',
+//        'ssl_key_file' => APP_REAL_PATH . 'ssl/server.key',
 
         /**
          * 设置OpenSSL隧道加密的算法。Server与Client使用的算法必须一致，否则SSL/TLS握手会失败，连接会被切断。 默认算法为 SWOOLE_SSLv23_METHOD
