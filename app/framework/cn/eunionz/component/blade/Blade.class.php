@@ -24,7 +24,8 @@ class Blade extends \cn\eunionz\core\Component
     public $_view_vars;
 
 
-    public function __construct(){
+    public function __construct()
+    {
         require_once __DIR__ . "/src/ViewFinderInterface.php";
         require_once __DIR__ . "/src/Autoloader.php";
         require_once __DIR__ . "/src/Factory.php";
@@ -39,17 +40,17 @@ class Blade extends \cn\eunionz\core\Component
         require_once __DIR__ . "/src/Engines/PhpEngine.php";
         require_once __DIR__ . "/src/Engines/CompilerEngine.php";
 
-        $config           = getConfig('view');
+        $config = getConfig('view');
         $this->_view_vars = $config['VIEW_VARS'];
         $this->_view_vars['APP_PATH'] = APP_PATH;
-        $this->_view_vars['APP_VERSION'] = getConfig('version','APP_VERSION');
+        $this->_view_vars['APP_VERSION'] = getConfig('version', 'APP_VERSION');
 
-        $this->_view_vars['APP_DEVENV']   =getConfig('app','APP_DEVENV');
-        $this->_view_vars['APP_DS']       = APP_DS;
-        $this->_view_vars['Router']     = ctx()->getRouter();
+        $this->_view_vars['APP_DEVENV'] = getConfig('app', 'APP_DEVENV');
+        $this->_view_vars['APP_DS'] = APP_DS;
+        $this->_view_vars['Router'] = ctx()->getRouter();
         $this->_view_vars['APP_PARTITION_NAME'] = strtolower(ctx()->getPartitionName());
         $this->_view_vars['APP_THEME'] = ctx()->getTheme();
-        $this->_view_vars['APP_LANGUAGE'] =str_ireplace('_','-', $this->getLanguage());
+        $this->_view_vars['APP_LANGUAGE'] = str_ireplace('_', '-', $this->getLanguage());
 
     }
 
@@ -63,7 +64,7 @@ class Blade extends \cn\eunionz\core\Component
      */
     public function __set($key, $value)
     {
-        if ( ! property_exists($this, $key))
+        if (!property_exists($this, $key))
             $this->_view_vars[$key] = $value;
     }
 
@@ -72,80 +73,85 @@ class Blade extends \cn\eunionz\core\Component
      * 根据当前应用，当前分区，当前主题以及指定的视图名称，设置指定主题网站路径以及物理路径
      * @param $page  不包含主题以及扩展名称的视图名,视图扩展名为.tpl或.tpl.php
      */
-    private function setAppThemePath($page){
-        if(!$page) return null;
+    private function setAppThemePath($page)
+    {
+        if (!$page) return null;
         //获取分区名称
         $partition_name = strtolower(ctx()->getPartitionName());
         //获取主题名称
-        $app_theme =  ctx()->getTheme();
+        $app_theme = ctx()->getTheme();
         //将主题名称存入视图变量
 
         //独立视图文件
-        $single_file = ctx()->getAppStorageRealPath() . 'view' . APP_DS . $app_theme . APP_DS . ltrim(str_ireplace('/', APP_DS ,$page),APP_DS);
+        $single_file = ctx()->getAppStorageRealPath() . 'view' . APP_DS . $app_theme . APP_DS . ltrim(str_ireplace('/', APP_DS, $page), APP_DS);
 
         //判断分区是否为后台管理分区，如果为后台管理分区则为统一视图文件，否则各分站独立视图文件
-        if(in_array($partition_name,getConfig('app','APP_MANAGE_PARTITIONS')) || !(is_file($single_file . '.tpl') || is_file($single_file . '.tpl.php'))){
+        if (in_array($partition_name, getConfig('app', 'APP_MANAGE_PARTITIONS')) || !(is_file($single_file . '.tpl') || is_file($single_file . '.tpl.php'))) {
             //是后台管理分区 或独立视图文件不存在 则使用统一视图文件
-            $this->_view_dir  = APP_PACKAGE_BASE_PATH . 'package' . APP_DS . 'view';
-            $this->_view_vars['APP_THEME_PATH'] =rtrim(APP_PATH , '/') . '/' . APP_PROGRAM_NAME . '/package/view/' . $app_theme;
-            $this->_view_vars['APP_THEME_PATH'] = str_replace('//','/',$this->_view_vars['APP_THEME_PATH']);
+            $this->_view_dir = APP_PACKAGE_BASE_PATH . 'package' . APP_DS . 'view';
+            $this->_view_vars['APP_THEME_PATH'] = rtrim(APP_PATH, '/') . '/' . APP_PROGRAM_NAME . '/package/view/' . $app_theme;
+            $this->_view_vars['APP_THEME_PATH'] = str_replace('//', '/', $this->_view_vars['APP_THEME_PATH']);
             $this->_view_vars['APP_THEME_PATH_NO_CDN'] = $this->_view_vars['APP_THEME_PATH'];
-            if(getConfig('app','APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS')){
-                $this->_view_vars['APP_THEME_PATH'] = trim(getConfig('app','APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS'),'/')  . '/'.  ltrim($this->_view_vars['APP_THEME_PATH'],'/');
+            if (getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS')) {
+                $this->_view_vars['APP_THEME_PATH'] = trim(getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS'), '/') . '/' . ltrim($this->_view_vars['APP_THEME_PATH'], '/');
             }
-            $this->_view_vars['APP_THEME_REALPATH'] = $this->_view_dir  . APP_DS . $app_theme;
-        }else{
+            $this->_view_vars['APP_THEME_REALPATH'] = $this->_view_dir . APP_DS . $app_theme;
+        } else {
             //不是后台管理分区且独立视图文件存在，则使用独立视图文件
-            $this->_view_dir  = ctx()->getAppStorageRealPath() . 'view';
-            $this->_view_vars['APP_THEME_PATH_NO_CDN'] = rtrim(APP_PATH , '/') . '/' . APP_STORAGE_NAME . '/' . ctx()->getSiteName() . '/view/' . $app_theme;
-            if(getConfig('app','APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS')){
+            $this->_view_dir = ctx()->getAppStorageRealPath() . 'view';
+            $this->_view_vars['APP_THEME_PATH_NO_CDN'] = rtrim(APP_PATH, '/') . '/' . APP_STORAGE_NAME . '/' . ctx()->getSiteName() . '/view/' . $app_theme;
+            if (getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS')) {
                 //如果启用了CDN
-                $this->_view_vars['APP_THEME_PATH'] = trim(getConfig('app','APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS'),'/')  . rtrim(APP_PATH , '/') . '/' . APP_STORAGE_NAME . '/' .  ctx()->getSiteName() . '/view/' . $app_theme;
-            }else{
+                $this->_view_vars['APP_THEME_PATH'] = trim(getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS'), '/') . rtrim(APP_PATH, '/') . '/' . APP_STORAGE_NAME . '/' . ctx()->getSiteName() . '/view/' . $app_theme;
+            } else {
                 //如果没有启用CDN
-                $this->_view_vars['APP_THEME_PATH'] =  rtrim(APP_PATH , '/') . '/' . APP_STORAGE_NAME . '/' . ctx()->getSiteName() . '/view/' . $app_theme;
+                $this->_view_vars['APP_THEME_PATH'] = rtrim(APP_PATH, '/') . '/' . APP_STORAGE_NAME . '/' . ctx()->getSiteName() . '/view/' . $app_theme;
             }
-            $this->_view_vars['APP_THEME_REALPATH'] =  ctx()->getAppStorageRealPath() . 'view' . APP_DS . $app_theme ;
+            $this->_view_vars['APP_THEME_REALPATH'] = ctx()->getAppStorageRealPath() . 'view' . APP_DS . $app_theme;
         }
     }
 
 
-
-    public function display($page, & $model = array(), $return = false){
+    public function display($page, & $model = array(), $return = false)
+    {
 
 
         $this->setAppThemePath($page);
 
         $text = '';
-        if (!empty($page))
-        {
+        if (!empty($page)) {
 
             // 视图文件目录，这是数组，可以有多个目录
             $view_dirs = [
-                $this->_view_vars['APP_THEME_REALPATH'] ,
+                $this->_view_vars['APP_THEME_REALPATH'],
                 ctx()->getAppRuntimeRealPath() . 'blade'
             ];
 
 
-            if(!file_exists(ctx()->getAppRuntimeRealPath() . 'blade')){
+            if (!file_exists(ctx()->getAppRuntimeRealPath() . 'blade')) {
                 @mkdir(ctx()->getAppRuntimeRealPath() . 'blade');
             }
             // 编译文件缓存目录
-            $cachePath = ctx()->getAppRuntimeRealPath(). 'cache' . APP_DS . 'blade_compiler';
-            if(!file_exists($cachePath)){
+            $cachePath = ctx()->getAppRuntimeRealPath() . 'cache' . APP_DS . 'blade_compiler';
+            if (!file_exists($cachePath)) {
                 @mkdir($cachePath);
             }
 
             $compiler = new \Xiaoler\Blade\Compilers\BladeCompiler($cachePath);
 
             // 如过有需要，你可以添加自定义关键字
-            $compiler->directive('datetime', function($timestamp) {
+            $compiler->directive('datetime', function ($timestamp) {
                 return preg_replace('/\((.+?)\)/', '<?php echo date("Y-m-d H:i:s", $1); ?>', $timestamp);
             });
 
             // 如过有需要，你可以添加自定义关键字
-            $compiler->directive('getLang', function($key) {
-                return str_replace('#29;',')',str_replace('#28;','(',preg_replace('/\((.+?)\)/', '<?php echo $core->getLang($1); ?>', $key)));
+            $compiler->directive('getLang', function ($key) {
+                return str_replace('#29;', ')', str_replace('#28;', '(', preg_replace('/\((.+?)\)/', '<?php echo $core->getLang($1); ?>', $key)));
+            });
+
+            // 如过有需要，你可以添加自定义关键字
+            $compiler->directive('csrftoken', function () {
+                return '<?php echo $core->csrftoken(); ?>';
             });
 
             $engine = new \Xiaoler\Blade\Engines\CompilerEngine($compiler);
@@ -159,14 +165,14 @@ class Blade extends \cn\eunionz\core\Component
             $factory = new \Xiaoler\Blade\Factory($engine, $finder);
 
             // 渲染视图并输出
-            $this->_view_vars=array_merge($this->_view_vars,$model);
+            $this->_view_vars = array_merge($this->_view_vars, $model);
             $this->_view_vars['__env'] = $factory;
             $this->_view_vars['core'] = $this;
             $model = $this->_view_vars;
 
-            $text= $factory->make($page, $this->_view_vars)->render();
+            $text = $factory->make($page, $this->_view_vars)->render();
         }
-        if($return) return $text;
+        if ($return) return $text;
         ctx()->getResponse()->ob_write($text);
         return $text;
 

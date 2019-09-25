@@ -53,6 +53,23 @@ class Request extends Component
             $this->SERVER['REMOTE_ADDR'] = isset($this->http_request->server['remote_addr']) ? $this->http_request->server['remote_addr'] : '';
             $this->SERVER['REMOTE_HOST'] = isset($this->http_request->server['remote_addr']) ? $this->http_request->server['remote_addr'] : '';
             $this->SERVER['REMOTE_PORT'] = isset($this->http_request->server['remote_port']) ? $this->http_request->server['remote_port'] : '';
+            $this->SERVER['HTTP_X_FORWARDED_FOR'] = isset($this->http_request->header['x-forwarded-for']) ? $this->http_request->header['x-forwarded-for'] : '';
+            $this->SERVER['HTTP_X_PROXY_SERVER'] = isset($this->http_request->header['x-proxy-server']) ? $this->http_request->header['x-proxy-server'] : '';
+            $this->SERVER['HTTP_X_PROXY_SCHEME'] = isset($this->http_request->header['x-proxy-scheme']) ? strtolower($this->http_request->header['x-proxy-scheme']) : 'http';
+            $this->SERVER['HTTP_X_PROXY_SERVER_PORT'] = isset($this->http_request->header['x-proxy-server-port']) ? $this->http_request->header['x-proxy-server-port'] : '';
+
+            if($this->SERVER['HTTP_X_PROXY_SCHEME']=='http'){
+                if($this->SERVER['HTTP_X_PROXY_SERVER_PORT']!='' && $this->SERVER['HTTP_X_PROXY_SERVER_PORT']!=80){
+                    $this->SERVER['HTTP_HOST']  .= ':' . $this->SERVER['HTTP_X_PROXY_SERVER_PORT'];
+                }
+            }
+            if($this->SERVER['HTTP_X_PROXY_SCHEME']=='https'){
+                if($this->SERVER['HTTP_X_PROXY_SERVER_PORT']!='' && $this->SERVER['HTTP_X_PROXY_SERVER_PORT']!=443){
+                    $this->SERVER['HTTP_HOST']  .= ':' . $this->SERVER['HTTP_X_PROXY_SERVER_PORT'];
+                }
+            }
+
+
             $this->SERVER['PHP_SELF'] = 'index.php';
             $this->SERVER['DOCUMENT_ROOT'] = APP_REAL_PATH;
             $this->SERVER['SERVER_SOFTWARE'] = "eunionz framework 1.0(swoole 4.x)";

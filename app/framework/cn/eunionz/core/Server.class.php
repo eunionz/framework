@@ -201,6 +201,14 @@ class Server extends Kernel
         $ctx->setSession(new Session());
         self::setContext($ctx);
         try {
+
+            if(ctx()->getRequest()->post('_csrftoken')){
+                if(ctx()->getRequest()->cookie('_csrftoken') != ctx()->getRequest()->post('_csrftoken')){
+                    ctx()->getResponse()->end("cross site request forgery!");
+                    return;
+                }
+            }
+
             //设置当前时区
             date_default_timezone_set(getConfig('app', 'APP_DEFAULT_TIMEZONE'));
 
@@ -261,12 +269,14 @@ class Server extends Kernel
 
             $site_favicon_ico_filename = ctx()->getAppStorageRealPath() . 'view' . APP_DS . trim(str_replace('/', APP_DS, ctx()->getRequest()->server('REQUEST_URI')), APP_DS);
             $favicon_ico_filename = APP_REAL_PATH . trim(str_replace('/', APP_DS, ctx()->getRequest()->server('REQUEST_URI')), APP_DS);
-            $this->log(APP_DEBUG, $site_favicon_ico_filename . ' ' . $favicon_ico_filename, 'ico');
+
+
 
             if (ctx()->getRequest()->server('REQUEST_URI') == '/health.shtml') {
                 ctx()->getResponse()->end("ok");
                 return;
             }
+
 
             if (ctx()->getRequest()->server('REQUEST_URI') == '/favicon.ico') {
                 if (file_exists($site_favicon_ico_filename)) {
@@ -340,6 +350,8 @@ class Server extends Kernel
                 self::destoryContext();
                 return;
             }
+
+
 
             // fire hook event
             if (!$this->loadCore('Hook')->call_hook('override_router')) {

@@ -851,5 +851,4 @@ class Kernel
         return $sum > 2 ? true : false;
     }
 
-
 }

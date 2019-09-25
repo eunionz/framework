@@ -28,4 +28,10 @@ class Test extends Controller
 
     }
 
+
+    public function _a(){
+//        ctx()->closeTraceOutput();
+        $this->write("ddssdds");
+    }
+
 }

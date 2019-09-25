@@ -447,4 +447,9 @@ trait KernelTrait
         return null;
     }
 
+    public function csrftoken(){
+        $_csrftoken = md5(uniqid() . time() . mt_rand(1, 1000000000));
+        ctx()->getResponse()->setcookie("_csrftoken", $_csrftoken);
+        return $_csrftoken;
+    }
 }

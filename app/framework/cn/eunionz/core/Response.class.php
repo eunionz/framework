@@ -69,7 +69,7 @@ class Response extends Component
     public function write($content)
     {
         if ($this->response && $content) {
-            @$this->response->write($content);
+            $this->response->write($content);
         }
     }
 
@@ -81,9 +81,9 @@ class Response extends Component
     {
         if ($this->response) {
             if ($content) {
-                @$this->response->end($content);
+                $this->response->end($content);
             } else {
-                @$this->response->end();
+                $this->response->end();
             }
         }
     }
