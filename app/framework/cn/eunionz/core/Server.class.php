@@ -99,9 +99,24 @@ class Server extends Kernel
      */
     public function onWorkerStart($server, $worker_id, $cfg)
     {
+
         require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'cn' . APP_DS . 'eunionz' . APP_DS . 'core' . APP_DS . 'ClassAutoLoader.class.php';
         spl_autoload_register(array('\cn\eunionz\core\ClassAutoLoader', 'autoload'));
         require_once APP_REAL_PATH . 'vendor' . APP_DS . 'autoload.php';
+        $main_server_params = self::getConfig("server","main_server_params");
+        $worker_user = "www";
+        $worker_group = "www";
+        if(isset($main_server_params['user']) && $main_server_params['user']){
+            $worker_user = $main_server_params['user'];
+        }
+        if(isset($main_server_params['group']) && $main_server_params['group']){
+            $worker_group = $main_server_params['group'];
+        }
+
+        $user = posix_getpwnam($worker_user);
+        posix_setuid($user['uid']);
+        posix_setgid($user['gid']);
+
         swoole_set_process_name($cfg['worker_process_name']);
 
 

