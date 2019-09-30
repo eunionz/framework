@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace cn\eunionz\core;
 
+use cn\eunionz\component\cdb\Cdb;
 use cn\eunionz\exception\ModelException;
 use cn\eunionz\exception\ModelValidateException;
 
@@ -124,9 +125,9 @@ class Model extends Kernel
 
     /**
      * 模型所使用的数据库配置文件主文件名定义，使用格式如：'db'  'db1'
-     * @var null
+     * @var string
      */
-    public $db_config_name = null;
+    public $db_config_name = 'db';
 
     /**
      * 模型使用的集群定义
@@ -134,7 +135,36 @@ class Model extends Kernel
      */
     protected $db_cluster_name = 'default';
 
-    public function initialize($tablename = "")
+
+    /**
+     * 是否使用协程数据库
+     * @var bool
+     */
+    private $isCoroutine = false;
+
+    /**
+     * 是否使用协程数据库
+     * @return bool
+     */
+    public function isCoroutine(): bool
+    {
+        return $this->isCoroutine;
+    }
+
+    /**
+     * 设置是否使用协程数据库
+     * @param bool $isCoroutine
+     */
+    public function setIsCoroutine(bool $isCoroutine): void
+    {
+        $this->isCoroutine = $isCoroutine;
+    }
+
+    /**
+     * 初始化Model
+     * @param string $tablename
+     */
+    public function initialize(string $tablename = ""): void
     {
 
         if (empty($tablename)) {
@@ -143,6 +173,7 @@ class Model extends Kernel
         } else {
             $this->tablename = strtolower($tablename);
         }
+        $this->isCoroutine = self::getConfig($this->db_config_name, 'APP_MODEL_IS_COROUTINE');
 
     }
 
@@ -150,9 +181,10 @@ class Model extends Kernel
     /**
      * 设置模型数据库配置及集群
      * @param string $db_cluster_name 群集名称  'default'
-     * @param null $db_config 数据库配置文件主文件名,'db' 'db1'
+     * @param string|null $db_config_name 数据库配置文件主文件名,'db' 'db1'
+     * @return Model
      */
-    public function set_db_config($db_cluster_name = 'default', $db_config_name = null)
+    public function set_db_config(string $db_cluster_name = 'default', string $db_config_name = null): Model
     {
         $this->db_config_name = $db_config_name;
         $this->db_cluster_name = $db_cluster_name;
@@ -162,9 +194,11 @@ class Model extends Kernel
 
     /**
      * 默认验证方法
-     * @param $model
+     * @param array $model
+     * @param int $action
+     * @return \stdClass
      */
-    protected function _validate($model, $action)
+    protected function _validate(array $model, int $action): \stdClass
     {
         $obj = new \stdClass();
         $obj->success = true;
@@ -174,7 +208,6 @@ class Model extends Kernel
 
         if (!$this->_validate_rules || !is_array($this->_validate_rules)) return $obj;
 
-        $obj = new \stdClass();
         $obj->success = true;
         $obj->msg = "";
 
@@ -260,14 +293,14 @@ class Model extends Kernel
 
     /**
      * 根据字段列表筛选自动创建日期时间赋值字段及值列表
-     * @param $fields
+     * @param array $fields
      * @return array('自动赋值字段名'=>值,..)
      */
-    private function get_auto_create_datetime_field_and_datas($fields)
+    private function get_auto_create_datetime_field_and_datas(array $fields): array
     {
         $auto_fields = [];
-        $APP_DB_TABLE_AUTO_DATETIME_FIELD_DATA_TYPE = getConfig('db', 'APP_DB_TABLE_AUTO_DATETIME_FIELD_DATA_TYPE');
-        $APP_DB_TABLE_AUTO_CREATE_DATETIME_FIELD_SUFFIX = getConfig('db', 'APP_DB_TABLE_AUTO_CREATE_DATETIME_FIELD_SUFFIX');
+        $APP_DB_TABLE_AUTO_DATETIME_FIELD_DATA_TYPE = self::getConfig('db', 'APP_DB_TABLE_AUTO_DATETIME_FIELD_DATA_TYPE');
+        $APP_DB_TABLE_AUTO_CREATE_DATETIME_FIELD_SUFFIX = self::getConfig('db', 'APP_DB_TABLE_AUTO_CREATE_DATETIME_FIELD_SUFFIX');
 
         if ($APP_DB_TABLE_AUTO_DATETIME_FIELD_DATA_TYPE && $APP_DB_TABLE_AUTO_CREATE_DATETIME_FIELD_SUFFIX) {
             $curr_time = time();
@@ -291,14 +324,14 @@ class Model extends Kernel
 
     /**
      * 根据字段列表筛选自动修改日期时间赋值字段及值列表
-     * @param $fields
+     * @param array $fields
      * @return array('自动赋值字段名'=>值,..)
      */
-    private function get_auto_update_datetime_field_and_datas($fields)
+    private function get_auto_update_datetime_field_and_datas(array $fields): array
     {
         $auto_fields = [];
-        $APP_DB_TABLE_AUTO_DATETIME_FIELD_DATA_TYPE = getConfig('db', 'APP_DB_TABLE_AUTO_DATETIME_FIELD_DATA_TYPE');
-        $APP_DB_TABLE_AUTO_UPDATE_DATETIME_FIELD_SUFFIX = getConfig('db', 'APP_DB_TABLE_AUTO_UPDATE_DATETIME_FIELD_SUFFIX');
+        $APP_DB_TABLE_AUTO_DATETIME_FIELD_DATA_TYPE = self::getConfig('db', 'APP_DB_TABLE_AUTO_DATETIME_FIELD_DATA_TYPE');
+        $APP_DB_TABLE_AUTO_UPDATE_DATETIME_FIELD_SUFFIX = self::getConfig('db', 'APP_DB_TABLE_AUTO_UPDATE_DATETIME_FIELD_SUFFIX');
         if ($APP_DB_TABLE_AUTO_DATETIME_FIELD_DATA_TYPE && $APP_DB_TABLE_AUTO_UPDATE_DATETIME_FIELD_SUFFIX) {
             $curr_time = time();
             if (is_string($APP_DB_TABLE_AUTO_DATETIME_FIELD_DATA_TYPE)) {
@@ -318,18 +351,10 @@ class Model extends Kernel
     }
 
     /**
-     * insert
-     *
      * insert an row data
-     *
-     * @qrcode
-     * $data = array('name'=>'zxd', 'age'=>'22', 'email'=>'my@qq.com');
-     *
-     * $this->r->user->insert($data);
-     * @end
-     *
      * @param array $data
-     * @return    int
+     * @throws ModelException
+     * @throws ModelValidateException
      */
     public function insert(array $data)
     {
@@ -360,9 +385,7 @@ class Model extends Kernel
         if (empty($this->tablename))
             throw new ModelException(ctx()->getI18n()->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_bind_table'));
 
-
-        $result = ctx()->cdb($this->db_cluster_name, $this->db_config_name)->insert($this->tablename, $data, $params, false, ($this->_pk_sequence_name) ? $this->_pk_sequence_name : '');
-
+        $result = $this->current_db()->insert($this->tablename, $data, $params, false, ($this->_pk_sequence_name) ? $this->_pk_sequence_name : '');
         // callback
         if (false !== $result)
             if (method_exists($this, 'end_insert'))
@@ -372,23 +395,12 @@ class Model extends Kernel
     }
 
     /**
-     * update
-     *
      * update an row data
-     *
-     * @qrcode
-     * $data = array('name'=>'zxd', 'age'=>'22', 'email'=>'my@qq.com');
-     *
-     * $options = array();
-     * $options['age']['>'] = 22;
-     *
-     * if (!$this->r->user->update($data, $options))
-     *        echo $this->getError();
-     * @end
-     *
      * @param array $data
      * @param array $options
-     * @return    string
+     * @return int
+     * @throws ModelException
+     * @throws ModelValidateException
      */
     public function update(array $data, array $options = array())
     {
@@ -425,8 +437,7 @@ class Model extends Kernel
         if (isset($params['limit']))
             $params['limit'] = $options['limit'];
 
-
-        $result = ctx()->cdb($this->db_cluster_name, $this->db_config_name)->update($this->tablename, $data, $params);
+        $result = $this->current_db()->update($this->tablename, $data, $params);
 
         // callback
         if (false !== $result)
@@ -437,12 +448,10 @@ class Model extends Kernel
     }
 
     /**
-     * delete
-     *
      * delete an row data
-     *
      * @param array $options
-     * @return    string
+     * @return int
+     * @throws ModelException
      */
     public function delete(array $options = array())
     {
@@ -464,7 +473,8 @@ class Model extends Kernel
         if (isset($options['limit']))
             $params['limit'] = $options['limit'];
 
-        $result = ctx()->cdb($this->db_cluster_name, $this->db_config_name)->delete($this->tablename, $params);
+
+        $result = $this->current_db()->delete($this->tablename, $params);
 
         // callback
         if (false !== $result)
@@ -476,41 +486,29 @@ class Model extends Kernel
 
     /**
      * truncate
-     *
-     * truncate an table data
+     * @throws ModelException
+     * @throws \cn\eunionz\exception\DBException
+     * @throws \cn\eunionz\exception\FileNotFoundException
      */
     public function truncate()
     {
         if (empty($this->tablename))
             throw new ModelException(ctx()->getI18n()->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_bind_table'));
 
-        if ('mysql' == strtolower(getConfig('db', 'APP_DB_TYPE'))) {
-            return ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query('TRUNCATE TABLE `' . $this->tablename . '`');
-        } else if ('oci' == strtolower(getConfig('db', 'APP_DB_TYPE'))) {
-            return ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query('TRUNCATE TABLE "' . $this->tablename . '"');
+        if ('mysql' == strtolower(self::getConfig('db', 'APP_DB_TYPE'))) {
+            return $this->current_db()->query('TRUNCATE TABLE `' . $this->tablename . '`');
+        } else if ('oci' == strtolower(self::getConfig('db', 'APP_DB_TYPE'))) {
+            return $this->current_db()->query('TRUNCATE TABLE "' . $this->tablename . '"');
         }
     }
 
     /**
-     * find all data
-     *
      * find all data by expression
-     *
-     * @qrcode
-     * $search = array();
-     * $search['school'] = '1';
-     * $search['age']['>'] = '30';
-     * $field = array('id', 'name');
-     *
-     * $result = $this->find($search, $field, 'id desc, age desc', '0,10');
-     * @end
-     *
      * @param array $options
-     *
-     * @return array
+     * @return array|null
+     * @throws ModelException
      */
-    public
-    function find(array $options = array())
+    public function find(array $options = array()): ?array
     {
         $params = $this->_params;
 
@@ -550,22 +548,18 @@ class Model extends Kernel
         if (isset($options['having']))
             $params['having'] = $options['having'];
 
-        $result = ctx()->cdb($this->db_cluster_name, $this->db_config_name)->select($this->tablename, $params);
+        $result = $this->current_db()->select($this->tablename, $params);
 
         return !is_array($result) ? array() : $result;
     }
 
     /**
-     * find single row
-     *
      * find single row data
-     *
      * @param array $options
-     *
-     * @return array
+     * @return array|mixed
+     * @throws ModelException
      */
-    public
-    function find_one(array $options = array())
+    public function find_one(array $options = array())
     {
         $options['limit'] = 1;
         $result = current($this->find($options));
@@ -574,33 +568,27 @@ class Model extends Kernel
     }
 
     /**
-     * find field value
-     *
      * find an field value by expression
-     *
      * @param array $options
-     * @param array $field
-     *
-     * @return    mixed
+     * @param string|array $field
+     * @return mixed
+     * @throws ModelException
      */
-    public
-    function find_field(array $options = array(), $field)
+    public function find_field(array $options = array(), $field)
     {
         $options['field'] = $field;
         return current($this->find_one($options));
     }
 
     /**
-     * count
-     *
      * count rows
-     *
      * @param array $options
-     *
-     * @return    integer
+     * @param string $field
+     * @param bool $distinct
+     * @return mixed
+     * @throws ModelException
      */
-    public
-    function count(array $options = array(), $field = '', $distinct = false)
+    public function count(array $options = array(), string $field = '', bool $distinct = false)
     {
         if (empty($field)) {
             if ($distinct) {
@@ -618,78 +606,59 @@ class Model extends Kernel
     }
 
     /**
-     * sum
-     *
      * sum rows
-     *
      * @param array $options
      * @param string $field
-     *
-     * @return    integer
+     * @return mixed
+     * @throws ModelException
      */
-    public
-    function sum(array $options = array(), $field)
+    public function sum(array $options = array(), string $field)
     {
         return $this->find_field($options, array('_SUM' => 'SUM(F{' . $field . '})'));
     }
 
     /**
-     * avg
-     *
      * avg rows
-     *
      * @param array $options
      * @param string $field
-     *
-     * @return    integer
+     * @return mixed
+     * @throws ModelException
      */
-    public
-    function avg(array $options = array(), $field)
+    public function avg(array $options = array(), string $field)
     {
         return $this->find_field($options, array('_AVG' => 'AVG(F{' . $field . '})'));
     }
 
     /**
-     * min
-     *
      * min rows
-     *
      * @param array $options
      * @param string $field
-     *
-     * @return integer
+     * @return mixed
+     * @throws ModelException
      */
-    public
-    function min(array $options = array(), $field)
+    public function min(array $options = array(), string $field)
     {
         return $this->find_field($options, array('_MIN' => 'MIN(F{' . $field . '})'));
     }
 
     /**
-     * max
-     *
      * max rows
-     *
      * @param array $options
      * @param string $field
-     *
-     * @return integer
+     * @return mixed
+     * @throws ModelException
      */
-    public
-    function max(array $options = array(), $field)
+    public function max(array $options = array(), string $field)
     {
         return $this->find_field($options, array('_MAX' => 'MAX(F{' . $field . '})'));
     }
 
     /**
-     * get table name
-     *
      * get main table name
-     *
      * @return string
+     * @throws ModelException
      */
-    public
-    function table()
+    public function table(): string
     {
         if (empty($this->tablename))
             throw new ModelException(ctx()->getI18n()->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_bind_table'));
@@ -698,670 +667,91 @@ class Model extends Kernel
     }
 
     /**
-     * get pk
-     *
-     * get main table pk
-     *
+     * get table pk field
      * @return string
+     * @throws ModelException
      */
-    public function pk()
+    public function pk(): string
     {
-
-        return ctx()->cdb($this->db_cluster_name, $this->db_config_name)->get_pk($this->table());
+        return $this->current_db()->get_pk($this->table());
     }
 
     /**
-     * get field fix
-     *
-     * get main table field fix
-     *
+     * get table pk field fix
      * @return string
+     * @throws ModelException
      */
-    public
-    function prefix()
+    public function prefix(): string
     {
         return substr($this->pk(), 0, strpos($this->pk(), '_')) . '_';
     }
 
     /**
-     * get field
-     *
-     * get main table fields
-     *
+     * get table fields
      * @return array
+     * @throws ModelException
+     * @throws \cn\eunionz\exception\DBException
      */
-    public function fields()
+    public function fields(): array
     {
-        return ctx()->cdb($this->db_cluster_name, $this->db_config_name)->get_fields_by_table($this->table());
+        return $this->current_db()->get_fields_by_table($this->table());
     }
 
     /**
      * get db connect
-     *
-     * get current server db connect
-     *
-     * @return DBComponentObject
+     * @return Cdb|null
      */
     public function current_db()
     {
-        return ctx()->cdb($this->db_cluster_name, $this->db_config_name);
-    }
-
-
-    /**
-     * 基于 mysql pdo 底层 查询，返回第1条记录第1个字段的值
-     * @param      $field  格式：array('字段1') 或者 字符串，单一字段
-     * @param      $joinTables 格式：'主表名'
-     *                          或格式：'主表名 as 别名'
-     *                          或格式：'主表名 as 别名 LEFT JOIN 从表名 as 别名  ON 连接条件'
-     *                          或格式：array('主表名')
-     *                          或格式：array('主表名',array('join'=>array('表1'=>'别名'),'on'=>'连接条件'),array('left join'=>array('表1'=>'别名'),'on'=>'连接条件')))
-     *                          或格式：array('主表名'=>'别名',array('join'=>array('表1'=>'别名'),'on'=>'连接条件'),array('left join'=>array('表1'=>'别名'),'on'=>'连接条件')))
-     * @param      $where  格式：'不带?条件'  字段名建议 ``引起来
-     *                      或格式：array('不带?条件')  字段名建议 ``引起来，如果没有值列表，则直接为一个字符串
-     *                      或格式：array('带?条件'=>array(值列表))  字段名建议 ``引起来，如果没有值列表，则直接为一个字符串
-     * @param      $order  格式：'id asc'
-     *                      或格式：'id asc,id1 desc'
-     *                      或格式：array('id','id1')
-     *                      或格式：array('id'=>'ASC','id1'=>'DESC')
-     * @param   $forupdate 格式：是否使用排它锁,必须在事务中才可使用
-     *
-     * @return mixed
-     */
-
-    public
-    function raw_find_field($field, $joinTables, $where, $order = null, $forupdate = false)
-    {
-        $rs = $this->raw_query($field, $joinTables, $where, $order, 1, $forupdate);
-        if ($rs) {
-            if (is_array($field)) {
-                $field_name = '';
-                foreach ($field as $key => $value) {
-                    $field_name = $value;
-                    break;
-                }
-                if (trim($field_name)) return $rs[0][trim($field_name)];
-            } else {
-                $field = strtolower($field);
-                $field = explode('as', $field);
-                $field_name = count($field) == 1 ? $field[0] : $field[1];
-                if (trim($field_name)) return $rs[0][trim($field_name)];
-            }
-
-        }
-        return '';
-    }
-
-
-    /**
-     * 基于 mysql pdo 底层 查询，返回一条记录
-     * @param      $field  格式：array('字段1','字段2','字段3'=>'字段3别名','b.字段4') 或者 字符串 或者  * 或者  null
-     * @param      $joinTables 格式：'主表名'
-     *                          或格式：'主表名 as 别名'
-     *                          或格式：'主表名 as 别名 LEFT JOIN 从表名 as 别名  ON 连接条件'
-     *                          或格式：array('主表名')
-     *                          或格式：array('主表名',array('join'=>array('表1'=>'别名'),'on'=>'连接条件'),array('left join'=>array('表1'=>'别名'),'on'=>'连接条件')))
-     *                          或格式：array('主表名'=>'别名',array('join'=>array('表1'=>'别名'),'on'=>'连接条件'),array('left join'=>array('表1'=>'别名'),'on'=>'连接条件')))
-     * @param      $where  格式：'不带?条件'  字段名建议 ``引起来
-     *                      或格式：array('不带?条件')  字段名建议 ``引起来，如果没有值列表，则直接为一个字符串
-     *                      或格式：array('带?条件'=>array(值列表))  字段名建议 ``引起来，如果没有值列表，则直接为一个字符串
-     * @param      $order  格式：'id asc'
-     *                      或格式：'id asc,id1 desc'
-     *                      或格式：array('id','id1')
-     *                      或格式：array('id'=>'ASC','id1'=>'DESC')
-     * @param   $forupdate 格式：是否使用排它锁,必须在事务中才可使用
-     *
-     * @return mixed
-     */
-
-    public
-    function raw_find_one($field, $joinTables, $where, $order = null, $forupdate = false)
-    {
-        $rs = $this->raw_query($field, $joinTables, $where, $order, 1, $forupdate);
-        if ($rs) return $rs[0];
-        return null;
-    }
-
-
-    /**
-     * 基于 mysql pdo 底层 查询
-     * @param      $field  格式：array('字段1','字段2','字段3'=>'字段3别名','b.字段4') 或者 字符串 或者  * 或者  null
-     * @param      $joinTables 格式：'主表名'
-     *                          或格式：'主表名 as 别名'
-     *                          或格式：'主表名 as 别名 LEFT JOIN 从表名 as 别名  ON 连接条件'
-     *                          或格式：array('主表名')
-     *                          或格式：array('主表名',array('join'=>array('表1'=>'别名'),'on'=>'连接条件'),array('left join'=>array('表1'=>'别名'),'on'=>'连接条件')))
-     *                          或格式：array('主表名'=>'别名',array('join'=>array('表1'=>'别名'),'on'=>'连接条件'),array('left join'=>array('表1'=>'别名'),'on'=>'连接条件')))
-     * @param      $where  格式：'不带?条件'  字段名建议 ``引起来
-     *                      或格式：array('不带?条件')  字段名建议 ``引起来，如果没有值列表，则直接为一个字符串
-     *                      或格式：array('带?条件'=>array(值列表))  字段名建议 ``引起来，如果没有值列表，则直接为一个字符串
-     * @param      $order  格式：'id asc'
-     *                      或格式：'id asc,id1 desc'
-     *                      或格式：array('id','id1')
-     *                      或格式：array('id'=>'ASC','id1'=>'DESC')
-     * @param null $limit 格式： 10
-     *                     或格式： '0,10'
-     *                     或格式： array(10)
-     *                     或格式： array(0,10)
-     * @param   $forupdate 格式：是否使用排它锁,必须在事务中才可使用
-     *
-     * @return mixed
-     */
-
-    public
-    function raw_query($field, $joinTables, $where, $order = null, $limit = null, $forupdate = false)
-    {
-        $field_str = $this->get_fields($field);
-
-        $sql = "SELECT {$field_str} FROM ";
-        if (!$joinTables)
-            throw new ModelException(ctx()->getI18n()->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_execute_jointables'));
-
-        $table_str = "";
-        if (is_string($joinTables)) {
-            $table_str .= "{$joinTables} ";
-        } else if (is_array($joinTables)) {
-            $table_str = "";
-            $is_find = false;
-            foreach ($joinTables as $key => $val) {
-                if (is_string($val)) {
-                    //是主表
-                    if (is_numeric($key)) {
-                        if (strpos($val, '`') === false) {
-                            $table_str .= "`{$val}`";
-                        } else {
-                            $table_str .= "{$val}";
-                        }
-                        $is_find = true;
-                    } elseif (is_string($key)) {
-                        if (strpos($key, '`') === false) {
-                            $table_str .= "`{$key}` as ";
-                        } else {
-                            $table_str .= "{$key} as ";
-                        }
-                        if (strpos($val, '`') === false) {
-                            $table_str .= "`{$val}`";
-                        } else {
-                            $table_str .= "{$val}";
-                        }
-                        $is_find = true;
-                    }
-                    break;
-                }
-            }
-            if (!$is_find) {
-                throw new ModelException(ctx()->getI18n()->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_execute_jointables_not_table'));
-            }
-
-            $join_table_str = "";
-            foreach ($joinTables as $key => $val) {
-                if (is_numeric($key) && is_array($val)) {
-                    //连接表 array('join'=>array('表1'=>'别名'),'on'=>'连接条件')
-                    foreach ($val as $k => $v) {
-                        $is_find = false;
-                        if ((strtolower($k) == "join" || strtolower($k) == "inner join" || strtolower($k) == "left join" || strtolower($k) == "left outer join" || strtolower($k) == "right join" || strtolower($k) == "right outer join") && (isset($val['on']) && is_string($val['on']))) {
-                            $is_find = true;
-                            $join_table_str .= strtoupper($k) . ' ';
-                            if (is_array($v)) {
-                                foreach ($v as $k1 => $v1) {
-                                    if (is_numeric($k1)) {
-                                        if (strpos($v1, '`') === false) {
-                                            $join_table_str .= "`{$v1}`";
-                                        } else {
-                                            $join_table_str .= "{$v1}";
-                                        }
-                                    } else {
-                                        if (strpos($k1, '`') === false) {
-                                            $join_table_str .= "`{$k1}` as ";
-                                        } else {
-                                            $join_table_str .= "{$k1} as ";
-                                        }
-                                        if (strpos($v1, '`') === false) {
-                                            $join_table_str .= "`{$v1}`";
-                                        } else {
-                                            $join_table_str .= "{$v1}";
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (strpos($v, '`') === false) {
-                                    $join_table_str .= "`{$v}`";
-                                } else {
-                                    $join_table_str .= "{$v}";
-                                }
-                            }
-                        }
-                        if ($is_find) {
-                            $join_table_str .= " ON " . $val['on'] . " ";
-                        }
-                    }
-                }
-            }
-            $table_str .= "{$join_table_str} ";
+        if ($this->isCoroutine) {
+            return ctx()->cdb($this->db_cluster_name, $this->db_config_name);
         } else {
-            throw new ModelException(ctx()->getI18n()->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_execute_jointables'));
-        }
-        $sql .= "{$table_str} ";
-
-        $val_array = array();
-
-        $where_str = "";
-        if ($where && is_string($where)) {
-            $where_str .= " WHERE {$where} ";
-        } else if ($where && is_array($where)) {
-            foreach ($where as $key => $val) {
-                if (is_numeric($key)) {
-                    $where_str .= " WHERE {$val} ";
-                } else {
-                    $where_str .= " WHERE {$key} ";
-                    $val_array = $val;
-                }
-            }
-        }
-        $sql .= "{$where_str} ";
-
-        $order_str = $this->get_orders($order);
-
-        $sql .= "{$order_str} ";
-
-
-        $limit_str = $this->get_limit($limit);
-        $sql .= " {$limit_str} ";
-        if ($forupdate) $sql .= " FOR UPDATE";
-
-
-        if ($val_array) {
-            return ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query($sql, false, $val_array);
-        } else {
-            return ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query($sql);
-        }
-    }
-
-    /**
-     * 基于 mysql pdo 底层 分页查询
-     * @param      $field  格式：array('字段1','字段2','字段3'=>'字段3别名','b.字段4') 或者 字符串 或者  * 或者  null
-     * @param      $joinTables 格式：'主表名'
-     *                          或格式：'主表名 as 别名'
-     *                          或格式：'主表名 as 别名 LEFT JOIN 从表名 as 别名  ON 连接条件'
-     *                          或格式：array('主表名')
-     *                          或格式：array('主表名',array('join'=>array('表1'=>'别名'),'on'=>'连接条件'),array('left join'=>array('表1'=>'别名'),'on'=>'连接条件')))
-     *                          或格式：array('主表名'=>'别名',array('join'=>array('表1'=>'别名'),'on'=>'连接条件'),array('left join'=>array('表1'=>'别名'),'on'=>'连接条件')))
-     * @param      $where  格式：'不带?条件'  字段名建议 ``引起来
-     *                      或格式：array('不带?条件')  字段名建议 ``引起来，如果没有值列表，则直接为一个字符串
-     *                      或格式：array('带?条件'=>array(值列表))  字段名建议 ``引起来，如果没有值列表，则直接为一个字符串
-     * @param      $order  格式：'id asc'
-     *                      或格式：'id asc,id1 desc'
-     *                      或格式：array('id','id1')
-     *                      或格式：array('id'=>'ASC','id1'=>'DESC')
-     * @param   $pagecount 格式：引用方式输出总页数，传递变量
-     * @param   $recordcount 格式：引用方式输出记录总数，传递变量
-     * @param   $pageno 格式：引用方式输出记录当前页，传递变量 1,2,3,4,5,
-     * @param   $pagesize 格式：页大小
-     * @param   $is_change_pageno 当$pageno大于总页数时是否改变$pageno的值
-     * @param   $forupdate 格式：是否使用排它锁,必须在事务中才可使用
-     *
-     * @return mixed
-     */
-
-    public
-    function raw_page_query($field, $joinTables, $where, $order, & $pagecount, & $recordcount, & $pageno, $pagesize = 10, $is_change_pageno = 1, $forupdate = false)
-    {
-        $field_str = $this->get_fields($field);
-
-        if (!$joinTables) throw new ModelException(ctx()->getI18n()->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_execute_jointables'));
-
-        $table_str = "";
-        if (is_string($joinTables)) {
-            $table_str .= "{$joinTables} ";
-        } else if (is_array($joinTables)) {
-            $table_str = "";
-            $is_find = false;
-            foreach ($joinTables as $key => $val) {
-                if (is_string($val)) {
-                    //是主表
-                    if (is_numeric($key)) {
-                        if (strpos($val, '`') === false) {
-                            $table_str .= "`{$val}`";
-                        } else {
-                            $table_str .= "{$val}";
-                        }
-                        $is_find = true;
-                    } elseif (is_string($key)) {
-                        if (strpos($key, '`') === false) {
-                            $table_str .= "`{$key}` as ";
-                        } else {
-                            $table_str .= "{$key} as ";
-                        }
-                        if (strpos($val, '`') === false) {
-                            $table_str .= "`{$val}`";
-                        } else {
-                            $table_str .= "{$val}";
-                        }
-                        $is_find = true;
-                    }
-                    break;
-                }
-            }
-            if (!$is_find) {
-                throw new ModelException(ctx()->getI18n()->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_execute_jointables_not_table'));
-            }
-
-            $join_table_str = "";
-            foreach ($joinTables as $key => $val) {
-                if (is_numeric($key) && is_array($val)) {
-                    //连接表 array('join'=>array('表1'=>'别名'),'on'=>'连接条件')
-                    foreach ($val as $k => $v) {
-                        $is_find = false;
-                        if ((strtolower($k) == "join" || strtolower($k) == "inner join" || strtolower($k) == "left join" || strtolower($k) == "left outer join" || strtolower($k) == "right join" || strtolower($k) == "right outer join") && (isset($val['on']) && is_string($val['on']))) {
-                            $is_find = true;
-                            $join_table_str .= strtoupper($k) . ' ';
-                            if (is_array($v)) {
-                                foreach ($v as $k1 => $v1) {
-                                    if (is_numeric($k1)) {
-                                        if (strpos($v1, '`') === false) {
-                                            $join_table_str .= "`{$v1}`";
-                                        } else {
-                                            $join_table_str .= "{$v1}";
-                                        }
-                                    } else {
-                                        if (strpos($k1, '`') === false) {
-                                            $join_table_str .= "`{$k1}` as ";
-                                        } else {
-                                            $join_table_str .= "{$k1} as ";
-                                        }
-                                        if (strpos($v1, '`') === false) {
-                                            $join_table_str .= "`{$v1}`";
-                                        } else {
-                                            $join_table_str .= "{$v1}";
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (strpos($v, '`') === false) {
-                                    $join_table_str .= "`{$v}`";
-                                } else {
-                                    $join_table_str .= "{$v}";
-                                }
-                            }
-                        }
-                        if ($is_find) {
-                            $join_table_str .= " ON " . $val['on'] . " ";
-                        }
-                    }
-                }
-            }
-            $table_str .= "{$join_table_str} ";
-        } else {
-            throw new ModelException(ctx()->getI18n()->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_execute_jointables'));
-        }
-
-        $val_array = array();
-
-        $where_str = "";
-        if ($where && is_string($where)) {
-            $where_str .= " WHERE {$where} ";
-        } else if ($where && is_array($where)) {
-            foreach ($where as $key => $val) {
-                if (is_numeric($key)) {
-                    $where_str .= " WHERE {$val} ";
-                } else {
-                    $where_str .= " WHERE {$key} ";
-                    $val_array = $val;
-                }
-            }
-        }
-        $sql = "SELECT COUNT(*) as num FROM {$table_str} {$where_str} ";
-        if ($forupdate) $sql .= " FOR UPDATE";
-
-        //获取记录总数
-        if ($val_array) {
-            $rs = ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query($sql, false, $val_array);
-        } else {
-            $rs = ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query($sql);
-        }
-        $recordcount = $rs[0]['num'];
-        $pagecount = ceil($recordcount / $pagesize);
-
-        if ($is_change_pageno) {
-            if ($pageno > $pagecount) $pageno = $pagecount;
-        }
-        if ($pageno < 1) $pageno = 1;
-
-        $order_str = $this->get_orders($order);
-
-        $limit_str = " LIMIT " . (($pageno - 1) * $pagesize) . "," . $pagesize;
-        $sql = "SELECT {$field_str} FROM {$table_str} {$where_str} {$order_str} {$limit_str}";
-        if ($forupdate) $sql .= " FOR UPDATE";
-
-        if ($val_array) {
-            return ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query($sql, false, $val_array);
-        } else {
-            return ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query($sql);
+            $db = ctx()->db($this->db_cluster_name, $this->db_config_name);
+            return $db;
         }
     }
 
 
     /**
-     * 基于 mysql pdo 底层 分页查询
-     * @param      $field  格式：array('字段1','字段2','字段3'=>'字段3别名','b.字段4') 或者 字符串 或者  * 或者  null
-     * @param      $joinTables 格式：'主表名'
-     *                          或格式：'主表名 as 别名'
-     *                          或格式：'主表名 as 别名 LEFT JOIN 从表名 as 别名  ON 连接条件'
-     *                          或格式：array('主表名')
-     *                          或格式：array('主表名',array('join'=>array('表1'=>'别名'),'on'=>'连接条件'),array('left join'=>array('表1'=>'别名'),'on'=>'连接条件')))
-     *                          或格式：array('主表名'=>'别名',array('join'=>array('表1'=>'别名'),'on'=>'连接条件'),array('left join'=>array('表1'=>'别名'),'on'=>'连接条件')))
-     * @param      $where  格式：'不带?条件'  字段名建议 ``引起来
-     *                      或格式：array('不带?条件')  字段名建议 ``引起来，如果没有值列表，则直接为一个字符串
-     *                      或格式：array('带?条件'=>array(值列表))  字段名建议 ``引起来，如果没有值列表，则直接为一个字符串
-     * @param      $order  格式：'id asc'
-     *                      或格式：'id asc,id1 desc'
-     *                      或格式：array('id','id1')
-     *                      或格式：array('id'=>'ASC','id1'=>'DESC')
-     * @param   $pagecount 格式：引用方式输出总页数，传递变量
-     * @param   $recordcount 格式：引用方式输出记录总数，传递变量
-     * @param   $start 格式：开始行，从0开始
-     * @param   $pagesize 格式：页大小
-     * @param   $forupdate 格式：是否使用排它锁,必须在事务中才可使用
-     *
-     * @return mixed
-     */
-
-    public
-    function raw_page_query_by_limit($field, $joinTables, $where, $order, & $pagecount, & $recordCount, $start = 0, $pagesize = 10, $forupdate = false)
-    {
-        $field_str = $this->get_fields($field);
-
-        if (!$joinTables) throw new ModelException(ctx()->getI18n()->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_execute_jointables'));
-
-        $table_str = "";
-        if (is_string($joinTables)) {
-            $table_str .= "{$joinTables} ";
-        } else if (is_array($joinTables)) {
-            $table_str = "";
-            $is_find = false;
-            foreach ($joinTables as $key => $val) {
-                if (is_string($val)) {
-                    //是主表
-                    if (is_numeric($key)) {
-                        if (strpos($val, '`') === false) {
-                            $table_str .= "`{$val}`";
-                        } else {
-                            $table_str .= "{$val}";
-                        }
-                        $is_find = true;
-                    } elseif (is_string($key)) {
-                        if (strpos($key, '`') === false) {
-                            $table_str .= "`{$key}` as ";
-                        } else {
-                            $table_str .= "{$key} as ";
-                        }
-                        if (strpos($val, '`') === false) {
-                            $table_str .= "`{$val}`";
-                        } else {
-                            $table_str .= "{$val}";
-                        }
-                        $is_find = true;
-                    }
-                    break;
-                }
-            }
-            if (!$is_find) {
-                throw new ModelException($this->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_execute_jointables_not_table'));
-            }
-
-            $join_table_str = "";
-            foreach ($joinTables as $key => $val) {
-                if (is_numeric($key) && is_array($val)) {
-                    //连接表 array('join'=>array('表1'=>'别名'),'on'=>'连接条件')
-                    foreach ($val as $k => $v) {
-                        $is_find = false;
-                        if ((strtolower($k) == "join" || strtolower($k) == "inner join" || strtolower($k) == "left join" || strtolower($k) == "left outer join" || strtolower($k) == "right join" || strtolower($k) == "right outer join") && (isset($val['on']) && is_string($val['on']))) {
-                            $is_find = true;
-                            $join_table_str .= strtoupper($k) . ' ';
-                            if (is_array($v)) {
-                                foreach ($v as $k1 => $v1) {
-                                    if (is_numeric($k1)) {
-                                        if (strpos($v1, '`') === false) {
-                                            $join_table_str .= "`{$v1}`";
-                                        } else {
-                                            $join_table_str .= "{$v1}";
-                                        }
-                                    } else {
-                                        if (strpos($k1, '`') === false) {
-                                            $join_table_str .= "`{$k1}` as ";
-                                        } else {
-                                            $join_table_str .= "{$k1} as ";
-                                        }
-                                        if (strpos($v1, '`') === false) {
-                                            $join_table_str .= "`{$v1}`";
-                                        } else {
-                                            $join_table_str .= "{$v1}";
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (strpos($v, '`') === false) {
-                                    $join_table_str .= "`{$v}`";
-                                } else {
-                                    $join_table_str .= "{$v}";
-                                }
-                            }
-                        }
-                        if ($is_find) {
-                            $join_table_str .= " ON " . $val['on'] . " ";
-                        }
-                    }
-                }
-            }
-            $table_str .= "{$join_table_str} ";
-        } else {
-            throw new ModelException(ctx()->getI18n()->getLang('error_model_title'), ctx()->getI18n()->getLang('error_model_execute_jointables'));
-        }
-
-        $val_array = array();
-
-        $where_str = "";
-        if ($where && is_string($where)) {
-            $where_str .= " WHERE {$where} ";
-        } else if ($where && is_array($where)) {
-            foreach ($where as $key => $val) {
-                if (is_numeric($key)) {
-                    $where_str .= " WHERE {$val} ";
-                } else {
-                    $where_str .= " WHERE {$key} ";
-                    $val_array = $val;
-                }
-            }
-        }
-        $sql = "SELECT COUNT(*) as num FROM {$table_str} {$where_str} ";
-        if ($forupdate) $sql .= " FOR UPDATE";
-        //获取记录总数
-        if ($val_array) {
-            $rs = ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query($sql, false, $val_array);
-        } else {
-            $rs = ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query($sql);
-        }
-        $recordCount = $rs[0]['num'];
-        $pagecount = ceil($recordCount / $pagesize);
-        $pageno = 0;
-        if ($pageno > $pagecount) $pageno = $pagecount;
-        if ($pageno < 1) $pageno = 1;
-
-        //$start=($pageno-1)*$pagesize;
-
-        $order_str = $this->get_orders($order);
-
-        $limit_str = " LIMIT " . ($start) . "," . $pagesize;
-        $sql = "SELECT {$field_str} FROM {$table_str} {$where_str} {$order_str} {$limit_str}";
-        if ($forupdate) $sql .= " FOR UPDATE";
-        if ($val_array) {
-            return ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query($sql, false, $val_array);
-        } else {
-            return ctx()->cdb($this->db_cluster_name, $this->db_config_name)->query($sql);
-        }
-    }
-
-
-    /**
-     * call component
-     *
-     * This is load_component alias
-     *
-     * $class is class name.
-     * $single is true for the singleton pattern, false is factory pattern.
-     *
+     * load component
      * @param string $name
      * @param bool $single
-     *
-     * @return object
+     * @return Component
      */
-    final protected function C($name, $single = true)
+    final protected function C(string $name, bool $single = true): Component
     {
         return $this->loadComponent($name, $single);
     }
 
     /**
-     * call plugin
-     *
-     * This is load_plugin alias
-     *
-     * $class is class name.
-     * $single is true for the singleton pattern, false is factory pattern.
-     *
+     * load plugin
      * @param string $name
      * @param bool $single
-     *
-     * @return object
+     * @return Plugin|null
      */
-    final protected function P($name, $single = true, $APP_ASSEMBLY_NAME = '')
+    final protected function P(string $name, bool $single = true)
     {
-        return $this->loadPlugin($name, $single, $APP_ASSEMBLY_NAME);
+        return $this->loadPlugin($name, $single);
     }
 
     /**
-     * get config item
-     *
-     * get this global config item
-     *
-     * $namespace is config file name, But does not contain ".config.php" suffix.
-     * $key is null, get all item.
-     *
+     * get this config item
      * @param string $namespace
      * @param string $key
-     *
      * @return mixed
+     * @throws \cn\eunionz\exception\FileNotFoundException
      */
-    final function F($namespace, $key = '', $APP_ASSEMBLY_NAME = '')
+    final function F(string $namespace, string $key = '')
     {
-        return getConfig($namespace, $key, $APP_ASSEMBLY_NAME);
+        return self::getConfig($namespace, $key);
     }
 
     /**
      * 字段转换，将 $field 描述的字段格式转换为sql字段列表
-     * @param  $field  格式：array('字段1','字段2','字段3'=>'字段3别名','b.字段4') 或者 字符串 或者  * 或者  null
-     * @param string sql field_list
+     * @param $field    格式：array('字段1','字段2','字段3'=>'字段3别名','b.字段4') 或者 字符串 或者  * 或者  null
+     * @return string   sql field_list
      */
-    final public function get_fields($field)
+    final public function get_fields($field): string
     {
         if ($field && is_array($field)) {
             $field_str = "";
@@ -1392,13 +782,13 @@ class Model extends Kernel
 
     /**
      * 排序转换，将 $order 描述的排序格式转换为sql排序列表
-     * @param      $order  格式：'id asc'
+     * @param $order $order  格式：'id asc'
      *                      或格式：'id asc,id1 desc'
      *                      或格式：array('id','id1')
      *                      或格式：array('id'=>'ASC','id1'=>'DESC')
-     * @param string sql order_list
+     * @return string   sql order_list
      */
-    final public function get_orders($order)
+    final public function get_orders($order): string
     {
         $order_str = "";
         if ($order && is_string($order)) {
@@ -1419,13 +809,14 @@ class Model extends Kernel
 
     /**
      * limit转换，将 $limit 描述的limit格式转换为sql limit格式
-     * @param null $limit 格式： 10
+     * @param $limit       格式： 10
      *                     或格式： '0,10'
      *                     或格式： array(10)
      *                     或格式： array(0,10)
-     * @param string sql limit_list
+     * @return string      sql limit_list
+     * @throws ModelException
      */
-    final public function get_limit($limit)
+    final public function get_limit($limit): string
     {
         $limit_str = "";
         if ($limit && is_numeric($limit)) {

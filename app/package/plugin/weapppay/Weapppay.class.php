@@ -13,7 +13,8 @@ namespace package\plugin\weapppay;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Weapppay extends \cn\eunionz\core\Plugin {
+class Weapppay extends \cn\eunionz\core\Plugin
+{
 
     /**
      * 微信支付APP_ID
@@ -54,7 +55,8 @@ class Weapppay extends \cn\eunionz\core\Plugin {
     private $SSLKEY_PATH = "";
 
 
-    function __construct() {
+    function __construct()
+    {
 
         $payment = $this->loadService('shop_payment')->get_payment('weapppay', $this->get_platform_shopid());
         if (isset($payment)) {
@@ -68,29 +70,28 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             if (!isset($payment['pay_config']['weapp']['weapp_ssl_key_files'])) {
                 $payment['pay_config']['weapp']['weapp_ssl_key_files'] = '';
             }
-//            $this->SSLCERT_PATH = APP_REAL_PATH . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_cert_files']);
-//            $this->SSLKEY_PATH = APP_REAL_PATH . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_key_files']);
 
-            $this->SSLCERT_PATH = APP_REAL_PATH . APP_SITE_TEMP_PATH . APP_DS . 'public_html' . APP_DS . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_cert_files']);
-            $this->SSLKEY_PATH = APP_REAL_PATH . APP_SITE_TEMP_PATH . APP_DS . 'public_html' . APP_DS . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_key_files']);
+            $this->SSLCERT_PATH = ctx()->getAppStorageRealPath() . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_cert_files']);
+            $this->SSLKEY_PATH = ctx()->getAppStorageRealPath() . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_key_files']);
             if ($payment['pay_config']['weapp']['weapp_ssl_rootca_files']) {
-                $this->SSLROOTCA_PATH = APP_REAL_PATH . APP_SITE_TEMP_PATH . APP_DS . 'public_html' . APP_DS . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_rootca_files']);
+                $this->SSLROOTCA_PATH = ctx()->getAppStorageRealPath() . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_rootca_files']);
             }
         }
     }
 
     /**
      * 生成支付代码/微信支付时返回微信网页支付需要的参数
-     * @param   array $order 订单信息
-     * @param   array $payment 支付方式信息
+     * @param array $order 订单信息
+     * @param array $payment 支付方式信息
      */
-    public function get_code($order, $payment, $front_url = '') {
+    public function get_code($order, $payment, $front_url = '')
+    {
         include_once("wxpay/WxPayPubHelper.php");
         \WxPayConf_pub::$APPID = $this->wxpay_app_id;
         \WxPayConf_pub::$APPSECRET = $this->wxpay_app_secret;
         \WxPayConf_pub::$MCHID = $this->wxpay_partnerid;
         \WxPayConf_pub::$KEY = $this->wxpay_partnerkey;
-        $this->loadCore('log')->write(APP_DEBUG, 'get_code_start', 'weapppay');
+        $this->loadCore('log')->log(APP_DEBUG, 'get_code_start', 'weapppay');
         $charset = 'utf-8';
         $jsApi = new \JsApi_pub();
         //=========步骤1：网页授权获取用户openid============
@@ -101,13 +102,15 @@ class Weapppay extends \cn\eunionz\core\Plugin {
         //http://demo3.s1.shop.iwanqi.cn/mobile/order.php?act=done&code=021072b846514da6f4bb71028b6910d-&state=STATE
 
         $pay_code['status'] = true;
-        if (!isset($_SESSION['weapp_openid']) || empty($_SESSION['weapp_openid'])) {
+        $SESSION = ctx()->session();
+
+        if (!isset($SESSION['weapp_openid']) || empty($SESSION['weapp_openid'])) {
             $pay_code['error_desc'] = "session已过期，支付参数获取失败！";
             $pay_code['status'] = false;
             return $pay_code;
         }
 
-        $openid = $_SESSION['weapp_openid'];
+        $openid = $SESSION['weapp_openid'];
 
         //=========步骤2：使用统一支付接口，获取prepay_id============
         $unifiedOrder = new \UnifiedOrder_pub();
@@ -171,21 +174,22 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             $pay_code['status'] = false;
         }
         $pay_code['result'] = json_decode($jsApiParameters, true);
-        $this->loadCore('log')->write(APP_DEBUG, print_r($pay_code, true), 'weapppay');
-        $this->loadCore('log')->write(APP_DEBUG, 'get_code_end', 'weapppay');
+        $this->loadCore('log')->log(APP_DEBUG, print_r($pay_code, true), 'weapppay');
+        $this->loadCore('log')->log(APP_DEBUG, 'get_code_end', 'weapppay');
         return $pay_code;
     }
 
     /**
      * 分销订单生成
      * */
-    public function distributor_get_code($order, $payment, $front_url = '') {
+    public function distributor_get_code($order, $payment, $front_url = '')
+    {
         include_once("wxpay/WxPayPubHelper.php");
         \WxPayConf_pub::$APPID = $this->wxpay_app_id;
         \WxPayConf_pub::$APPSECRET = $this->wxpay_app_secret;
         \WxPayConf_pub::$MCHID = $this->wxpay_partnerid;
         \WxPayConf_pub::$KEY = $this->wxpay_partnerkey;
-        $this->loadCore('log')->write(APP_DEBUG, 'get_code_start', 'weapppay');
+        $this->loadCore('log')->log(APP_DEBUG, 'get_code_start', 'weapppay');
         $charset = 'utf-8';
         $jsApi = new \JsApi_pub();
         //=========步骤1：网页授权获取用户openid============
@@ -196,13 +200,15 @@ class Weapppay extends \cn\eunionz\core\Plugin {
         //http://demo3.s1.shop.iwanqi.cn/mobile/order.php?act=done&code=021072b846514da6f4bb71028b6910d-&state=STATE
 
         $pay_code['status'] = true;
-        if (!isset($_SESSION['weapp_openid']) || empty($_SESSION['weapp_openid'])) {
+        $SESSION = ctx()->session();
+
+        if (!isset($SESSION['weapp_openid']) || empty($SESSION['weapp_openid'])) {
             $pay_code['error_desc'] = "session已过期，支付参数获取失败！";
             $pay_code['status'] = false;
             return $pay_code;
         }
 
-        $openid = $_SESSION['weapp_openid'];
+        $openid = $SESSION['weapp_openid'];
 
         //=========步骤2：使用统一支付接口，获取prepay_id============
         $unifiedOrder = new \UnifiedOrder_pub();
@@ -266,12 +272,13 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             $pay_code['status'] = false;
         }
         $pay_code['result'] = json_decode($jsApiParameters, true);
-        $this->loadCore('log')->write(APP_DEBUG, 'get_code_end', 'weapppay');
+        $this->loadCore('log')->log(APP_DEBUG, 'get_code_end', 'weapppay');
         return $pay_code;
     }
 
     //获取url后面字符
-    function getParameter($url, $keys) {
+    function getParameter($url, $keys)
+    {
         $arr = array();
         $arrvalue = array();
         $url = substr($url, strpos($url, "?") + 1, strlen($url));
@@ -289,12 +296,13 @@ class Weapppay extends \cn\eunionz\core\Plugin {
     /**
      * 响应操作
      */
-    function respond($array_data) {
+    function respond($array_data)
+    {
         $payment = $this->loadService('shop_payment')->get_payment('weapppay', $this->get_platform_shopid());
-        $this->loadCore('log')->write(APP_DEBUG, 'respond_start', 'weapppay');
-        $this->loadCore('log')->write(APP_DEBUG, print_r($array_data, true), 'weapppay');
+        $this->loadCore('log')->log(APP_DEBUG, 'respond_start', 'weapppay');
+        $this->loadCore('log')->log(APP_DEBUG, print_r($array_data, true), 'weapppay');
         if ($this->loadPlugin('common')->is_mobile_browser()) {
-            $this->loadCore('log')->write(APP_DEBUG, 'respond：is_mobile_browser', 'weapppay');
+            $this->loadCore('log')->log(APP_DEBUG, 'respond：is_mobile_browser', 'weapppay');
             /*取返回参数*/
             $fields = 'bank_billno,bank_type,discount,fee_type,input_charset,notify_id,out_trade_no,partner,product_fee' . ',sign_type,time_end,total_fee,trade_mode,trade_state,transaction_id,transport_fee,result_code,return_code';
             $arr = null;
@@ -325,7 +333,7 @@ class Weapppay extends \cn\eunionz\core\Plugin {
 
         } else {
             //pc
-            $this->loadCore('log')->write(APP_DEBUG, 'respond：pc', 'weapppay');
+            $this->loadCore('log')->log(APP_DEBUG, 'respond：pc', 'weapppay');
             /*取返回参数*/
             $fields = 'appid,bank_type,cash_fee,code,fee_type,is_subscribe,mch_id,nonce_str,openid' . ',out_trade_no,result_code,return_code,sign,time_end,total_fee,trade_type,transaction_id';
             $arr = null;
@@ -339,12 +347,12 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             $order_id = $this->loadService('order_info')->get_order_id_by_order_pay_sn($order_sn);
             /* 如果trade_state大于0则表示支付失败 */
             if ($arr['result_code'] != "SUCCESS" || $arr['return_code'] != "SUCCESS") {
-                $this->loadCore('log')->write(APP_DEBUG, 'respond：trade_state大于0', 'weapppay');
+                $this->loadCore('log')->log(APP_DEBUG, 'respond：trade_state大于0', 'weapppay');
                 return false;
             }
             /* 检查支付的金额是否相符 */
             if (!$this->loadService('order_info')->check_order_pay_money($order_sn, $arr['total_fee'] / 100)) {
-                $this->loadCore('log')->write(APP_DEBUG, 'respond：支付的金额不相符', 'weapppay');
+                $this->loadCore('log')->log(APP_DEBUG, 'respond：支付的金额不相符', 'weapppay');
                 return false;
             }
 
@@ -353,10 +361,10 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             if ($ret['status']) {
                 $this->loadService('order_info')->delete_payment_notice_data('weapppay', $order_sn);
             }
-            if (file_exists(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx" . $order_id . "html")) {
-                @unlink(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx" . $order_id . "html");
+            if (file_exists(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx" . $order_id . "html")) {
+                @unlink(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx" . $order_id . "html");
             }
-            $this->loadCore('log')->write(APP_DEBUG, 'respond：success', 'weapppay');
+            $this->loadCore('log')->log(APP_DEBUG, 'respond：success', 'weapppay');
             return $ret['status'];
         }
     }
@@ -364,7 +372,8 @@ class Weapppay extends \cn\eunionz\core\Plugin {
     /**
      * 响应操作
      */
-    function auto_respond($post) {
+    function auto_respond($post)
+    {
         $payment = $this->loadService('shop_payment')->get_payment('weapppay', $this->get_platform_shopid());
         $arr = $post;
         $order_sn = $arr['out_trade_no'];
@@ -383,8 +392,8 @@ class Weapppay extends \cn\eunionz\core\Plugin {
         if ($ret['status']) {
             $this->loadService('order_info')->delete_payment_notice_data('weapppay', $order_sn);
         }
-        if (file_exists(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx" . $order_id . "html")) {
-            @unlink(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx" . $order_id . "html");
+        if (file_exists(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx" . $order_id . "html")) {
+            @unlink(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx" . $order_id . "html");
         }
         return $ret['status'];
     }
@@ -392,12 +401,13 @@ class Weapppay extends \cn\eunionz\core\Plugin {
     /**
      * 响应操作
      */
-    function distributor_respond($array_data) {
-        $platform_shopid=$this->get_platform_shopid();
-        $payment = $this->loadService('shop_payment')->get_payment('weapppay',$platform_shopid);
-        $this->loadCore('log')->write(APP_DEBUG, print_r($array_data, true), 'weapppay');
+    function distributor_respond($array_data)
+    {
+        $platform_shopid = $this->get_platform_shopid();
+        $payment = $this->loadService('shop_payment')->get_payment('weapppay', $platform_shopid);
+        $this->loadCore('log')->log(APP_DEBUG, print_r($array_data, true), 'weapppay');
         if ($this->loadPlugin('common')->is_mobile_browser()) {
-            $this->loadCore('log')->write(APP_DEBUG, 'respond：is_mobile_browser', 'weapppay');
+            $this->loadCore('log')->log(APP_DEBUG, 'respond：is_mobile_browser', 'weapppay');
             /*取返回参数*/
             $fields = 'bank_billno,bank_type,discount,fee_type,input_charset,notify_id,out_trade_no,partner,product_fee' . ',sign_type,time_end,total_fee,trade_mode,trade_state,transaction_id,transport_fee,result_code,return_code';
             $arr = null;
@@ -414,7 +424,7 @@ class Weapppay extends \cn\eunionz\core\Plugin {
                 return false;
             }
             /* 检查支付的金额是否相符 */
-            if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee'] / 100,$platform_shopid)) {
+            if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee'] / 100, $platform_shopid)) {
                 return false;
             }
             /* 改变订单状态 */
@@ -425,7 +435,7 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             return $ret['status'];
         } else {
             //pc
-            $this->loadCore('log')->write(APP_DEBUG, 'respond：pc', 'weapppay');
+            $this->loadCore('log')->log(APP_DEBUG, 'respond：pc', 'weapppay');
             /*取返回参数*/
             $fields = 'appid,bank_type,cash_fee,code,fee_type,is_subscribe,mch_id,nonce_str,openid' . ',out_trade_no,result_code,return_code,sign,time_end,total_fee,trade_type,transaction_id';
             $arr = null;
@@ -439,12 +449,12 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             $order_id = $this->loadService('order_info')->get_order_id_by_order_pay_sn($order_sn);
             /* 如果trade_state大于0则表示支付失败 */
             if ($arr['result_code'] != "SUCCESS" || $arr['return_code'] != "SUCCESS") {
-                $this->loadCore('log')->write(APP_DEBUG, 'respond：trade_state大于0', 'weapppay');
+                $this->loadCore('log')->log(APP_DEBUG, 'respond：trade_state大于0', 'weapppay');
                 return false;
             }
             /* 检查支付的金额是否相符 */
-            if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee'] / 100,$platform_shopid)) {
-                $this->loadCore('log')->write(APP_DEBUG, 'respond：支付的金额不相符', 'weapppay');
+            if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee'] / 100, $platform_shopid)) {
+                $this->loadCore('log')->log(APP_DEBUG, 'respond：支付的金额不相符', 'weapppay');
                 return false;
             }
             /* 改变订单状态 */
@@ -452,10 +462,10 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             if ($ret['status']) {
                 $this->loadService('distributor_buy_log')->delete_payment_notice_data('weapppay', $order_sn);
             }
-            if (file_exists(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx_dist" . $order_id . "html")) {
-                @unlink(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx_dist" . $order_id . "html");
+            if (file_exists(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx_dist" . $order_id . "html")) {
+                @unlink(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx_dist" . $order_id . "html");
             }
-            $this->loadCore('log')->write(APP_DEBUG, 'respond：success', 'weapppay');
+            $this->loadCore('log')->log(APP_DEBUG, 'respond：success', 'weapppay');
             return $ret['status'];
         }
     }
@@ -463,9 +473,10 @@ class Weapppay extends \cn\eunionz\core\Plugin {
     /**
      * 响应操作
      */
-    function distributor_auto_respond($post) {
-        $platform_shopid=$this->get_platform_shopid();
-        $payment = $this->loadService('shop_payment')->get_payment('weapppay',$platform_shopid);
+    function distributor_auto_respond($post)
+    {
+        $platform_shopid = $this->get_platform_shopid();
+        $payment = $this->loadService('shop_payment')->get_payment('weapppay', $platform_shopid);
         $arr = $post;
         $order_sn = $arr['out_trade_no'];
         $order_id = $this->loadService('order_info')->get_order_id_by_order_pay_sn($order_sn);
@@ -474,7 +485,7 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             return false;
         }
         /* 检查支付的金额是否相符 */
-        if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee']/100,$platform_shopid)) {
+        if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee'] / 100, $platform_shopid)) {
             return false;
         }
         /* 改变订单状态 */
@@ -482,8 +493,8 @@ class Weapppay extends \cn\eunionz\core\Plugin {
         if ($ret['status']) {
             $this->loadService('distributor_buy_log')->delete_payment_notice_data('weapppay', $order_sn);
         }
-        if (file_exists(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx_dist" . $order_id . "html")) {
-            @unlink(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx_dist" . $order_id . "html");
+        if (file_exists(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx_dist" . $order_id . "html")) {
+            @unlink(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx_dist" . $order_id . "html");
         }
         return $ret['status'];
     }
@@ -496,24 +507,25 @@ class Weapppay extends \cn\eunionz\core\Plugin {
      * @param array $refund 退款单数据
      * @return bool true--成功  false--失败
      */
-    public function refund($order, $refund) {
+    public function refund($order, $refund)
+    {
         $obj = null;//new \stdClass();
         $payment = $this->loadService('shop_payment')->get_payment('weapppay', $this->get_platform_shopid());
         require_once "wxlib/WxPay.Api.php";
-        $this->loadCore('log')->write(APP_ERROR, "refund1", 'weapppay');
+        $this->loadCore('log')->log(APP_ERROR, "refund1", 'weapppay');
 
         \WxPayConfig::$APPID = $payment['pay_config']['weapp']['App_id'];
         \WxPayConfig::$APPSECRET = $payment['pay_config']['weapp']['Openid_JSP'];
         \WxPayConfig::$MCHID = $payment['pay_config']['weapp']['PartnerID'];
         \WxPayConfig::$KEY = $payment['pay_config']['weapp']['PaySignKey'];
 
-        \WxPayConfig::$SSLCERT_PATH = APP_REAL_PATH . APP_SITE_TEMP_PATH . APP_DS . 'public_html' . APP_DS . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_cert_files']);
-        \WxPayConfig::$SSLKEY_PATH = APP_REAL_PATH . APP_SITE_TEMP_PATH . APP_DS . 'public_html' . APP_DS . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_key_files']);
+        \WxPayConfig::$SSLCERT_PATH = ctx()->getAppRuntimeRealPath() . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_cert_files']);
+        \WxPayConfig::$SSLKEY_PATH = ctx()->getAppRuntimeRealPath() . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_key_files']);
 
 
         $remarket = "微信支付退款成功";
         if ($this->loadPlugin('common')->is_mobile_browser()) {
-            $this->loadCore('log')->write(APP_ERROR, "退款途径：wap", 'weapppay');
+            $this->loadCore('log')->log(APP_ERROR, "退款途径：wap", 'weapppay');
             //wap
             ini_set('date.timezone', 'Asia/Shanghai');
             error_reporting(E_ERROR);
@@ -545,11 +557,11 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             $orefund_way = 0;// 0:线上退款 1：线下退款  
             //直接调用退款成功处理函数
             $ret = $this->loadService('order_info')->op_refund_by_order_sn($refund['order_sn'], $refund['orefund_amount'], $remarket, $refund['orefund_id'], $orefund_way);
-            $this->loadCore('log')->write(APP_ERROR, "refund4:" . $ret['msg'], 'weapppay');
+            $this->loadCore('log')->log(APP_ERROR, "refund4:" . $ret['msg'], 'weapppay');
 
             return $ret;
         } else {
-            $this->loadCore('log')->write(APP_ERROR, "退款途径：PC", 'weapppay');
+            $this->loadCore('log')->log(APP_ERROR, "退款途径：PC", 'weapppay');
             //pc
             ini_set('date.timezone', 'Asia/Shanghai');
             error_reporting(E_ERROR);
@@ -567,7 +579,7 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             $input->SetOp_user_id(\WxPayConfig::$MCHID);
 
             $rs = \WxPayApi::refund($input);
-            $this->loadCore('log')->write(APP_ERROR, "refund2:" . print_r($rs, true), 'weapppay');
+            $this->loadCore('log')->log(APP_ERROR, "refund2:" . print_r($rs, true), 'weapppay');
             if ($rs['return_code'] == 'FAIL') {
                 //echo "微信支付退款失败，失败原因：".$rs['return_msg'];
                 //exit;
@@ -577,14 +589,14 @@ class Weapppay extends \cn\eunionz\core\Plugin {
             }
 
             //业务数据处理
-            $this->loadCore('log')->write(APP_ERROR, "refund3:", 'weapppay');
+            $this->loadCore('log')->log(APP_ERROR, "refund3:", 'weapppay');
 
 
             //修改退款单号的状态
             $orefund_way = 0;// 0:线上退款 1：线下退款  
             //直接调用退款成功处理函数
             $ret = $this->loadService('order_info')->op_refund_by_order_sn($refund['order_sn'], $refund['orefund_amount'], $remarket, $refund['orefund_id'], $orefund_way);
-            $this->loadCore('log')->write(APP_ERROR, "refund4:" . $ret['msg'], 'weapppay');
+            $this->loadCore('log')->log(APP_ERROR, "refund4:" . $ret['msg'], 'weapppay');
 
             return $ret;
         }
@@ -598,7 +610,8 @@ class Weapppay extends \cn\eunionz\core\Plugin {
      * @param array $order 订单数据
      * @param array $refund_transfer 退款转帐申请数据
      */
-    public function refund_notify() {
+    public function refund_notify()
+    {
 
         return true;
     }
@@ -608,7 +621,8 @@ class Weapppay extends \cn\eunionz\core\Plugin {
      * 创建sign
      * @return string
      */
-    public function create_sign($arr) {
+    public function create_sign($arr)
+    {
         $para = $this->parafilter($arr);
         $para = $this->argsort($para);
         $signValue = $this->createlinkstring($para);
@@ -622,7 +636,8 @@ class Weapppay extends \cn\eunionz\core\Plugin {
      * @param $para 需要拼接的数组
      * return 拼接完成以后的字符串
      */
-    public function createlinkstring($para) {
+    public function createlinkstring($para)
+    {
         $arg = "";
         foreach ($para as $key => $val) {
             $arg .= strtolower($key) . "=" . $val . "&";
@@ -645,7 +660,8 @@ class Weapppay extends \cn\eunionz\core\Plugin {
      * return 去掉空值与签名参数后的新签名参数组
      */
 
-    public function parafilter($para) {
+    public function parafilter($para)
+    {
         $para_filter = array();
         foreach ($para as $key => $val) {
             if ($key == "sign_method" || $key == "sign" || $val == "")
@@ -659,7 +675,8 @@ class Weapppay extends \cn\eunionz\core\Plugin {
      * @param $para 排序前的数组
      * return 排序后的数组
      */
-    public function argsort($para) {
+    public function argsort($para)
+    {
         ksort($para);
         reset($para);
         return $para;
@@ -669,7 +686,8 @@ class Weapppay extends \cn\eunionz\core\Plugin {
      * 从xml中获取数组
      * @return array
      */
-    public function getXmlArray() {
+    public function getXmlArray()
+    {
         $postStr = @$this->input();
         if ($postStr) {
             $postObj = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
@@ -684,7 +702,8 @@ class Weapppay extends \cn\eunionz\core\Plugin {
     }
 
 
-    public function testpay() {
+    public function testpay()
+    {
 
         $order['order_title'] = "测试支付";
         $order['order_sn'] = "wt_sn_" . time();
@@ -739,25 +758,26 @@ class Weapppay extends \cn\eunionz\core\Plugin {
      * @param array $order 订单数据   $data['money_paid'] --订单在线支付总金额，单位元
      * @return bool true--成功  false--失败
      */
-    public function refund_cancel_order($order) {
+    public function refund_cancel_order($order)
+    {
         $obj = null;//new \stdClass();
         $payment = $this->loadService('shop_payment')->get_payment('weapppay', $this->get_platform_shopid());
         require_once "wxlib/WxPay.Api.php";
-        $this->loadCore('log')->write(APP_ERROR, "refund1", 'weapppay');
+        $this->loadCore('log')->log(APP_ERROR, "refund1", 'weapppay');
 
         \WxPayConfig::$APPID = $payment['pay_config']['weapp']['App_id'];
         \WxPayConfig::$APPSECRET = $payment['pay_config']['weapp']['Openid_JSP'];
         \WxPayConfig::$MCHID = $payment['pay_config']['weapp']['PartnerID'];
         \WxPayConfig::$KEY = $payment['pay_config']['weapp']['PaySignKey'];
 
-        \WxPayConfig::$SSLCERT_PATH = APP_REAL_PATH . APP_SITE_TEMP_PATH . APP_DS . 'public_html' . APP_DS . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_cert_files']);
-        \WxPayConfig::$SSLKEY_PATH = APP_REAL_PATH . APP_SITE_TEMP_PATH . APP_DS . 'public_html' . APP_DS . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_key_files']);
+        \WxPayConfig::$SSLCERT_PATH = ctx()->getAppRuntimeRealPath() . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_cert_files']);
+        \WxPayConfig::$SSLKEY_PATH = ctx()->getAppRuntimeRealPath() . str_replace("/", APP_DS, $payment['pay_config']['weapp']['weapp_ssl_key_files']);
 
         $retdata['msg'] = "退款申请成功！";
         $retdata['data'] = null;
         $retdata['status'] = true;
 
-        $this->loadCore('log')->write(APP_ERROR, "退款途径：pc", 'weapppay');
+        $this->loadCore('log')->log(APP_ERROR, "退款途径：pc", 'weapppay');
         //wap
         ini_set('date.timezone', 'Asia/Shanghai');
         error_reporting(E_ERROR);
@@ -800,7 +820,7 @@ class Weapppay extends \cn\eunionz\core\Plugin {
 
         //业务数据处理
         $ret = $this->loadService('order_info')->do_cancel_by_order_sn($order);
-        $this->loadCore('log')->write(APP_ERROR, "refund4:" . $ret, 'orderinfo_refund');
+        $this->loadCore('log')->log(APP_ERROR, "refund4:" . $ret, 'orderinfo_refund');
         if ($ret === false) {
             $retdata['msg'] = "退款申请失败！";
             $retdata['status'] = false;
@@ -809,8 +829,10 @@ class Weapppay extends \cn\eunionz\core\Plugin {
         return $retdata;
     }
 
-    function get_platform_shopid() {
-        return (isset($_SESSION['PLATFORM_SHOP_ID'])) ? $_SESSION['PLATFORM_SHOP_ID'] : $this->getConfig('shop', 'SHOP_ID');
+    function get_platform_shopid()
+    {
+        $SESSION = ctx()->session();
+        return (isset($SESSION['PLATFORM_SHOP_ID'])) ? $SESSION['PLATFORM_SHOP_ID'] : ctx()->getShopId();
     }
 
 }

@@ -24,10 +24,11 @@ class Version_limit extends \cn\eunionz\core\Plugin
 
     public function alert($message,$back=''){
         header("Content-Type: text/html;charset=utf-8");
+        $SERVER = ctx()->server();
         if($back){
             $back= $back;
-        }else if(!empty($_SERVER['HTTP_REFERER'])){
-            $back= $_SERVER['HTTP_REFERER'];
+        }else if(!empty($SERVER['HTTP_REFERER'])){
+            $back= $SERVER['HTTP_REFERER'];
         }
 /*         echo <<<str
 
@@ -84,12 +85,12 @@ str;
        $ret['status']=true;
        $ret['msg']="";
        
-        $shop_id = $this->getConfig('shop','SHOP_ID');
+        $shop_id = ctx()->getShopId();
         if($shop_id<1){
             return $ret;
         }
         //用户数
-        $user_number  = $this->getConfig($version_config,'USER_NUMBER');
+        $user_number  = self::getConfig($version_config,'USER_NUMBER');
 //         echo $user_number,'-',$version_config;
 //         exit;
         //当前用户使用用户数
@@ -115,14 +116,14 @@ str;
      */
     public function get_service_User_vip_registe($version_config,$param){
         $this->message = '';
-        $shop_id = $this->getConfig('shop','SHOP_ID');
+        $shop_id = ctx()->getShopId();
         //基础版，多陪伴直接限制
         $email_mobile_versions = $this->get_email_mobile_versions();
         if($shop_id<1){
             return 0;
         }
         //用户注册类型
-        $rigister_limit  = $this->getConfig($version_config,'REGISTER_LIMIT');
+        $rigister_limit  = self::getConfig($version_config,'REGISTER_LIMIT');
         $shop_version = str_replace('version', '', $version_config);
 //         echo '<pre>';
 //         echo $version_config,"\n";
@@ -172,12 +173,12 @@ str;
      */
     public function get_service_Find_pwd_start($version_config,$type){
         $this->message = '';
-        $shop_id = $this->getConfig('shop','SHOP_ID');
+        $shop_id = ctx()->getShopId();
         if($shop_id<1){
             return 0;
         }
         //用户注册类型
-//         $rigister_limit  = $this->getConfig($version_config,'REGISTER_LIMIT');
+//         $rigister_limit  = self::getConfig($version_config,'REGISTER_LIMIT');
 //         echo '<pre>';
 //         echo $version_config,"\n";
 //         echo $shop_id,"\n";
@@ -211,12 +212,12 @@ str;
      */
     public function get_admin_shopping_volumes($version_config){
          
-        $shop_id = $this->getConfig('shop','SHOP_ID');
+        $shop_id = ctx()->getShopId();
         if($shop_id<1){
             return true;
         }
         //优惠卡券活动数量限制 0表示不限制 大于0表示限制的个数
-        $discount_card  = $this->getConfig($version_config,'DISCOUNT_CARD');
+        $discount_card  = self::getConfig($version_config,'DISCOUNT_CARD');
 
         //当前开启活动数量
         $now_shopping_volumes_open_count = $this->loadService('shopping_volumes')->get_is_open_count();

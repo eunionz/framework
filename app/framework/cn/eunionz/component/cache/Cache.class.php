@@ -114,7 +114,7 @@ class Cache extends Component
             $this->cache_life_seconds = $cfg['cache_life_seconds'];
             $this->cache_driver_data = $cfg['cache_driver_data'];
         } else {
-            $cfg = $this->getConfig('cache');
+            $cfg = self::getConfig('cache');
             $this->is_cache = $cfg['is_cache'];
             $this->cache_type = $cfg['cache_type'];
             $this->cache_life_seconds = $cfg['cache_life_seconds'];
@@ -539,7 +539,7 @@ class Cache extends Component
         }
 
         if ($expire > 0) {
-            $ret = $this->getRedis()->expireAt($prefix . ':' . $key, time() + $expire);
+            $ret = $this->getRedis()->expire($prefix, $expire);
         }
         return $ret;
     }

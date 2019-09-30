@@ -72,9 +72,9 @@ class RpcServer extends \cn\eunionz\core\Server
         @libxml_disable_entity_loader(true);
         ctx()->addTimeNode('system_launch');
         //设置当前时区
-        date_default_timezone_set(getConfig('app', 'APP_DEFAULT_TIMEZONE'));
+        date_default_timezone_set(self::getConfig('app', 'APP_DEFAULT_TIMEZONE'));
         //设置脚本最大执行时间
-        set_time_limit(getConfig('app', 'APP_DEFAULT_SCRIPT_EXECUTE_TIMEOUT_SECONDS'));
+        set_time_limit(self::getConfig('app', 'APP_DEFAULT_SCRIPT_EXECUTE_TIMEOUT_SECONDS'));
 
 
         $rpc_datas = @unserialize($data);
@@ -140,7 +140,7 @@ class RpcServer extends \cn\eunionz\core\Server
 
         ctx()->setShopID($shop_id);
 
-        $site_name = (empty($shop_id) ? getConfig('app', 'APP_SHOP_ID_ZERO_FOLDER_NAME') : $shop_id);
+        $site_name = (empty($shop_id) ? self::getConfig('app', 'APP_SHOP_ID_ZERO_FOLDER_NAME') : $shop_id);
         ctx()->setSiteName($site_name);
 
         //当前站点临时文件夹物理路径
@@ -209,7 +209,7 @@ class RpcServer extends \cn\eunionz\core\Server
         if ($clinetVersion > 0) {
             $client_version_suffixs = $this->cache('shop_0_shop_actions', array($service_class, $action, $clinetVersion));
             if (!is_array($client_version_suffixs)) {
-                $APP_SHOP_VERSION_LISTS = getConfig('version', 'APP_VERSION_LISTS');
+                $APP_SHOP_VERSION_LISTS = self::getConfig('version', 'APP_VERSION_LISTS');
                 if ($APP_SHOP_VERSION_LISTS) {
                     for ($i = count($APP_SHOP_VERSION_LISTS) - 1; $i >= 0; $i--) {
                         $version = $APP_SHOP_VERSION_LISTS[$i];

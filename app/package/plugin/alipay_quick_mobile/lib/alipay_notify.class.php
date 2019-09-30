@@ -39,13 +39,14 @@ class AlipayNotify {
      * @return 验证结果
      */
 	function verifyNotify(){
-		if(empty($_POST)) {//判断POST来的数组是否为空
+		$POST = ctx()->post();
+		if(empty($POST)) {//判断POST来的数组是否为空
 			return false;
 		}
 		else {
 			
 			//对notify_data解密
-			$decrypt_post_para = $_POST;
+			$decrypt_post_para = $POST;
 			if ($this->alipay_config['sign_type'] == '0001') {
 				$decrypt_post_para['notify_data'] = rsaDecrypt($decrypt_post_para['notify_data'], $this->alipay_config['private_key_path']);
 			}
@@ -60,7 +61,7 @@ class AlipayNotify {
 			if (! empty($notify_id)) {$responseTxt = $this->getResponse($notify_id);}
 			
 			//生成签名结果
-			$isSign = $this->getSignVeryfy($decrypt_post_para, $_POST["sign"],false);
+			$isSign = $this->getSignVeryfy($decrypt_post_para, $POST["sign"],false);
 			
 			//写日志记录
 			//if ($isSign) {
@@ -89,12 +90,13 @@ class AlipayNotify {
      * @return 验证结果
      */
 	function verifyReturn(){
-		if(empty($_GET)) {//判断GET来的数组是否为空
+		$GET = ctx()->get();
+		if(empty($GET)) {//判断GET来的数组是否为空
 			return false;
 		}
 		else {
 			//生成签名结果
-			$isSign = $this->getSignVeryfy($_GET, $_GET["sign"],true);
+			$isSign = $this->getSignVeryfy($GET, $GET["sign"],true);
 			
 			//写日志记录
 			//if ($isSign) {

@@ -240,7 +240,8 @@ class SaeTOAuthV2 {
 	 */
 	function getTokenFromJSSDK() {
 		$key = "weibojs_" . $this->client_id;
-		if ( isset($_COOKIE[$key]) && $cookie = $_COOKIE[$key] ) {
+		$COOKIE = ctx()->cookie();
+		if ( isset($COOKIE[$key]) && $cookie = $COOKIE[$key] ) {
 			parse_str($cookie, $token);
 			if ( isset($token['access_token']) && isset($token['refresh_token']) ) {
 				$this->access_token = $token['access_token'];
@@ -378,6 +379,8 @@ class SaeTOAuthV2 {
 		curl_setopt($ci, CURLOPT_HEADERFUNCTION, array($this, 'getHeader'));
 		curl_setopt($ci, CURLOPT_HEADER, FALSE);
 
+        $SERVER = ctx()->server();
+
 		switch ($method) {
 			case 'POST':
 				curl_setopt($ci, CURLOPT_POST, TRUE);
@@ -404,7 +407,7 @@ class SaeTOAuthV2 {
 			}
 		} else {
 			if ( !defined('SAE_ACCESSKEY') ) {
-				$headers[] = "API-RemoteIP: " . $_SERVER['REMOTE_ADDR'];
+				$headers[] = "API-RemoteIP: " . $SERVER['REMOTE_ADDR'];
 			}
 		}
 		curl_setopt($ci, CURLOPT_URL, $url );

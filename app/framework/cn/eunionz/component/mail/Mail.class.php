@@ -65,7 +65,7 @@ class Mail extends \cn\eunionz\core\Component
             self::$_mailer->CharSet = 'UTF-8';
             self::$_mailer->IsSMTP();
             self::$_mailer->SMTPAuth = true;
-            $plad_shop_id = $this->session('PLATFORM_SHOP_ID') ? $this->session('PLATFORM_SHOP_ID') : $this->getConfig('app', 'SHOP_ID');
+            $plad_shop_id = $this->session('PLATFORM_SHOP_ID') ? $this->session('PLATFORM_SHOP_ID') : ctx()->getShopId();
             self::$_mailer->Host = $this->loadService('shop_params')->get_value_by_key('SITE_MAIL_HOST', $plad_shop_id);
             self::$_mailer->Port = $this->loadService('shop_params')->get_value_by_key('SITE_MAIL_PORT', $plad_shop_id);
             self::$_mailer->Username = $this->loadService('shop_params')->get_value_by_key('SITE_MAIL_USERNAME', $plad_shop_id);

@@ -23,7 +23,7 @@ class Apidoc extends \cn\eunionz\core\Plugin
      */
     public function __construct()
     {
-    	$config=$this->getConfig('apidoc');
+    	$config=self::getConfig('apidoc');
         $this->config = array_merge($this->config, $config);
     }
 

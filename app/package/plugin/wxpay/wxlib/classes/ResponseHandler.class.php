@@ -1,7 +1,8 @@
 <?php
 
 
-class ResponseHandler  {
+class ResponseHandler
+{
 
     /** 密钥 */
     var $key;
@@ -12,21 +13,26 @@ class ResponseHandler  {
     /** debug信息 */
     var $debugInfo;
 
-    function __construct() {
+    function __construct()
+    {
         $this->ResponseHandler();
     }
 
-    function ResponseHandler() {
+    function ResponseHandler()
+    {
+        $GET = ctx()->get();
+        $POST = ctx()->post();
+
         $this->key = "";
         $this->parameters = array();
         $this->debugInfo = "";
 
         /* GET */
-        foreach($_GET as $k => $v) {
+        foreach ($GET as $k => $v) {
             $this->setParameter($k, $v);
         }
         /* POST */
-        foreach($_POST as $k => $v) {
+        foreach ($POST as $k => $v) {
             $this->setParameter($k, $v);
         }
     }
@@ -34,36 +40,41 @@ class ResponseHandler  {
     /**
      *获取密钥
      */
-    function getKey() {
+    function getKey()
+    {
         return $this->key;
     }
 
     /**
      *设置密钥
      */
-    function setKey($key) {
+    function setKey($key)
+    {
         $this->key = $key;
     }
 
     /**
      *获取参数值
      */
-    function getParameter($parameter) {
+    function getParameter($parameter)
+    {
         return $this->parameters[$parameter];
     }
 
     /**
      *设置参数值
      */
-    function setParameter($parameter, $parameterValue) {
+    function setParameter($parameter, $parameterValue)
+    {
         $this->parameters[$parameter] = $parameterValue;
     }
 
     /**
      *获取所有请求的参数
-     *@return array
+     * @return array
      */
-    function getAllParameters() {
+    function getAllParameters()
+    {
         return $this->parameters;
     }
 
@@ -72,11 +83,12 @@ class ResponseHandler  {
      *true:是
      *false:否
      */
-    function isTenpaySign() {
+    function isTenpaySign()
+    {
         $signPars = "";
         ksort($this->parameters);
-        foreach($this->parameters as $k => $v) {
-            if("sign" != $k && "" != $v) {
+        foreach ($this->parameters as $k => $v) {
+            if ("sign" != $k && "" != $v) {
                 $signPars .= $k . "=" . $v . "&";
             }
         }
@@ -97,15 +109,17 @@ class ResponseHandler  {
     /**
      *获取debug信息
      */
-    function getDebugInfo() {
+    function getDebugInfo()
+    {
         return $this->debugInfo;
     }
 
     /**
      *显示处理结果。
-     *@param $show_url 显示处理结果的url地址,绝对url地址的形式(http://www.xxx.com/xxx.php)。
+     * @param $show_url 显示处理结果的url地址,绝对url地址的形式(http://www.xxx.com/xxx.php)。
      */
-    function doShow($show_url) {
+    function doShow($show_url)
+    {
         $strHtml = "<html><head>\r\n" .
             "<meta name=\"TENCENT_ONLINE_PAYMENT\" content=\"China TENCENT\">" .
             "<script language=\"javascript\">\r\n" .
@@ -123,12 +137,13 @@ class ResponseHandler  {
      * @param signParameterArray 签名的参数数组
      * @return boolean
      */
-    function _isTenpaySign($signParameterArray) {
+    function _isTenpaySign($signParameterArray)
+    {
 
         $signPars = "";
-        foreach($signParameterArray as $k) {
+        foreach ($signParameterArray as $k) {
             $v = $this->getParameter($k);
-            if("sign" != $k && "" != $v) {
+            if ("sign" != $k && "" != $v) {
                 $signPars .= $k . "=" . $v . "&";
             }
         }
@@ -150,7 +165,8 @@ class ResponseHandler  {
     /**
      *设置debug信息
      */
-    function _setDebugInfo($debugInfo) {
+    function _setDebugInfo($debugInfo)
+    {
         $this->debugInfo = $debugInfo;
     }
 

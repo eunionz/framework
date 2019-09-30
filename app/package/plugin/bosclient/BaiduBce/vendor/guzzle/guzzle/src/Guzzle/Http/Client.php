@@ -310,7 +310,7 @@ class Client extends AbstractHasDispatcher implements ClientInterface
         if (!$this->curlMulti) {
             $this->curlMulti = new CurlMultiProxy(
                 self::MAX_HANDLES,
-                $this->getConfig('select_timeout') ?: self::DEFAULT_SELECT_TIMEOUT
+                self::getConfig('select_timeout') ?: self::DEFAULT_SELECT_TIMEOUT
             );
         }
 
@@ -348,7 +348,7 @@ class Client extends AbstractHasDispatcher implements ClientInterface
      */
     protected function expandTemplate($template, array $variables = null)
     {
-        $expansionVars = $this->getConfig()->toArray();
+        $expansionVars = self::getConfig()->toArray();
         if ($variables) {
             $expansionVars = $variables + $expansionVars;
         }

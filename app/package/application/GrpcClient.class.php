@@ -66,7 +66,7 @@ class GrpcClient extends Kernel
         if (empty($grpc_host) || empty($grpc_port)) {
             $grpc_config_name = 'grpc_service_default';
             $this->grpc_config_name = $grpc_config_name;
-            $grpc_config = getConfig('rpc', $this->grpc_config_name);
+            $grpc_config = self::getConfig('rpc', $this->grpc_config_name);
             $this->grpc_host = isset($grpc_config['host']) ? $grpc_config['host'] : '127.0.0.1';
             $this->grpc_port = isset($grpc_config['port']) ? intval($grpc_config['port']) : 8888;
             $this->grpc_timeout = isset($grpc_config['timeout']) ? $grpc_config['timeout'] : 0.5;

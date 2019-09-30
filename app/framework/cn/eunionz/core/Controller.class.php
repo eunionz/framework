@@ -83,7 +83,7 @@ class Controller extends Kernel
         // 当前实例
     }
 
-    public function initialize()
+    public function initialize(): Controller
     {
         $this->mergeLang($this->getControllerLang(get_called_class()));
         $this->viewData['all_langs'] = $this->getLang();
@@ -95,37 +95,16 @@ class Controller extends Kernel
         $js_headers['clientversion'] = ctx()->getRequest()->getClinetVersion();
         $js_headers['applanguage'] = ctx()->getI18n()->getLanguage();
         $this->viewData['js_headers'] = json_encode($js_headers);
+        return $this;
     }
 
     /**
      * is post request
-     *
      * @return bool
      */
-    final protected function is_post()
+    public final function is_post(): bool
     {
         if (strtolower($this->server('REQUEST_METHOD')) == 'post') {
-            /*$http_referer= isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:'';
-            if(empty($http_referer)){
-                echo $this->getLang('access_denied');
-                exit;
-            }
-            $host=isset($_SERVER['HTTP_HOST'])?$_SERVER['HTTP_HOST']:'';
-            if(empty($host)){
-                echo $this->getLang('access_denied');
-                exit;
-            }
-            $http_referer_host=parse_url($http_referer);
-            $port=isset($http_referer_host['port'])? $http_referer_host['port']:'80';
-            if($port=='80')
-                $port='';
-            else
-                $port=':'.$port;
-
-            if(!isset($http_referer_host['host'])  || ((strtolower($http_referer_host['host']).$port)!= strtolower($host)) ){
-                echo $this->getLang('access_denied');
-                exit;
-            }*/
             return true;
         }
         return false;
@@ -136,7 +115,7 @@ class Controller extends Kernel
      *
      * @return bool
      */
-    final protected function is_ajax()
+    public final function is_ajax(): bool
     {
         if (!$this->server('HTTP_X_REQUESTED_WITH')) return false;
         return strtolower($this->server('HTTP_X_REQUESTED_WITH')) == 'xmlhttprequest';
@@ -147,7 +126,7 @@ class Controller extends Kernel
      *
      * @return bool
      */
-    final protected function is_get()
+    public final function is_get(): bool
     {
         return strtolower($this->server('REQUEST_METHOD')) == 'get';
     }
@@ -157,7 +136,7 @@ class Controller extends Kernel
      *
      * @return bool
      */
-    final protected function is_put()
+    public final function is_put(): bool
     {
         return strtolower($this->server('REQUEST_METHOD')) == 'put';
     }
@@ -167,7 +146,7 @@ class Controller extends Kernel
      *
      * @return bool
      */
-    final protected function is_delete()
+    public final function is_delete(): bool
     {
         return strtolower($this->server('REQUEST_METHOD')) == 'delete';
     }
@@ -177,7 +156,7 @@ class Controller extends Kernel
      *
      * @return bool
      */
-    final protected function is_options()
+    public final function is_options(): bool
     {
         return strtolower($this->server('REQUEST_METHOD')) == 'options';
     }
@@ -186,9 +165,9 @@ class Controller extends Kernel
      * redirect url
      *
      * @param string $url
-     * @param bool
+     * @param bool $is_exit
      */
-    final protected function redirect($url, $is_exit = true)
+    final protected function redirect(string $url, bool $is_exit = true): void
     {
         if (ctx()->getResponse()) {
             ctx()->getResponse()->redirect($url);
@@ -197,90 +176,57 @@ class Controller extends Kernel
 
     /**
      * get config item
-     *
-     * get this global config item
-     *
-     * $namespace is config file name, But does not contain ".config.php" suffix.
-     * $key is null, get all item.
-     *
      * @param string $namespace
      * @param string $key
-     *
      * @return mixed
+     * @throws \cn\eunionz\exception\FileNotFoundException
      */
-    final function F($namespace, $key = '')
+    final function F(string $namespace, string $key = '')
     {
-        return getConfig($namespace, $key);
+        return self::getConfig($namespace, $key);
     }
 
     /**
-     * call service
-     *
-     * This is load_service alias
-     *
-     * $class is class name.
-     * $single is true for the singleton pattern, false is factory pattern.
-     *
+     * load service
      * @param string $name
      * @param bool $single
-     *
-     * @return object
+     * @return Service|null
      */
-    final protected function S($name, $single = true)
+    final protected function S(string $name, bool $single = true): ?Service
     {
         return $this->loadService($name, $single);
     }
 
     /**
-     * call component
-     *
-     * This is load_component alias
-     *
-     * $class is class name.
-     * $single is true for the singleton pattern, false is factory pattern.
-     *
+     * load component
      * @param string $name
      * @param bool $single
-     *
-     * @return object
+     * @return Component|null
      */
-    final protected function C($name, $single = true)
+    final protected function C(string $name, bool $single = true): ?Component
     {
         return $this->loadComponent($name, $single);
     }
 
     /**
-     * call plugin
-     *
-     * This is load_plugin alias
-     *
-     * $class is class name.
-     * $single is true for the singleton pattern, false is factory pattern.
-     *
+     * load plugin
      * @param string $name
      * @param bool $single
-     *
-     * @return object
+     * @return Plugin|null
      */
-    final protected function P($name, $single = true)
+    final protected function P(string $name, bool $single = true): ?Plugin
     {
         return $this->loadPlugin($name, $single);
     }
 
     /**
      * display view
-     *
-     * use the template show an view
-     *
-     * $return is true, return the need to display content.
-     *
-     * @param string $page
-     * @param array $vars
+     * @param string|null $page
+     * @param array $model
      * @param bool $return
-     *
      * @return string
      */
-    final protected function display($page = null, $model = array(), $return = false)
+    public final function display(string $page = null, array $model = array(), bool $return = false)
     {
         $route_datas = ctx()->getRouter();
         if (empty($page)) {
@@ -293,8 +239,13 @@ class Controller extends Kernel
     }
 
 
-    //控制器将返回json，同时关闭跟踪输出
-    final protected function ajaxReturn($data = null, $is_return = false)
+    /**
+     * 控制器将返回json，同时关闭跟踪输出
+     * @param null $data
+     * @param bool $is_return
+     * @return mixed|string
+     */
+    public final function ajaxReturn($data = null, bool $is_return = false)
     {
         $this->_is_json_return = true;
         $this->addHeader("Content-Type", "application/json");
@@ -315,18 +266,12 @@ class Controller extends Kernel
 
     /**
      * display view
-     *
-     * use the template show an view
-     *
-     * $return is true, return the need to display content.
-     *
      * @param string $page
-     * @param array $vars
+     * @param array $model
      * @param bool $return
-     *
-     * @return string
+     * @return mixed
      */
-    final protected function displayBlade($page, $model = array(), $return = false)
+    final protected function displayBlade(string $page, array $model = array(), bool $return = false)
     {
         if (empty($model)) $model = array();
 
@@ -351,15 +296,15 @@ class Controller extends Kernel
     /**
      * 释放控制器
      */
-    public final function free()
+    public final function free(): void
     {
         ctx()->getRouter(true);
     }
 
 
     /**
-     * 基于当前请求ID设置$_COOKIE变量
-     * @param $key
+     * 设置$_COOKIE变量
+     * @param string $key
      * @param string $value
      * @param int $expire
      * @param string $path
@@ -368,56 +313,58 @@ class Controller extends Kernel
      * @param bool $httponly
      * @return string
      */
-    public final function setcookie($key, $value = '', $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = true)
+    public final function setcookie(string $key, string $value = '', int $expire = 0, string $path = '/', string $domain = '', bool $secure = false, bool $httponly = true): string
     {
         return ctx()->getResponse()->setcookie($key, $value, $expire, $path, $domain, $secure, $httponly);
     }
 
     /**
      * 分段输出内容
-     * @param $content 内容不能为空，内容不超过2M
+     * @param string $content 内容不能为空，内容不超过2M
+     * @return bool
      */
-    public function write($content)
+    public function write(?string $content): bool
     {
         return ctx()->getResponse()->ob_write($content);
     }
 
     /**
      * 发送Http响应体，并结束请求处理
-     * @param null $content
+     * @param string|null $content
      */
-    public function end($content = null)
+    public function end(?string $content = null): void
     {
-        return ctx()->getResponse()->end($content);
+        ctx()->getResponse()->end($content);
     }
 
     /**
      * 发送HTTP状态码
-     * @param $code 200 302
+     * @param int $code 200 302
      */
-    public function status($code)
+    public function status(int $code): void
     {
-        return ctx()->getResponse()->status($code);
+        ctx()->getResponse()->status($code);
     }
 
     /**
      * 发送文件
-     * @param $filename    文件名
+     * @param string $filename 文件名
      * @param int $offset 偏移 发送文件的偏移量，可以指定从文件的中间部分开始传输数据。此特性可用于支持断点续传。
      * @param int $length 长度 发送数据的尺寸，默认为整个文件的尺寸
      */
-    public function sendfile($filename, $offset = 0, $length = 0)
+    public function sendfile(string $filename, int $offset = 0, int $length = 0): void
     {
-        return ctx()->getResponse()->sendfile($filename, $offset, $length);
+        ctx()->getResponse()->sendfile($filename, $offset, $length);
     }
 
 
     /**
-     * 基于当前请求ID在请求中增加头部信息
-     * @param $name  头部信息名称
-     * @param $value  头部信息值
+     * 在请求中增加头部信息
+     * @param string $name 头部信息名称
+     * @param string $value 头部信息值
+     * @return bool
      */
-    public function addHeader($name, $value)
+    public function addHeader(string $name, string $value)
     {
         if (ctx()->getResponse()) {
             return ctx()->getResponse()->addHeader($name, $value);

@@ -22,10 +22,10 @@ use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use Psr\Http\Message\ResponseInterface;
 
-session_start();
+$SERVER = ctx()->server();
 
 //If this automatic URL doesn't work, set it yourself manually
-$redirectUri = isset($_SERVER['HTTPS']) ? 'https://' : 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
+$redirectUri = (isset($SERVER['HTTPS']) && $SERVER['HTTPS']=='on') ? 'https://' : 'http://' . $SERVER['HTTP_HOST'] . $SERVER['REQUEST_URI'];
 //$redirectUri = 'http://localhost/phpmailer/get_oauth_token.php';
 
 //These details obtained are by setting up app in Google developer console.
@@ -68,12 +68,12 @@ class Google extends AbstractProvider
 
     public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
-	return ' ';
+        return ' ';
     }
 
     protected function getAuthorizationParameters(array $options)
     {
-	if (is_array($this->scope)) {
+        if (is_array($this->scope)) {
             $separator = $this->getScopeSeparator();
             $this->scope = implode($separator, $this->scope);
         }
@@ -81,11 +81,11 @@ class Google extends AbstractProvider
         $params = array_merge(
             parent::getAuthorizationParameters($options),
             array_filter([
-                'hd'          => $this->hostedDomain,
+                'hd' => $this->hostedDomain,
                 'access_type' => $this->accessType,
-		'scope'       => $this->scope,
+                'scope' => $this->scope,
                 // if the user is logged in with more than one account ask which one to use for the login!
-                'authuser'    => '-1'
+                'authuser' => '-1'
             ])
         );
         return $params;
@@ -108,11 +108,11 @@ class Google extends AbstractProvider
     protected function checkResponse(ResponseInterface $response, $data)
     {
         if (!empty($data['error'])) {
-            $code  = 0;
+            $code = 0;
             $error = $data['error'];
 
             if (is_array($error)) {
-                $code  = $error['code'];
+                $code = $error['code'];
                 $error = $error['message'];
             }
 
@@ -134,26 +134,28 @@ $provider = new Google(
         'clientSecret' => $clientSecret,
         'redirectUri' => $redirectUri,
         'scope' => array('https://mail.google.com/'),
-	'accessType' => 'offline'
+        'accessType' => 'offline'
     )
 );
+$GET = ctx()->get();
+$SESSION = ctx()->session();
 
-if (!isset($_GET['code'])) {
+if (!isset($GET['code'])) {
     // If we don't have an authorization code then get one
     $authUrl = $provider->getAuthorizationUrl();
-    $_SESSION['oauth2state'] = $provider->getState();
+    ctx()->session('oauth2state', $provider->getState());
     header('Location: ' . $authUrl);
     exit;
 // Check given state against previously stored one to mitigate CSRF attack
-} elseif (empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
-    unset($_SESSION['oauth2state']);
+} elseif (empty($GET['state']) || ($GET['state'] !== $SESSION['oauth2state'])) {
+    ctx()->session('oauth2state', null);
     exit('Invalid state');
 } else {
     // Try to get an access token (using the authorization code grant)
     $token = $provider->getAccessToken(
         'authorization_code',
         array(
-            'code' => $_GET['code']
+            'code' => $GET['code']
         )
     );
 

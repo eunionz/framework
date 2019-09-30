@@ -12,13 +12,15 @@ namespace package\plugin\alipay;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Alipay extends \cn\eunionz\core\Plugin {
+class Alipay extends \cn\eunionz\core\Plugin
+{
     /**
      * 生成支付代码
-     * @param   array $order 订单信息
-     * @param   array $payment 支付方式信息
+     * @param array $order 订单信息
+     * @param array $payment 支付方式信息
      */
-    public function get_code($order_list, $payment, $front_url = '') {
+    public function get_code($order_list, $payment, $front_url = '')
+    {
         $front_url = $front_url ? $front_url : $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=alipay';
         $charset = 'utf-8';
         if ($this->loadPlugin('common')->is_mobile_browser()) {          // Wap
@@ -211,7 +213,8 @@ class Alipay extends \cn\eunionz\core\Plugin {
     /**
      * 分销订单生成
      * */
-    public function distributor_get_code($order_list, $payment, $front_url = '') {
+    public function distributor_get_code($order_list, $payment, $front_url = '')
+    {
         $front_url = $front_url ? $front_url : $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=distalipay';
         $charset = 'utf-8';
         if ($this->loadPlugin('common')->is_mobile_browser()) { // Wap
@@ -303,52 +306,55 @@ class Alipay extends \cn\eunionz\core\Plugin {
     /**
      * 响应操作
      */
-    function respond() {
+    function respond()
+    {
         //        $alipay_ips=array('110.75.225.3');
         //        $ip= $this->loadPlugin('common')->get_ip();
         //        if(!in_array($ip,$alipay_ips)){
         //            //非支付宝的服务器ip，拒绝修改状态
         //            return false;
         //        }
-        //        $this->loadCore('log')->write(APP_DEBUG,'alipay：ip'.$ip);
+        //        $this->loadCore('log')->log(APP_DEBUG,'alipay：ip'.$ip);
         $payment = $this->loadService('shop_payment')->get_payment('alipay', $this->get_platform_shopid());
 
-        $this->loadCore('log')->write(APP_DEBUG, 'payment_input_REQUEST： ' . var_export($_REQUEST, true), 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, 'payment_input_REQUEST： ' . var_export(ctx()->request(), true), 'alipay');
 
-        if ($_REQUEST['client_type'] == 'wap') {
+        $POST = ctx()->post();
+
+        if (ctx()->request('client_type') == 'wap') {
             // Wap
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：Wap 1', 'alipay');
-            if (!empty($_POST)) {
-                foreach ($_POST as $key => $data) {
-                    $_GET[$key] = $data;
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：Wap 1', 'alipay');
+            if (!empty($POST)) {
+                foreach ($POST as $key => $data) {
+                    ctx()->get($key, $data);
                 }
             }
 
-            $order_sn = $_POST['out_trade_no'];
-            $this->loadService('order_info')->save_payment_notice_data('alipay', $order_sn, $_POST);
+            $order_sn = $POST['out_trade_no'];
+            $this->loadService('order_info')->save_payment_notice_data('alipay', $order_sn, $POST);
 
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：Wap ' . $order_sn, 'alipay');
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：Wap ' . $order_sn, 'alipay');
 
 
             include_once('aop/AopClient.php');
             $aop = new \AopClient();
             $aop->alipayrsaPublicKey = $payment['pay_config']['zfb']['alipayrsaPublicKey'];
-            $result = $aop->rsaCheckV1($_POST, $payment['pay_config']['zfb']['alipayrsaPublicKey'], 'RSA2');
-            //            $this->loadCore('log')->write(APP_DEBUG,'alipay：Wap 21'.var_export($result,true));
+            $result = $aop->rsaCheckV1($POST, $payment['pay_config']['zfb']['alipayrsaPublicKey'], 'RSA2');
+            //            $this->loadCore('log')->log(APP_DEBUG,'alipay：Wap 21'.var_export($result,true));
             //            if (!$result){
             //                return false;
             //            }
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：Wap 22', 'alipay');
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：Wap 22', 'alipay');
             /* 检查支付的金额是否相符 */
-            $price = isset($_POST['total_amount']) ? $_POST['total_amount'] : 0;
+            $price = isset($POST['total_amount']) ? $POST['total_amount'] : 0;
             if (!$this->loadService('order_info')->check_order_pay_money($order_sn, $price)) {
                 return false;
             }
 
-            if ($_POST['trade_status'] == 'TRADE_SUCCESS') {
+            if ($POST['trade_status'] == 'TRADE_SUCCESS') {
                 /* 改变订单状态 */
-                $this->loadCore('log')->write(APP_DEBUG, 'alipay：Wap 23', 'alipay');
-                $ret = $this->loadService('order_info')->pay_success($order_sn, $_POST['trade_no']);
+                $this->loadCore('log')->log(APP_DEBUG, 'alipay：Wap 23', 'alipay');
+                $ret = $this->loadService('order_info')->pay_success($order_sn, $POST['trade_no']);
                 if ($ret['status']) {
                     $this->loadService('order_info')->delete_payment_notice_data('alipay', $order_sn);
                 }
@@ -360,37 +366,38 @@ class Alipay extends \cn\eunionz\core\Plugin {
 
         } else {
             //pc
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 1', 'alipay');
-            if (!empty($_POST)) {
-                foreach ($_POST as $key => $data) {
-                    $_GET[$key] = $data;
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 1', 'alipay');
+            if (!empty($POST)) {
+                foreach ($POST as $key => $data) {
+                    ctx()->get($key, $data);
                 }
             }
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay_get1： ' . print_r($_GET, true), 'alipay');
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay_get1： ' . print_r(ctx()->get(), true), 'alipay');
 
 
-            $body = $_GET['body'];
+            $body = ctx()->get('body');
 
-            $seller_email = rawurldecode($_GET['seller_email']);
+            $seller_email = rawurldecode(ctx()->get('seller_email'));
 
-            $order_sn = $_GET['out_trade_no'];
+            $order_sn = ctx()->get('out_trade_no');
 
-            $this->loadService('order_info')->save_payment_notice_data('alipay', $order_sn, $_GET);
+            $this->loadService('order_info')->save_payment_notice_data('alipay', $order_sn, ctx()->get());
 
             // $order_sn = str_replace($_GET['subject'], '', $_GET['out_trade_no']);
             /* 检查数字签名是否正确 */
-            ksort($_GET);
-            reset($_GET);
+            $GET = ctx()->get();
+            ksort($GET);
+            reset($GET);
 
             $sign = '';
-            foreach ($_GET AS $key => $val) {
+            foreach ($GET AS $key => $val) {
                 if ($key != 'sign' && $key != 'sign_type' && $key != 'code') {
                     $sign .= "$key=$val&";
                 }
             }
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc ' . $order_sn, 'alipay');
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc ' . $order_sn, 'alipay');
 
-            $price = isset($_GET['price']) ? $_GET['price'] : 0;
+            $price = isset($GET['price']) ? $GET['price'] : 0;
 
 
             $sign = substr($sign, 0, -1) . $payment['pay_config']['zfb']['key'];
@@ -400,35 +407,35 @@ class Alipay extends \cn\eunionz\core\Plugin {
             //            {
             //                return false;
             //            }
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 21', 'alipay');
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 21', 'alipay');
 
 
             /* 检查支付的金额是否相符 */
             if (!$this->loadService('order_info')->check_order_pay_money($order_sn, $price)) {
                 return false;
             }
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 22 ' . $_GET['trade_status'], 'alipay');
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 22 ' . $GET['trade_status'], 'alipay');
 
-            if ($_GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
+            if ($GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
                 /* 改变订单状态 */
-                $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 23', 'alipay');
-                $ret = $this->loadService('order_info')->pay_success($order_sn, $_GET['trade_no']);
+                $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 23', 'alipay');
+                $ret = $this->loadService('order_info')->pay_success($order_sn, $GET['trade_no']);
                 if ($ret['status']) {
                     $this->loadService('order_info')->delete_payment_notice_data('alipay', $order_sn);
                 }
                 return $ret['status'];
-            } elseif ($_GET['trade_status'] == 'TRADE_FINISHED') {
+            } elseif ($GET['trade_status'] == 'TRADE_FINISHED') {
                 /* 改变订单状态 */
-                $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 24', 'alipay');
-                $ret = $this->loadService('order_info')->pay_success($order_sn, $_GET['trade_no']);
+                $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 24', 'alipay');
+                $ret = $this->loadService('order_info')->pay_success($order_sn, $GET['trade_no']);
                 if ($ret['status']) {
                     $this->loadService('order_info')->delete_payment_notice_data('alipay', $order_sn);
                 }
                 return $ret['status'];
-            } elseif ($_GET['trade_status'] == 'TRADE_SUCCESS') {
+            } elseif ($GET['trade_status'] == 'TRADE_SUCCESS') {
                 /* 改变订单状态 */
-                $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 25', 'alipay');
-                $ret = $this->loadService('order_info')->pay_success($order_sn, $_GET['trade_no']);
+                $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 25', 'alipay');
+                $ret = $this->loadService('order_info')->pay_success($order_sn, $GET['trade_no']);
                 if ($ret['status']) {
                     $this->loadService('order_info')->delete_payment_notice_data('alipay', $order_sn);
                 }
@@ -443,24 +450,25 @@ class Alipay extends \cn\eunionz\core\Plugin {
     /**
      * 自动响应操作
      */
-    function auto_respond($post) {
+    function auto_respond($post)
+    {
         $payment = $this->loadService('shop_payment')->get_payment('alipay', $this->get_platform_shopid());
-        $_GET = $post;
-        $body = $_GET['body'];
-        $seller_email = rawurldecode($_GET['seller_email']);
-        $order_sn = $_GET['out_trade_no'];
+        $GET = $post;
+        $body = $GET['body'];
+        $seller_email = rawurldecode($GET['seller_email']);
+        $order_sn = $GET['out_trade_no'];
         // $order_sn = str_replace($_GET['subject'], '', $_GET['out_trade_no']);
         /* 检查数字签名是否正确 */
-        ksort($_GET);
-        reset($_GET);
+        ksort($GET);
+        reset($GET);
         $sign = '';
-        foreach ($_GET AS $key => $val) {
+        foreach ($GET AS $key => $val) {
             if ($key != 'sign' && $key != 'sign_type' && $key != 'code') {
                 $sign .= "$key=$val&";
             }
         }
 
-        $price = isset($_GET['price']) ? $_GET['price'] : 0;
+        $price = isset($GET['price']) ? $GET['price'] : 0;
 
 
         $sign = substr($sign, 0, -1) . $payment['pay_config']['zfb']['key'];
@@ -470,35 +478,35 @@ class Alipay extends \cn\eunionz\core\Plugin {
         //            {
         //                return false;
         //            }
-        $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 21', 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 21', 'alipay');
 
 
         /* 检查支付的金额是否相符 */
         if (!$this->loadService('order_info')->check_order_pay_money($order_sn, $price)) {
             return false;
         }
-        $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 22 ' . $_GET['trade_status'], 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 22 ' . $GET['trade_status'], 'alipay');
 
-        if ($_GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
+        if ($GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
             /* 改变订单状态 */
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 23', 'alipay');
-            $ret = $this->loadService('order_info')->pay_success($order_sn, $_GET['trade_no']);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 23', 'alipay');
+            $ret = $this->loadService('order_info')->pay_success($order_sn, $GET['trade_no']);
             if ($ret['status']) {
                 $this->loadService('order_info')->delete_payment_notice_data('alipay', $order_sn);
             }
             return $ret['status'];
-        } elseif ($_GET['trade_status'] == 'TRADE_FINISHED') {
+        } elseif ($GET['trade_status'] == 'TRADE_FINISHED') {
             /* 改变订单状态 */
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 24', 'alipay');
-            $ret = $this->loadService('order_info')->pay_success($order_sn, $_GET['trade_no']);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 24', 'alipay');
+            $ret = $this->loadService('order_info')->pay_success($order_sn, $GET['trade_no']);
             if ($ret['status']) {
                 $this->loadService('order_info')->delete_payment_notice_data('alipay', $order_sn);
             }
             return $ret['status'];
-        } elseif ($_GET['trade_status'] == 'TRADE_SUCCESS') {
+        } elseif ($GET['trade_status'] == 'TRADE_SUCCESS') {
             /* 改变订单状态 */
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 25', 'alipay');
-            $ret = $this->loadService('order_info')->pay_success($order_sn, $_GET['trade_no']);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 25', 'alipay');
+            $ret = $this->loadService('order_info')->pay_success($order_sn, $GET['trade_no']);
             if ($ret['status']) {
                 $this->loadService('order_info')->delete_payment_notice_data('alipay', $order_sn);
             }
@@ -511,35 +519,40 @@ class Alipay extends \cn\eunionz\core\Plugin {
     /**
      * 响应操作
      */
-    function distributor_respond() {
-        $platform_shopid=$this->get_platform_shopid();
+    function distributor_respond()
+    {
+        $platform_shopid = $this->get_platform_shopid();
         $payment = $this->loadService('shop_payment')->get_payment('alipay', $platform_shopid);
-        $this->loadCore('log')->write(APP_DEBUG, 'payment_input_REQUEST： ' . var_export($_REQUEST, true), 'alipay');
-        if ($_REQUEST['client_type'] == 'wap') {
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：Wap 1', 'alipay');
-            if (!empty($_GET) && empty($_POST) ) {
-                foreach ($_GET as $key => $data) {
-                    $_POST[$key] = $data;
+        $this->loadCore('log')->log(APP_DEBUG, 'payment_input_REQUEST： ' . var_export(ctx()->request(), true), 'alipay');
+        $GET = ctx()->get();
+        $POST = ctx()->post();
+
+        if (ctx()->request('client_type') == 'wap') {
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：Wap 1', 'alipay');
+            if (!empty($GET) && empty($POST)) {
+                foreach ($GET as $key => $data) {
+                    ctx()->post($key , $data);
                 }
             }
-            $order_sn = $_POST['out_trade_no'];
-            $this->loadService('distributor_buy_log')->save_payment_notice_data('alipay', $order_sn, $_POST);
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：Wap ' . $order_sn, 'alipay');
+            $POST = ctx()->post();
+            $order_sn = $POST['out_trade_no'];
+            $this->loadService('distributor_buy_log')->save_payment_notice_data('alipay', $order_sn, $POST);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：Wap ' . $order_sn, 'alipay');
             include_once('aop/AopClient.php');
             $aop = new \AopClient();
             $aop->alipayrsaPublicKey = $payment['pay_config']['zfb']['alipayrsaPublicKey'];
-            $result = $aop->rsaCheckV1($_POST, $payment['pay_config']['zfb']['alipayrsaPublicKey'], 'RSA2');
-            $this->loadCore('log')->write(APP_DEBUG,'alipay：Wap 21'.var_export($result,true), 'alipay');
+            $result = $aop->rsaCheckV1($POST, $payment['pay_config']['zfb']['alipayrsaPublicKey'], 'RSA2');
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：Wap 21' . var_export($result, true), 'alipay');
             /* 检查支付的金额是否相符 */
-            $price = isset($_POST['total_amount']) ? $_POST['total_amount'] : 0;
-            if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $price,$platform_shopid)) {
+            $price = isset($POST['total_amount']) ? $POST['total_amount'] : 0;
+            if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $price, $platform_shopid)) {
                 return false;
             }
-            if ($_POST['trade_status'] == 'TRADE_SUCCESS') {
+            if ($POST['trade_status'] == 'TRADE_SUCCESS') {
                 /* 改变订单状态 */
-                $this->loadCore('log')->write(APP_DEBUG, 'alipay：Wap 22:'.var_export($_POST,true), 'alipay');
-                $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $_POST['trade_no'],$platform_shopid);
-                $this->loadCore('log')->write(APP_DEBUG, 'alipay：Wap 23:'.var_export($ret,true), 'alipay');
+                $this->loadCore('log')->log(APP_DEBUG, 'alipay：Wap 22:' . var_export($POST, true), 'alipay');
+                $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $POST['trade_no'], $platform_shopid);
+                $this->loadCore('log')->log(APP_DEBUG, 'alipay：Wap 23:' . var_export($ret, true), 'alipay');
                 if ($ret['status']) {
                     $this->loadService('distributor_buy_log')->delete_payment_notice_data('alipay', $order_sn);
                 }
@@ -548,56 +561,57 @@ class Alipay extends \cn\eunionz\core\Plugin {
                 return false;
             }
         } else {//pc
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 1', 'alipay');
-            if (!empty($_POST)) {
-                foreach ($_POST as $key => $data) {
-                    $_GET[$key] = $data;
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 1', 'alipay');
+            if (!empty($POST)) {
+                foreach ($POST as $key => $data) {
+                    ctx()->get($key, $data);
                 }
             }
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay_get1： ' . print_r($_GET, true), 'alipay');
-            $body = $_GET['body'];
-            $seller_email = rawurldecode($_GET['seller_email']);
-            $order_sn = $_GET['out_trade_no'];
-            $this->loadService('distributor_buy_log')->save_payment_notice_data('alipay', $order_sn, $_GET);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay_get1： ' . print_r(ctx()->get(), true), 'alipay');
+            $body = ctx()->get('body');
+            $seller_email = rawurldecode(ctx()->get('seller_email'));
+            $order_sn = ctx()->get('out_trade_no');
+            $this->loadService('distributor_buy_log')->save_payment_notice_data('alipay', $order_sn, ctx()->get());
             // $order_sn = str_replace($_GET['subject'], '', $_GET['out_trade_no']);
             /* 检查数字签名是否正确 */
-            ksort($_GET);
-            reset($_GET);
+            $GET = ctx()->get();
+            ksort($GET);
+            reset($GET);
             $sign = '';
-            foreach ($_GET AS $key => $val) {
+            foreach ($GET AS $key => $val) {
                 if ($key != 'sign' && $key != 'sign_type' && $key != 'code') {
                     $sign .= "$key=$val&";
                 }
             }
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc ' . $order_sn, 'alipay');
-            $price = isset($_GET['price']) ? $_GET['price'] : 0;
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc ' . $order_sn, 'alipay');
+            $price = isset($GET['price']) ? $GET['price'] : 0;
             $sign = substr($sign, 0, -1) . $payment['pay_config']['zfb']['key'];
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 21'.$sign, 'alipay');
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 21' . $sign, 'alipay');
             /* 检查支付的金额是否相符 */
             if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $price)) {
                 return false;
             }
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 22 ' . $_GET['trade_status'], 'alipay');
-            if ($_GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 22 ' . $GET['trade_status'], 'alipay');
+            if ($GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
                 /* 改变订单状态 */
-                $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $_GET['trade_no'],$platform_shopid);
-                $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 23'.var_export($ret,true), 'alipay');
+                $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
+                $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 23' . var_export($ret, true), 'alipay');
                 if ($ret['status']) {
                     $this->loadService('distributor_buy_log')->delete_payment_notice_data('alipay', $order_sn);
                 }
                 return $ret['status'];
-            } elseif ($_GET['trade_status'] == 'TRADE_FINISHED') {
+            } elseif ($GET['trade_status'] == 'TRADE_FINISHED') {
                 /* 改变订单状态 */
-                $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $_GET['trade_no'],$platform_shopid);
-                $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 24'.var_export($ret,true), 'alipay');
+                $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
+                $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 24' . var_export($ret, true), 'alipay');
                 if ($ret['status']) {
                     $this->loadService('distributor_buy_log')->delete_payment_notice_data('alipay', $order_sn);
                 }
                 return $ret['status'];
-            } elseif ($_GET['trade_status'] == 'TRADE_SUCCESS') {
+            } elseif ($GET['trade_status'] == 'TRADE_SUCCESS') {
                 /* 改变订单状态 */
-                $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $_GET['trade_no'],$platform_shopid);
-                $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 25'.var_export($ret,true), 'alipay');
+                $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
+                $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 25' . var_export($ret, true), 'alipay');
                 if ($ret['status']) {
                     $this->loadService('distributor_buy_log')->delete_payment_notice_data('alipay', $order_sn);
                 }
@@ -612,54 +626,55 @@ class Alipay extends \cn\eunionz\core\Plugin {
     /**
      * 自动响应操作
      */
-    function distributor_auto_respond($post) {
-        $platform_shopid=$this->get_platform_shopid();
+    function distributor_auto_respond($post)
+    {
+        $platform_shopid = $this->get_platform_shopid();
         $payment = $this->loadService('shop_payment')->get_payment('alipay', $platform_shopid);
-        $_GET = $post;
-        $body = $_GET['body'];
-        $seller_email = rawurldecode($_GET['seller_email']);
-        $order_sn = $_GET['out_trade_no'];
+        $GET = $post;
+        $body = $GET['body'];
+        $seller_email = rawurldecode($GET['seller_email']);
+        $order_sn = $GET['out_trade_no'];
         /* 检查数字签名是否正确 */
-        ksort($_GET);
-        reset($_GET);
+        ksort($GET);
+        reset($GET);
         $sign = '';
-        foreach ($_GET AS $key => $val) {
+        foreach ($GET AS $key => $val) {
             if ($key != 'sign' && $key != 'sign_type' && $key != 'code') {
                 $sign .= "$key=$val&";
             }
         }
-        $price = isset($_GET['price']) ? $_GET['price'] : 0;
+        $price = isset($GET['price']) ? $GET['price'] : 0;
         $sign = substr($sign, 0, -1) . $payment['pay_config']['zfb']['key'];
         //$sign = substr($sign, 0, -1) . ALIPAY_AUTH;
         // if (md5($sign) != $_GET['sign']){
         //   return false;
         // }
-        $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 21', 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 21', 'alipay');
         /* 检查支付的金额是否相符 */
         if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $price)) {
             return false;
         }
-        $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 22 ' . $_GET['trade_status'], 'alipay');
-        if ($_GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
+        $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 22 ' . $GET['trade_status'], 'alipay');
+        if ($GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
             /* 改变订单状态 */
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 23', 'alipay');
-            $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $_GET['trade_no'],$platform_shopid);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 23', 'alipay');
+            $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
             if ($ret['status']) {
                 $this->loadService('distributor_buy_log')->delete_payment_notice_data('alipay', $order_sn);
             }
             return $ret['status'];
-        } elseif ($_GET['trade_status'] == 'TRADE_FINISHED') {
+        } elseif ($GET['trade_status'] == 'TRADE_FINISHED') {
             /* 改变订单状态 */
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 24', 'alipay');
-            $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $_GET['trade_no'],$platform_shopid);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 24', 'alipay');
+            $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
             if ($ret['status']) {
                 $this->loadService('distributor_buy_log')->delete_payment_notice_data('alipay', $order_sn);
             }
             return $ret['status'];
-        } elseif ($_GET['trade_status'] == 'TRADE_SUCCESS') {
+        } elseif ($GET['trade_status'] == 'TRADE_SUCCESS') {
             /* 改变订单状态 */
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 25', 'alipay');
-            $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $_GET['trade_no'],$platform_shopid);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 25', 'alipay');
+            $ret = $this->loadService('distributor_buy_log')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
             if ($ret['status']) {
                 $this->loadService('distributor_buy_log')->delete_payment_notice_data('alipay', $order_sn);
             }
@@ -670,7 +685,8 @@ class Alipay extends \cn\eunionz\core\Plugin {
     }
 
     //退款配置
-    function alipay_config($payment) {
+    function alipay_config($payment)
+    {
         //合作身份者id，以2088开头的16位纯数字
         $alipay_config['partner'] = $payment['pay_config']['zfb']['alipay_partner'];
 
@@ -699,13 +715,14 @@ class Alipay extends \cn\eunionz\core\Plugin {
 
     /**
      * 生成退款代码
-     * @param   array $order 订单信息
-     * @param   array $refund 退款信息
+     * @param array $order 订单信息
+     * @param array $refund 退款信息
      */
-    function refund_old($order, $refund) {
+    function refund_old($order, $refund)
+    {
         $payment = $this->loadService('shop_payment')->get_payment('alipay');
 
-        $this->loadCore('log')->write(APP_ERROR, 'alipay: ' . print_r($refund, true), 'alipay');
+        $this->loadCore('log')->log(APP_ERROR, 'alipay: ' . print_r($refund, true), 'alipay');
 
         $alipay_config = $this->alipay_config($payment);
 
@@ -717,7 +734,7 @@ class Alipay extends \cn\eunionz\core\Plugin {
         //服务器异步通知页面路径 需http://格式的完整路径，不允许加?id=123这类自定义参数
         /* $arr = $this->loadService('shop_base')->get_domain_by_kid();
         if (!$arr) {
-            $domain = 'http://' . $this->SHOP_ID . $this->getConfig('params', 'DEFAULT_MOBILE_DOMAIN_SUFFIX');
+            $domain = 'http://' . $this->SHOP_ID . self::getConfig('params', 'DEFAULT_MOBILE_DOMAIN_SUFFIX');
         } else {
             $domain = $arr['mobile_host'];
         } */
@@ -735,18 +752,18 @@ class Alipay extends \cn\eunionz\core\Plugin {
         //退款详细数据
         //计算手续费
         $refund_amount = $refund['orefund_amount'];
-        $this->loadCore('log')->write(APP_DEBUG, '退款金额' . $refund_amount, 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, '退款金额' . $refund_amount, 'alipay');
         $detail_data = $order['order_origQid'] . '^' . $refund_amount . '^' . "支付宝退款成功";//外部交易单号^退款金额^处理结果
         //必填，具体格式请参见接口技术文档
         //业务扩展参数--存储退款单号ID
         //$extend_param = $order['order_id'].'^'.$refund['orefund_id'];//订单id^退款单号
-        $this->loadCore('log')->write(APP_DEBUG, '退款数据：' . $detail_data, 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, '退款数据：' . $detail_data, 'alipay');
 
         /************************************************************/
 
         //构造要请求的参数数组，无需改动
         $parameter = array("service" => "refund_fastpay_by_platform_pwd", "partner" => trim($payment['pay_config']['zfb']['alipay_partner']), "notify_url" => $notify_url, "seller_email" => $seller_email, "refund_date" => $refund_date, "batch_no" => $batch_no, "batch_num" => $batch_num, "detail_data" => $detail_data, "_input_charset" => trim(strtolower($alipay_config['input_charset'])));
-        $this->loadCore('log')->write(APP_ERROR, "refund_parameter:" . print_r($parameter, true), 'alipay');
+        $this->loadCore('log')->log(APP_ERROR, "refund_parameter:" . print_r($parameter, true), 'alipay');
 
         //建立请求
         $alipaySubmit = new \AlipaySubmit($alipay_config);
@@ -761,55 +778,56 @@ class Alipay extends \cn\eunionz\core\Plugin {
 
 
     //退款响应操作
-    function refund_notify_old($orefund_id) {
-        $this->loadCore('log')->write(APP_ERROR, "refund7", 'alipay');
-
+    function refund_notify_old($orefund_id)
+    {
+        $this->loadCore('log')->log(APP_ERROR, "refund7", 'alipay');
         $payment = $this->loadService('shop_payment')->get_payment('alipay');
+        $POST = ctx()->post();
 
-        unset($_POST['code']);
+        unset($POST['code']);
 
-        $log_data = serialize($_POST);
-        $this->loadCore('log')->write(APP_ERROR, "refund8:" . $log_data, 'alipay');
+        $log_data = serialize($POST);
+        $this->loadCore('log')->log(APP_ERROR, "refund8:" . $log_data, 'alipay');
 
         $alipay_config = $this->alipay_config($payment);
-        $this->loadCore('log')->write(APP_ERROR, "refund9", 'alipay');
+        $this->loadCore('log')->log(APP_ERROR, "refund9", 'alipay');
 
         require_once("alipay_lib/alipay_notify.class.php");
         //计算得出通知验证结果
         $alipayNotify = new \AlipayNotify($alipay_config);
         $verify_result = $alipayNotify->verifyNotify();
 
-        $this->loadCore('log')->write(APP_ERROR, "refund10:" . print_r($_POST, true), 'alipay');
+        $this->loadCore('log')->log(APP_ERROR, "refund10:" . print_r($POST, true), 'alipay');
 
-        $this->loadCore('log')->write(APP_ERROR, "refund11:{$verify_result}", 'alipay');
+        $this->loadCore('log')->log(APP_ERROR, "refund11:{$verify_result}", 'alipay');
 
         if ($verify_result) {
             //验证成功
             //批次号
-            $this->loadCore('log')->write(APP_ERROR, "refund110:" . print_r($_POST, true), 'alipay');
-            $batch_no = $_POST['batch_no'];
+            $this->loadCore('log')->log(APP_ERROR, "refund110:" . print_r($POST, true), 'alipay');
+            $batch_no = $POST['batch_no'];
 
             //批量退款数据中转账成功的笔数
 
-            $success_num = $_POST['success_num'];
+            $success_num = $POST['success_num'];
 
             //批量退款数据中的详细信息
             //$_POST['result_details'] = '2015061800001000060055813807^0.01^789^';
-            $result_details = $_POST['result_details'];
+            $result_details = $POST['result_details'];
             $data = explode('^', $result_details);
-            $this->loadCore('log')->write(APP_ERROR, "refund12:{$result_details}", 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "refund12:{$result_details}", 'alipay');
 
             //修改订单退款状态；
-            $this->loadCore('log')->write(APP_ERROR, "refund120:", 'alipay');
-            $info_where['where']['b.shop_id'] = $this->getConfig('shop', 'SHOP_ID');
-            $info_where['where']['order_shop_id'] = $this->getConfig('shop', 'SHOP_ID');
+            $this->loadCore('log')->log(APP_ERROR, "refund120:", 'alipay');
+            $info_where['where']['b.shop_id'] = ctx()->getShopId();
+            $info_where['where']['order_shop_id'] = ctx()->getShopId();
             $info_where['where']['order_origQid'] = $data[0];
             /*根据条件搜索出对应的订单id,然后获取到日志文件中保存的留言日志 start*/
-            $this->loadCore('log')->write(APP_ERROR, "refund121:" . print_r($info_where, true), 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "refund121:" . print_r($info_where, true), 'alipay');
 
-            $order_id = $this->loadService('order_info')->find_field($info_where, 'order_id', $this->getConfig('shop', 'SHOP_ID'));
-            $this->loadCore('log')->write(APP_ERROR, "refund122:{$order_id}", 'alipay');
-            $cache_dir = APP_RUNTIME_REAL_PATH . 'cache' . APP_DS . $order_id;
+            $order_id = $this->loadService('order_info')->find_field($info_where, 'order_id', ctx()->getShopId());
+            $this->loadCore('log')->log(APP_ERROR, "refund122:{$order_id}", 'alipay');
+            $cache_dir = ctx()->getAppRuntimeRealPath() . 'cache' . APP_DS . $order_id;
             if (file_exists($cache_dir . APP_DS . $order_id . '.log')) {
                 $remarket = file_get_contents($cache_dir . APP_DS . $order_id . '.log');
             } else {
@@ -817,12 +835,12 @@ class Alipay extends \cn\eunionz\core\Plugin {
             }
 
             //修改退款单号的状态
-            $this->loadCore('log')->write(APP_ERROR, "退款单号refund_id:{$orefund_id}", 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "退款单号refund_id:{$orefund_id}", 'alipay');
             //查询退款订单-商品信息(包含订单信息)
-            $order_refund_info = $this->loadService('order_refunds')->findByID($orefund_id, $this->getConfig('shop', 'SHOP_ID'));
+            $order_refund_info = $this->loadService('order_refunds')->findByID($orefund_id, ctx()->getShopId());
 
             if ($order_refund_info['orefund_state'] == 4) {//防止重复修改
-                $this->loadCore('log')->write(APP_ERROR, "refund_id:{$orefund_id}已经退款成功，不再处理", 'alipay');
+                $this->loadCore('log')->log(APP_ERROR, "refund_id:{$orefund_id}已经退款成功，不再处理", 'alipay');
                 echo "success";        //请不要修改或删除
                 return true;
             }
@@ -830,7 +848,7 @@ class Alipay extends \cn\eunionz\core\Plugin {
             $orefund_way = 0;// 0:线上退款 1：线下退款
             //直接调用退款成功处理函数
             $ret = $this->loadService('order_info')->op_refund_by_order_sn($order_refund_info['order_sn'], $order_refund_info['orefund_amount'], $remarket, $order_refund_info['orefund_id'], $orefund_way);
-            $this->loadCore('log')->write(APP_ERROR, "refund13:" . $ret['msg'], 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "refund13:" . $ret['msg'], 'alipay');
 
             if (file_exists($cache_dir . APP_DS . $order_id . '.log')) {
                 @unlink($cache_dir . APP_DS . $order_id . '.log');
@@ -838,7 +856,7 @@ class Alipay extends \cn\eunionz\core\Plugin {
 
 
             /*根据条件搜索出对应的订单id,然后获取到日志文件中保存的留言日志 end*/
-            $this->loadCore('log')->write(APP_ERROR, "refund14:" . $this->C('db')->get_sql(), 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "refund14:" . $this->C('db')->get_sql(), 'alipay');
             echo "success";        //请不要修改或删除
 
             //调试用，写文本函数记录程序运行情况是否正常
@@ -853,17 +871,18 @@ class Alipay extends \cn\eunionz\core\Plugin {
 
             //调试用，写文本函数记录程序运行情况是否正常
             //logResult("这里写入想要调试的代码变量值，或其他运行的结果记录");
-            $this->loadCore('log')->write(APP_ERROR, "返回参数校验错误", 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "返回参数校验错误", 'alipay');
             return false;
         }
     }
 
     /**
      * 生成退款代码
-     * @param   array $order 订单信息
-     * @param   array $refund 退款信息
+     * @param array $order 订单信息
+     * @param array $refund 退款信息
      */
-    function refund($order, $refund) {
+    function refund($order, $refund)
+    {
 
         $payment = $this->loadService('shop_payment')->get_payment('alipay', $this->get_platform_shopid());
         $alipay_config = $this->alipay_config($payment);
@@ -914,19 +933,19 @@ class Alipay extends \cn\eunionz\core\Plugin {
         //退款总笔数
         $batch_num = 1;
         $refund_amount = $refund['orefund_amount'];
-        $this->loadCore('log')->write(APP_DEBUG, '退款金额' . $refund_amount, 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, '退款金额' . $refund_amount, 'alipay');
         $detail_data = $order['order_origQid'] . '^' . $refund_amount . '^' . "支付宝退款成功";//外部交易单号^退款金额^处理结果
         //必填，具体格式请参见接口技术文档
         //业务扩展参数--存储退款单号ID
         //$extend_param = $order['order_id'].'^'.$refund['orefund_id'];//订单id^退款单号
-        $this->loadCore('log')->write(APP_DEBUG, '退款数据：' . $detail_data, 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, '退款数据：' . $detail_data, 'alipay');
 
         /************************************************************/
 
 
         //构造要请求的参数数组，无需改动
         $parameter = array("service" => "refund_fastpay_by_platform_nopwd", "partner" => trim($payment['pay_config']['zfb']['alipay_partner']), "notify_url" => $notify_url, "batch_no" => $batch_no, "refund_date" => $refund_date, "batch_num" => $batch_num, "detail_data" => $detail_data, "_input_charset" => $alipay_config['input_charset'],);
-        $this->loadCore('log')->write(APP_ERROR, "refund_parameter:" . print_r($parameter, true), 'alipay');
+        $this->loadCore('log')->log(APP_ERROR, "refund_parameter:" . print_r($parameter, true), 'alipay');
 
         //建立请求
         $alipaySubmit = new \AlipaySubmit($alipay_config);
@@ -954,16 +973,16 @@ class Alipay extends \cn\eunionz\core\Plugin {
                 //                    return $retdata;
                 //                }
 
-                $info_where['where']['b.shop_id'] = $this->getConfig('shop', 'SHOP_ID');
-                $info_where['where']['order_shop_id'] = $this->getConfig('shop', 'SHOP_ID');
+                $info_where['where']['b.shop_id'] = ctx()->getShopId();
+                $info_where['where']['order_shop_id'] = ctx()->getShopId();
                 $info_where['where']['order_origQid'] = $order['order_origQid'];
                 /*根据条件搜索出对应的订单id,然后获取到日志文件中保存的留言日志 start*/
-                $this->loadCore('log')->write(APP_ERROR, "refund121:" . print_r($info_where, true), 'alipay');
+                $this->loadCore('log')->log(APP_ERROR, "refund121:" . print_r($info_where, true), 'alipay');
 
-                $order_id = $this->loadService('order_info')->find_field($info_where, 'order_id', $this->getConfig('shop', 'SHOP_ID'));
+                $order_id = $this->loadService('order_info')->find_field($info_where, 'order_id', ctx()->getShopId());
                 //修改订单退款状态；
-                $this->loadCore('log')->write(APP_ERROR, "refund122:{$order_id}", 'alipay');
-                $cache_dir = APP_RUNTIME_REAL_PATH . 'cache' . APP_DS . $order_id;
+                $this->loadCore('log')->log(APP_ERROR, "refund122:{$order_id}", 'alipay');
+                $cache_dir = ctx()->getAppRuntimeRealPath() . 'cache' . APP_DS . $order_id;
                 if (file_exists($cache_dir . APP_DS . $order_id . '.log')) {
                     $remarket = file_get_contents($cache_dir . APP_DS . $order_id . '.log');
                 } else {
@@ -971,12 +990,12 @@ class Alipay extends \cn\eunionz\core\Plugin {
                 }
                 //修改退款单号的状态
                 $orefund_id = $refund['orefund_id'];
-                $this->loadCore('log')->write(APP_ERROR, "退款单号refund_id:{$orefund_id}", 'alipay');
+                $this->loadCore('log')->log(APP_ERROR, "退款单号refund_id:{$orefund_id}", 'alipay');
                 //查询退款订单-商品信息(包含订单信息)
-                $order_refund_info = $this->loadService('order_refunds')->findByID($orefund_id, $this->getConfig('shop', 'SHOP_ID'));
+                $order_refund_info = $this->loadService('order_refunds')->findByID($orefund_id, ctx()->getShopId());
 
                 if ($order_refund_info['orefund_state'] == 4) {//防止重复修改
-                    $this->loadCore('log')->write(APP_ERROR, "refund_id:{$orefund_id}已经退款成功，不再处理", 'alipay');
+                    $this->loadCore('log')->log(APP_ERROR, "refund_id:{$orefund_id}已经退款成功，不再处理", 'alipay');
                     $retdata['msg'] = "退款成功！";
                     $retdata['status'] = true;
                     return $retdata;
@@ -1000,8 +1019,10 @@ class Alipay extends \cn\eunionz\core\Plugin {
 
 
     //退款响应操作
-    function refund_notify($orefund_id) {
-        $this->loadCore('log')->write(APP_ERROR, "refund7", 'alipay');
+    function refund_notify($orefund_id)
+    {
+        $this->loadCore('log')->log(APP_ERROR, "refund7", 'alipay');
+        $POST = ctx()->post();
 
         $payment = $this->loadService('shop_payment')->get_payment('alipay', $this->get_platform_shopid());
         $alipay_config = $this->alipay_config($payment);
@@ -1024,37 +1045,37 @@ class Alipay extends \cn\eunionz\core\Plugin {
         $alipayNotify = new \AlipayNotify($alipay_config);
         $verify_result = $alipayNotify->verifyNotify();
 
-        $this->loadCore('log')->write(APP_ERROR, "refund10:" . print_r($_POST, true), 'alipay');
+        $this->loadCore('log')->log(APP_ERROR, "refund10:" . print_r($POST, true), 'alipay');
 
-        $this->loadCore('log')->write(APP_ERROR, "refund11:{$verify_result}", 'alipay');
+        $this->loadCore('log')->log(APP_ERROR, "refund11:{$verify_result}", 'alipay');
 
         if ($verify_result) {
             //验证成功
             //批次号
-            $this->loadCore('log')->write(APP_ERROR, "refund110:" . print_r($_POST, true), 'alipay');
-            $batch_no = $_POST['batch_no'];
+            $this->loadCore('log')->log(APP_ERROR, "refund110:" . print_r($POST, true), 'alipay');
+            $batch_no = $POST['batch_no'];
 
             //批量退款数据中转账成功的笔数
 
-            $success_num = $_POST['success_num'];
+            $success_num = $POST['success_num'];
 
             //批量退款数据中的详细信息
             //$_POST['result_details'] = '2015061800001000060055813807^0.01^789^';
-            $result_details = $_POST['result_details'];
+            $result_details = $POST['result_details'];
             $data = explode('^', $result_details);
-            $this->loadCore('log')->write(APP_ERROR, "refund12:{$result_details}", 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "refund12:{$result_details}", 'alipay');
 
             //修改订单退款状态；
-            $this->loadCore('log')->write(APP_ERROR, "refund120:", 'alipay');
-            $info_where['where']['b.shop_id'] = $this->getConfig('shop', 'SHOP_ID');
-            $info_where['where']['order_shop_id'] = $this->getConfig('shop', 'SHOP_ID');
+            $this->loadCore('log')->log(APP_ERROR, "refund120:", 'alipay');
+            $info_where['where']['b.shop_id'] = ctx()->getShopId();
+            $info_where['where']['order_shop_id'] = ctx()->getShopId();
             $info_where['where']['order_origQid'] = $data[0];
             /*根据条件搜索出对应的订单id,然后获取到日志文件中保存的留言日志 start*/
-            $this->loadCore('log')->write(APP_ERROR, "refund121:" . print_r($info_where, true), 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "refund121:" . print_r($info_where, true), 'alipay');
 
-            $order_id = $this->loadService('order_info')->find_field($info_where, 'order_id', $this->getConfig('shop', 'SHOP_ID'));
-            $this->loadCore('log')->write(APP_ERROR, "refund122:{$order_id}", 'alipay');
-            $cache_dir = APP_RUNTIME_REAL_PATH . 'cache' . APP_DS . $order_id;
+            $order_id = $this->loadService('order_info')->find_field($info_where, 'order_id', ctx()->getShopId());
+            $this->loadCore('log')->log(APP_ERROR, "refund122:{$order_id}", 'alipay');
+            $cache_dir = ctx()->getAppRuntimeRealPath() . 'cache' . APP_DS . $order_id;
             if (file_exists($cache_dir . APP_DS . $order_id . '.log')) {
                 $remarket = file_get_contents($cache_dir . APP_DS . $order_id . '.log');
             } else {
@@ -1062,12 +1083,12 @@ class Alipay extends \cn\eunionz\core\Plugin {
             }
 
             //修改退款单号的状态
-            $this->loadCore('log')->write(APP_ERROR, "退款单号refund_id:{$orefund_id}", 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "退款单号refund_id:{$orefund_id}", 'alipay');
             //查询退款订单-商品信息(包含订单信息)
-            $order_refund_info = $this->loadService('order_refunds')->findByID($orefund_id, $this->getConfig('shop', 'SHOP_ID'));
+            $order_refund_info = $this->loadService('order_refunds')->findByID($orefund_id, ctx()->getShopId());
 
             if ($order_refund_info['orefund_state'] == 4) {//防止重复修改
-                $this->loadCore('log')->write(APP_ERROR, "refund_id:{$orefund_id}已经退款成功，不再处理", 'alipay');
+                $this->loadCore('log')->log(APP_ERROR, "refund_id:{$orefund_id}已经退款成功，不再处理", 'alipay');
                 echo "success";        //请不要修改或删除
                 return true;
             }
@@ -1075,7 +1096,7 @@ class Alipay extends \cn\eunionz\core\Plugin {
             $orefund_way = 0;// 0:线上退款 1：线下退款  
             //直接调用退款成功处理函数
             $ret = $this->loadService('order_info')->op_refund_by_order_sn($order_refund_info['order_sn'], $order_refund_info['orefund_amount'], $remarket, $order_refund_info['orefund_id'], $orefund_way);
-            $this->loadCore('log')->write(APP_ERROR, "refund13:" . $ret['msg'], 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "refund13:" . $ret['msg'], 'alipay');
 
             if (file_exists($cache_dir . APP_DS . $order_id . '.log')) {
                 @unlink($cache_dir . APP_DS . $order_id . '.log');
@@ -1083,7 +1104,7 @@ class Alipay extends \cn\eunionz\core\Plugin {
 
 
             /*根据条件搜索出对应的订单id,然后获取到日志文件中保存的留言日志 end*/
-            $this->loadCore('log')->write(APP_ERROR, "refund14:" . $this->C('db')->get_sql(), 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "refund14:" . $this->C('db')->get_sql(), 'alipay');
             echo "success";        //请不要修改或删除
 
             //调试用，写文本函数记录程序运行情况是否正常
@@ -1098,13 +1119,14 @@ class Alipay extends \cn\eunionz\core\Plugin {
 
             //调试用，写文本函数记录程序运行情况是否正常
             //logResult("这里写入想要调试的代码变量值，或其他运行的结果记录");
-            $this->loadCore('log')->write(APP_ERROR, "返回参数校验错误", 'alipay');
+            $this->loadCore('log')->log(APP_ERROR, "返回参数校验错误", 'alipay');
             return false;
         }
     }
 
 
-    function post_data($url, $curlPost) {
+    function post_data($url, $curlPost)
+    {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_HEADER, false);
@@ -1123,7 +1145,8 @@ class Alipay extends \cn\eunionz\core\Plugin {
      * @param $out_biz_no 查询外部订单号
      * @return  true -- 转帐成功   false--转帐失败
      */
-    public function transfer_query($out_biz_no) {
+    public function transfer_query($out_biz_no)
+    {
         $payment = $this->loadService('shop_payment')->get_payment('alipay', $this->get_platform_shopid());
 
         include_once('aop/AopClient.php');
@@ -1161,7 +1184,8 @@ class Alipay extends \cn\eunionz\core\Plugin {
      * @param $error_msg  失败时返回的错误信息
      * @return bool  true -- 转帐成功  false -- 转帐失败
      */
-    public function transfer($out_biz_no, $transfer_money, $to_account, $to_realname, $transfer_remark, & $error_msg) {
+    public function transfer($out_biz_no, $transfer_money, $to_account, $to_realname, $transfer_remark, & $error_msg)
+    {
         $payment = $this->loadService('shop_payment')->get_payment('alipay', $this->get_platform_shopid());
 
         include_once('aop/AopClient.php');
@@ -1184,9 +1208,9 @@ class Alipay extends \cn\eunionz\core\Plugin {
         $request->setBizContent("{" . "\"out_biz_no\":\"" . $out_biz_no . "\"," . "\"payee_type\":\"ALIPAY_LOGONID\"," . "\"payee_account\":\"" . $to_account . "\"," . "\"amount\":\"" . $transfer_money . "\"," . "\"payer_show_name\":\"转帐到" . $to_account . "\"," . "\"payee_real_name\":\"" . $to_realname . "\"," . "\"remark\":\"" . $transfer_remark . "\"" . "}");
         try {
             $result = $aop->execute($request);
-            $this->loadCore('log')->write(APP_DEBUG, print_r($result, true), 'trans');
-            $this->loadCore('log')->write(APP_DEBUG, $to_account, 'trans');
-            $this->loadCore('log')->write(APP_DEBUG, $to_realname, 'trans');
+            $this->loadCore('log')->log(APP_DEBUG, print_r($result, true), 'trans');
+            $this->loadCore('log')->log(APP_DEBUG, $to_account, 'trans');
+            $this->loadCore('log')->log(APP_DEBUG, $to_realname, 'trans');
             $respond = str_replace(".", "_", $request->getApiMethodName()) . "_response";
             $resultCode = $result->$respond->code;
             if (!empty($resultCode) && $resultCode == 10000) {
@@ -1202,7 +1226,8 @@ class Alipay extends \cn\eunionz\core\Plugin {
     }
 
 
-    function random($length, $type = 0, $hash = '') {
+    function random($length, $type = 0, $hash = '')
+    {
         if ($type == 0) {
             $chars = '0123456789abcdefghijklmnopqrstuvwxyz';
         } else if ($type == 1) {
@@ -1224,7 +1249,8 @@ class Alipay extends \cn\eunionz\core\Plugin {
      * @param array $order 订单数据   $data['money_paid'] --订单在线支付总金额，单位元
      * @return bool true--成功  false--失败
      */
-    public function refund_cancel_order($order) {
+    public function refund_cancel_order($order)
+    {
         $retdata['msg'] = "退款申请成功！";
         $retdata['data'] = null;
         $retdata['status'] = true;
@@ -1296,19 +1322,19 @@ class Alipay extends \cn\eunionz\core\Plugin {
         //退款详细数据
         //计算手续费
         $refund_amount = $order['order_money_paid'];
-        $this->loadCore('log')->write(APP_DEBUG, '退款金额' . $refund_amount, 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, '退款金额' . $refund_amount, 'alipay');
         $detail_data = $order['order_origQid'] . '^' . $refund_amount . '^' . "支付宝退款成功";//外部交易单号^退款金额^处理结果
         //必填，具体格式请参见接口技术文档
         //业务扩展参数--存储退款单号ID
         //$extend_param = $order['order_id'].'^'.$refund['orefund_id'];//订单id^退款单号
-        $this->loadCore('log')->write(APP_DEBUG, '退款数据：' . $detail_data, 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, '退款数据：' . $detail_data, 'alipay');
 
         /************************************************************/
 
         //构造要请求的参数数组，无需改动
         //构造要请求的参数数组，无需改动
         $parameter = array("service" => "refund_fastpay_by_platform_nopwd", "partner" => trim($payment['pay_config']['zfb']['alipay_partner']), "notify_url" => $notify_url, "batch_no" => $batch_no, "refund_date" => $refund_date, "batch_num" => $batch_num, "detail_data" => $detail_data, "_input_charset" => $alipay_config['input_charset'],);
-        $this->loadCore('log')->write(APP_ERROR, "refund_parameter:" . print_r($parameter, true), 'alipay');
+        $this->loadCore('log')->log(APP_ERROR, "refund_parameter:" . print_r($parameter, true), 'alipay');
 
         //建立请求
         $alipaySubmit = new \AlipaySubmit($alipay_config);
@@ -1347,8 +1373,10 @@ class Alipay extends \cn\eunionz\core\Plugin {
     }
 
     //退款响应操作
-    function cancel_order_notify($order_id) {
-        $this->loadCore('log')->write(APP_ERROR, "refund7", 'alipay');
+    function cancel_order_notify($order_id)
+    {
+        $this->loadCore('log')->log(APP_ERROR, "refund7", 'alipay');
+        $POST = ctx()->post();
 
         $payment = $this->loadService('shop_payment')->get_payment('alipay', $this->get_platform_shopid());
         $alipay_config = $this->alipay_config($payment);
@@ -1418,22 +1446,22 @@ class Alipay extends \cn\eunionz\core\Plugin {
             //获取支付宝的通知返回参数，可参考技术文档中服务器异步通知参数列表
 
             //退款批次号
-            $batch_no = $_POST['batch_no'];
+            $batch_no = $POST['batch_no'];
             //必填
 
 
             //退款成功总数
-            $success_num = $_POST['success_num'];
+            $success_num = $POST['success_num'];
             //必填，0<= success_num<= batch_num
 
 
             //处理结果详情
-            $result_details = $_POST['result_details'];
+            $result_details = $POST['result_details'];
             //必填，详见“6.3 处理结果详情说明”
 
 
             //解冻结果明细
-            $unfreezed_deta = $_POST['unfreezed_deta'];
+            $unfreezed_deta = $POST['unfreezed_deta'];
             //格式：解冻结订单号^冻结订单号^解冻结金额^交易号^处理时间^状态^描述码
 
 
@@ -1458,14 +1486,18 @@ class Alipay extends \cn\eunionz\core\Plugin {
         }
     }
 
-    function get_platform_shopid() {
-        return (isset($_SESSION['PLATFORM_SHOP_ID'])) ? $_SESSION['PLATFORM_SHOP_ID'] : $this->getConfig('shop', 'SHOP_ID');
+    function get_platform_shopid()
+    {
+        $SESSION = ctx()->session();
+
+        return (isset($SESSION['PLATFORM_SHOP_ID'])) ? $SESSION['PLATFORM_SHOP_ID'] : ctx()->getShopId();
     }
 
     /**
      * 店铺等级支付
      * */
-    public function apply_get_code($order_list, $payment, $front_url = '') {
+    public function apply_get_code($order_list, $payment, $front_url = '')
+    {
         $front_url = $front_url ? $front_url : $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=applyalipay';
         $charset = 'utf-8';
         if ($this->loadPlugin('common')->is_mobile_browser()) { // Wap
@@ -1561,57 +1593,59 @@ class Alipay extends \cn\eunionz\core\Plugin {
     {
         $platform_shopid = $this->get_platform_shopid();
         $payment = $this->loadService('shop_payment')->get_payment('alipay', $platform_shopid);
-        $this->loadCore('log')->write(APP_DEBUG, 'payment_input_REQUEST： ' . var_export($_REQUEST, true), 'alipay');
-        $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 1', 'alipay');
-        if (!empty($_POST)) {
-            foreach ($_POST as $key => $data) {
-                $_GET[$key] = $data;
+        $this->loadCore('log')->log(APP_DEBUG, 'payment_input_REQUEST： ' . var_export(ctx()->request(), true), 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 1', 'alipay');
+        $POST = ctx()->post();
+        if (!empty($POST)) {
+            foreach ($POST as $key => $data) {
+                ctx()->get($key , $data);
             }
         }
-        $this->loadCore('log')->write(APP_DEBUG, 'alipay_get1： ' . print_r($_GET, true), 'alipay');
-        $body = $_GET['body'];
-        $seller_email = rawurldecode($_GET['seller_email']);
-        $order_sn = $_GET['out_trade_no'];
-        $this->loadService('shop_grade_apply')->save_payment_notice_data('alipay', $order_sn, $_GET);
+        $this->loadCore('log')->log(APP_DEBUG, 'alipay_get1： ' . print_r(ctx()->get(), true), 'alipay');
+        $body = ctx()->get('body');
+        $seller_email = rawurldecode(ctx()->get('seller_email'));
+        $order_sn = ctx()->get('out_trade_no');
+        $this->loadService('shop_grade_apply')->save_payment_notice_data('alipay', $order_sn, ctx()->get());
         // $order_sn = str_replace($_GET['subject'], '', $_GET['out_trade_no']);
         /* 检查数字签名是否正确 */
-        ksort($_GET);
-        reset($_GET);
+        $GET = ctx()->get();
+        ksort($GET);
+        reset($GET);
         $sign = '';
-        foreach ($_GET AS $key => $val) {
+        foreach ($GET AS $key => $val) {
             if ($key != 'sign' && $key != 'sign_type' && $key != 'code') {
                 $sign .= "$key=$val&";
             }
         }
-        $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc ' . $order_sn, 'alipay');
-        $price = isset($_GET['total_fee']) ? $_GET['total_fee'] : 0;
+        $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc ' . $order_sn, 'alipay');
+        $price = isset($GET['total_fee']) ? $GET['total_fee'] : 0;
         $sign = substr($sign, 0, -1) . $payment['pay_config']['zfb']['key'];
-        $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 21' . $sign, 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 21' . $sign, 'alipay');
         /* 检查支付的金额是否相符 */
         if (!$this->loadService('shop_grade_apply')->check_apply_pay_money($order_sn, $price)) {
             return false;
         }
-        $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 22 ' . $_GET['trade_status'], 'alipay');
-        if ($_GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
+        $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 22 ' . $GET['trade_status'], 'alipay');
+        if ($GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
             /* 改变订单状态 */
-            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $_GET['trade_no'], $platform_shopid);
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 23' . var_export($ret, true), 'alipay');
+            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 23' . var_export($ret, true), 'alipay');
             if ($ret['status']) {
                 $this->loadService('shop_grade_apply')->delete_payment_notice_data('alipay', $order_sn);
             }
             return $ret['status'];
-        } elseif ($_GET['trade_status'] == 'TRADE_FINISHED') {
+        } elseif ($GET['trade_status'] == 'TRADE_FINISHED') {
             /* 改变订单状态 */
-            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $_GET['trade_no'], $platform_shopid);
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 24' . var_export($ret, true), 'alipay');
+            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 24' . var_export($ret, true), 'alipay');
             if ($ret['status']) {
                 $this->loadService('shop_grade_apply')->delete_payment_notice_data('alipay', $order_sn);
             }
             return $ret['status'];
-        } elseif ($_GET['trade_status'] == 'TRADE_SUCCESS') {
+        } elseif ($GET['trade_status'] == 'TRADE_SUCCESS') {
             /* 改变订单状态 */
-            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $_GET['trade_no'], $platform_shopid);
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 25' . var_export($ret, true), 'alipay');
+            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 25' . var_export($ret, true), 'alipay');
             if ($ret['status']) {
                 $this->loadService('shop_grade_apply')->delete_payment_notice_data('alipay', $order_sn);
             }
@@ -1624,54 +1658,55 @@ class Alipay extends \cn\eunionz\core\Plugin {
     /**
      * 自动响应操作
      */
-    function apply_auto_respond($post) {
-        $platform_shopid=$this->get_platform_shopid();
+    function apply_auto_respond($post)
+    {
+        $platform_shopid = $this->get_platform_shopid();
         $payment = $this->loadService('shop_payment')->get_payment('alipay', $platform_shopid);
-        $_GET = $post;
-        $body = $_GET['body'];
-        $seller_email = rawurldecode($_GET['seller_email']);
-        $order_sn = $_GET['out_trade_no'];
+        $GET = $post;
+        $body = $GET['body'];
+        $seller_email = rawurldecode($GET['seller_email']);
+        $order_sn = $GET['out_trade_no'];
         /* 检查数字签名是否正确 */
-        ksort($_GET);
-        reset($_GET);
+        ksort($GET);
+        reset($GET);
         $sign = '';
-        foreach ($_GET AS $key => $val) {
+        foreach ($GET AS $key => $val) {
             if ($key != 'sign' && $key != 'sign_type' && $key != 'code') {
                 $sign .= "$key=$val&";
             }
         }
-        $price = isset($_GET['total_fee']) ? $_GET['total_fee'] : 0;
+        $price = isset($GET['total_fee']) ? $GET['total_fee'] : 0;
         $sign = substr($sign, 0, -1) . $payment['pay_config']['zfb']['key'];
         //$sign = substr($sign, 0, -1) . ALIPAY_AUTH;
         // if (md5($sign) != $_GET['sign']){
         //   return false;
         // }
-        $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 21', 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 21', 'alipay');
         /* 检查支付的金额是否相符 */
         if (!$this->loadService('shop_grade_apply')->check_apply_pay_money($order_sn, $price)) {
             return false;
         }
-        $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 22 ' . $_GET['trade_status'], 'alipay');
-        if ($_GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
+        $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 22 ' . $GET['trade_status'], 'alipay');
+        if ($GET['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {
             /* 改变订单状态 */
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 23', 'alipay');
-            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $_GET['trade_no'],$platform_shopid);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 23', 'alipay');
+            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
             if ($ret['status']) {
                 $this->loadService('shop_grade_apply')->delete_payment_notice_data('alipay', $order_sn);
             }
             return $ret['status'];
-        } elseif ($_GET['trade_status'] == 'TRADE_FINISHED') {
+        } elseif ($GET['trade_status'] == 'TRADE_FINISHED') {
             /* 改变订单状态 */
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 24', 'alipay');
-            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $_GET['trade_no'],$platform_shopid);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 24', 'alipay');
+            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
             if ($ret['status']) {
                 $this->loadService('shop_grade_apply')->delete_payment_notice_data('alipay', $order_sn);
             }
             return $ret['status'];
-        } elseif ($_GET['trade_status'] == 'TRADE_SUCCESS') {
+        } elseif ($GET['trade_status'] == 'TRADE_SUCCESS') {
             /* 改变订单状态 */
-            $this->loadCore('log')->write(APP_DEBUG, 'alipay：pc 25', 'alipay');
-            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $_GET['trade_no'],$platform_shopid);
+            $this->loadCore('log')->log(APP_DEBUG, 'alipay：pc 25', 'alipay');
+            $ret = $this->loadService('shop_grade_apply')->pay_success($order_sn, $GET['trade_no'], $platform_shopid);
             if ($ret['status']) {
                 $this->loadService('shop_grade_apply')->delete_payment_notice_data('alipay', $order_sn);
             }
@@ -1687,7 +1722,8 @@ class Alipay extends \cn\eunionz\core\Plugin {
      * @param array $order 订单数据   $data['money_paid'] --订单在线支付总金额，单位元
      * @return bool true--成功  false--失败
      */
-    public function refund_cancel_apply($order) {
+    public function refund_cancel_apply($order)
+    {
         $retdata['msg'] = "退款申请成功！";
         $retdata['data'] = null;
         $retdata['status'] = true;
@@ -1759,19 +1795,19 @@ class Alipay extends \cn\eunionz\core\Plugin {
         //退款详细数据
         //计算手续费
         $refund_amount = $order['apply_pay_fee'];
-        $this->loadCore('log')->write(APP_DEBUG, '退款金额' . $refund_amount, 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, '退款金额' . $refund_amount, 'alipay');
         $detail_data = $order['apply_origQid'] . '^' . $refund_amount . '^' . "支付宝退款成功";//外部交易单号^退款金额^处理结果
         //必填，具体格式请参见接口技术文档
         //业务扩展参数--存储退款单号ID
         //$extend_param = $order['order_id'].'^'.$refund['orefund_id'];//订单id^退款单号
-        $this->loadCore('log')->write(APP_DEBUG, '退款数据：' . $detail_data, 'alipay');
+        $this->loadCore('log')->log(APP_DEBUG, '退款数据：' . $detail_data, 'alipay');
 
         /************************************************************/
 
         //构造要请求的参数数组，无需改动
         //构造要请求的参数数组，无需改动
         $parameter = array("service" => "refund_fastpay_by_platform_nopwd", "partner" => trim($payment['pay_config']['zfb']['alipay_partner']), "notify_url" => $notify_url, "batch_no" => $batch_no, "refund_date" => $refund_date, "batch_num" => $batch_num, "detail_data" => $detail_data, "_input_charset" => $alipay_config['input_charset'],);
-        $this->loadCore('log')->write(APP_ERROR, "refund_parameter:" . print_r($parameter, true), 'alipay');
+        $this->loadCore('log')->log(APP_ERROR, "refund_parameter:" . print_r($parameter, true), 'alipay');
 
         //建立请求
         $alipaySubmit = new \AlipaySubmit($alipay_config);
@@ -1781,7 +1817,7 @@ class Alipay extends \cn\eunionz\core\Plugin {
         //注意：该功能PHP5环境及以上支持，需开通curl、SSL等PHP配置环境。建议本地调试时使用PHP开发软件
         $doc = new \DOMDocument();
         $doc->loadXML($html_text);
-        $this->loadCore('log')->write(APP_ERROR, "html_text:" . $html_text, 'alipay');
+        $this->loadCore('log')->log(APP_ERROR, "html_text:" . $html_text, 'alipay');
 
         //请在这里加上商户的业务逻辑程序代码
 

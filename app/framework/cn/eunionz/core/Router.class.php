@@ -21,12 +21,10 @@ class Router extends Kernel
 
     /**
      * get uri str
-     *
      * @param string $str
-     *
      * @return string
      */
-    private function _get_uri_str($str)
+    private function _get_uri_str(string $str): string
     {
         if (false !== strpos($str, '&'))
             $str = substr($str, 0, strpos($str, '&'));
@@ -37,10 +35,8 @@ class Router extends Kernel
 
     /**
      * find controller by uri
-     *
-     * @param  $uri array
-     *
-     * @return array
+     * @param $uri
+     * @throws ControllerNotFoundException
      */
     private function _find_controller($uri)
     {
@@ -98,17 +94,18 @@ class Router extends Kernel
     }
 
     /**
-     * parse controller
-     *
-     * Through the routing info get controller info
-     *
+     * parse controller return router
+     * @param string $path
      * @return array
+     * @throws ControllerNotFoundException
+     * @throws MethodNotFoundException
+     * @throws \cn\eunionz\exception\FileNotFoundException
      */
-    public function parse_controller($path = '')
+    public function parse_controller(string $path = ''): array
     {
 
-        $default_controller = getConfig('app', 'APP_ROUTER_DEFAULT');
-        $default_action = getConfig('app', 'APP_DEFAULT_ACTION');
+        $default_controller = self::getConfig('app', 'APP_ROUTER_DEFAULT');
+        $default_action = self::getConfig('app', 'APP_DEFAULT_ACTION');
 
         // path info mode
 
@@ -187,7 +184,7 @@ class Router extends Kernel
                 } else {
                     // query string mode
                     $path = (ctx()->getRequest()->server('QUERY_STRING')) ? ctx()->getRequest()->server('QUERY_STRING') : @getenv('QUERY_STRING');
-                    $path = empty($path)? '' : $path;
+                    $path = empty($path) ? '' : $path;
                     if (trim($path, '/') != '') {
                         $uri_str = $this->_get_uri_str($path);
                     } else {

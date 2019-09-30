@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 namespace cn\eunionz\core;
 
 use cn\eunionz\exception\ControllerNotFoundException;
@@ -228,12 +228,12 @@ class Server extends Kernel
             date_default_timezone_set(getConfig('app', 'APP_DEFAULT_TIMEZONE'));
 
             //设置脚本最大执行时间
-            set_time_limit(getConfig('app', 'APP_DEFAULT_SCRIPT_EXECUTE_TIMEOUT_SECONDS'));
+            set_time_limit(self::getConfig('app', 'APP_DEFAULT_SCRIPT_EXECUTE_TIMEOUT_SECONDS'));
 
             //获取当前SHOP_ID
             $shop_id = 0;
-            if (getConfig('app', 'APP_SET_SHOP_ID_BY_HTTP_HOST_CALLBACK')) {
-                $CALLBACK = getConfig('app', 'APP_SET_SHOP_ID_BY_HTTP_HOST_CALLBACK');
+            if (self::getConfig('app', 'APP_SET_SHOP_ID_BY_HTTP_HOST_CALLBACK')) {
+                $CALLBACK = self::getConfig('app', 'APP_SET_SHOP_ID_BY_HTTP_HOST_CALLBACK');
                 if (is_string($CALLBACK)) {
                     if (function_exists($CALLBACK)) {
                         $shop_id = $CALLBACK(ctx()->getRequest()->server("HTTP_HOST"));
@@ -249,8 +249,8 @@ class Server extends Kernel
 
 
             ctx()->setShopId($shop_id);
-            $site_name = (empty($shop_id) ? getConfig('app', 'APP_SHOP_ID_ZERO_FOLDER_NAME') : $shop_id);
-            ctx()->setSiteName($site_name);
+            $site_name = (empty($shop_id) ? self::getConfig('app', 'APP_SHOP_ID_ZERO_FOLDER_NAME') : $shop_id);
+            ctx()->setSiteName(strval($site_name));
             //设置当前站点名称
 
             //当前站点临时文件夹物理路径
@@ -308,7 +308,7 @@ class Server extends Kernel
             //如果请求为针对'php' , 'inc' , 'shtml'源文件的请求则直接返回404错误
             $extension = strtolower(pathinfo($favicon_ico_filename, PATHINFO_EXTENSION));
             if (is_file($favicon_ico_filename)) {
-                if (!in_array($extension, getConfig('app', 'APP_PHP_EXTENSIONS'))) {
+                if (!in_array($extension, self::getConfig('app', 'APP_PHP_EXTENSIONS'))) {
                     ctx()->getResponse()->end(file_get_contents($favicon_ico_filename));
                 } else {
                     ctx()->getResponse()->status(404);
@@ -318,18 +318,18 @@ class Server extends Kernel
             }
 
 
-            if (getConfig('app', 'APP_CROSS_DOMAIN_ALLOW')) {
-                if (getConfig('app', 'APP_CROSS_DOMAIN_ALLOW_ORIGINS') == "*") {
+            if (self::getConfig('app', 'APP_CROSS_DOMAIN_ALLOW')) {
+                if (self::getConfig('app', 'APP_CROSS_DOMAIN_ALLOW_ORIGINS') == "*") {
                     ctx()->getResponse()->addHeader("Access-Control-Allow-Origin", "*");
                 } else {
-                    $allow_hosts = explode(',', strtolower(getConfig('app', 'APP_CROSS_DOMAIN_ALLOW_ORIGINS')));
+                    $allow_hosts = explode(',', strtolower(self::getConfig('app', 'APP_CROSS_DOMAIN_ALLOW_ORIGINS')));
                     if (in_array(strtolower(ctx()->getRequest()->server('REQUEST_SCHEME') . "://" . ctx()->getRequest()->server("HTTP_HOST")), $allow_hosts)) {
                         ctx()->getResponse()->addHeader("Access-Control-Allow-Origin", strtolower(ctx()->getRequest()->server('REQUEST_SCHEME') . "://" . ctx()->getRequest()->server("HTTP_HOST")));
                     }
                 }
-                ctx()->getResponse()->addHeader("Access-Control-Allow-Methods", getConfig('app', 'APP_CROSS_DOMAIN_ALLOW_METHODS'));
-                ctx()->getResponse()->addHeader("Access-Control-Allow-Headers", "Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Accept,Accept-Language,Origin,Accept-Encoding," . getConfig('app', 'APP_CROSS_DOMAIN_ALLOW_HEADERS'));
-                ctx()->getResponse()->addHeader("Access-Control-Expose-Headers", getConfig('app', 'APP_CROSS_DOMAIN_ALLOW_HEADERS'));
+                ctx()->getResponse()->addHeader("Access-Control-Allow-Methods", self::getConfig('app', 'APP_CROSS_DOMAIN_ALLOW_METHODS'));
+                ctx()->getResponse()->addHeader("Access-Control-Allow-Headers", "Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Accept,Accept-Language,Origin,Accept-Encoding," . self::getConfig('app', 'APP_CROSS_DOMAIN_ALLOW_HEADERS'));
+                ctx()->getResponse()->addHeader("Access-Control-Expose-Headers", self::getConfig('app', 'APP_CROSS_DOMAIN_ALLOW_HEADERS'));
             }
             ctx()->getSession()->initSession();
 
@@ -354,7 +354,7 @@ class Server extends Kernel
             }
 
 
-            @ini_set("session.gc_maxlifetime", getConfig('app', 'APP_SESSION_LIFETIME_SECONDS'));
+            @ini_set("session.gc_maxlifetime", strval(self::getConfig('app', 'APP_SESSION_LIFETIME_SECONDS')));
 
 
             // parse controller
@@ -397,7 +397,7 @@ class Server extends Kernel
             if ($clinetVersion > 0) {
                 $client_version_suffixs = $this->cache('shop_0_shop_actions', array($classes, $action, $clinetVersion));
                 if (!is_array($client_version_suffixs)) {
-                    $APP_SHOP_VERSION_LISTS = getConfig('version', 'APP_VERSION_LISTS');
+                    $APP_SHOP_VERSION_LISTS = self::getConfig('version', 'APP_VERSION_LISTS');
                     if ($APP_SHOP_VERSION_LISTS) {
                         for ($i = count($APP_SHOP_VERSION_LISTS) - 1; $i >= 0; $i--) {
                             $version = $APP_SHOP_VERSION_LISTS[$i];
@@ -426,8 +426,8 @@ class Server extends Kernel
             $is_allow_cache_view = false;
             //视图缓存处理
             if (isset($controller->_is_ob_start) && $controller->_is_ob_start) {
-                $VIEW_CACHE = getConfig('view', 'VIEW_CACHE');
-                $VIEW_BUILD_RENAME = getConfig('view', 'VIEW_BUILD_RENAME');
+                $VIEW_CACHE = self::getConfig('view', 'VIEW_CACHE');
+                $VIEW_BUILD_RENAME = self::getConfig('view', 'VIEW_BUILD_RENAME');
                 if (ctx()->isCli() && !APP_IS_IN_SWOOLE) {
                     $view_cache_filename = md5($_SERVER['argv'][0] . isset($_SERVER['argv'][1]) ? $_SERVER['argv'][1] : '');
                 } else {
@@ -438,10 +438,10 @@ class Server extends Kernel
                     throw new \cn\eunionz\exception\ViewException(ctx()->getI18n()->getLang('view_cache_filename_mode_title'), ctx()->getI18n()->getLang('view_cache_filename_mode'));
                 }
 
-                $view_cache_file = ctx()->getAppRuntimeRealPath() . getConfig('view', 'VIEW_CACHE_DIR') . APP_DS . $view_cache_filename . getConfig('view', 'VIEW_HTML_SUFFIX');
-                $view_cache_json_file = ctx()->getAppRuntimeRealPath() . getConfig('view', 'VIEW_CACHE_DIR') . APP_DS . $view_cache_filename . '_json' . getConfig('view', 'VIEW_HTML_SUFFIX');
+                $view_cache_file = ctx()->getAppRuntimeRealPath() . self::getConfig('view', 'VIEW_CACHE_DIR') . APP_DS . $view_cache_filename . self::getConfig('view', 'VIEW_HTML_SUFFIX');
+                $view_cache_json_file = ctx()->getAppRuntimeRealPath() . self::getConfig('view', 'VIEW_CACHE_DIR') . APP_DS . $view_cache_filename . '_json' . self::getConfig('view', 'VIEW_HTML_SUFFIX');
 
-                $VIEW_CACHE_EXPIRES = (isset($controller->_cache_view_lifetime)) ? $controller->_cache_view_lifetime : getConfig('view', 'VIEW_CACHE_EXPIRES');
+                $VIEW_CACHE_EXPIRES = (isset($controller->_cache_view_lifetime)) ? $controller->_cache_view_lifetime : self::getConfig('view', 'VIEW_CACHE_EXPIRES');
 
                 if ($VIEW_CACHE) {
                     if ($controller->is_cache_view) {
@@ -749,8 +749,8 @@ class Server extends Kernel
 
             ctx()->setShopID($shop_id);
 
-            $site_name = (empty($shop_id) ? getConfig('app', 'APP_SHOP_ID_ZERO_FOLDER_NAME') : $shop_id);
-            ctx()->setSiteName($site_name);
+            $site_name = (empty($shop_id) ? self::getConfig('app', 'APP_SHOP_ID_ZERO_FOLDER_NAME') : $shop_id);
+            ctx()->setSiteName(strval($site_name));
 
             //当前站点临时文件夹物理路径
             ctx()->setAppStorageRealPath(APP_STORAGE_REAL_PATH . $site_name . APP_DS);
@@ -794,7 +794,7 @@ class Server extends Kernel
                 ctx()->setIsCli(true);
             }
 
-            @ini_set("session.gc_maxlifetime", getConfig('app', 'APP_SESSION_LIFETIME_SECONDS'));
+            @ini_set("session.gc_maxlifetime", strval(self::getConfig('app', 'APP_SESSION_LIFETIME_SECONDS')));
 
             // parse controller
             $route_datas = $this->loadCore('Router')->parse_controller($url);
@@ -838,7 +838,7 @@ class Server extends Kernel
             if ($clinetVersion > 0) {
                 $client_version_suffixs = $this->cache('shop_0_shop_actions', array($service_class, $action, $clinetVersion));
                 if (!is_array($client_version_suffixs)) {
-                    $APP_SHOP_VERSION_LISTS = getConfig('version', 'APP_VERSION_LISTS');
+                    $APP_SHOP_VERSION_LISTS = self::getConfig('version', 'APP_VERSION_LISTS');
                     if ($APP_SHOP_VERSION_LISTS) {
                         for ($i = count($APP_SHOP_VERSION_LISTS) - 1; $i >= 0; $i--) {
                             $version = $APP_SHOP_VERSION_LISTS[$i];
@@ -910,7 +910,7 @@ class Server extends Kernel
             $websocket_return['return'] = $rs;
 
 
-            $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+            $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
             ctx()->getSession()->saveSession();
             self::destoryContext();
             return;

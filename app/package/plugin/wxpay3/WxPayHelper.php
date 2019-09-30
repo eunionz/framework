@@ -131,11 +131,12 @@ class WxPayHelper
 
     //POST模拟提交
     public function CurlPost($url,$data){
+        $SERVER = ctx()->server();
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($curl, CURLOPT_USERAGENT, isset($_SERVER['HTTP_USER_AGENT'])?$_SERVER['HTTP_USER_AGENT']:'');
+        curl_setopt($curl, CURLOPT_USERAGENT, isset($SERVER['HTTP_USER_AGENT'])?$SERVER['HTTP_USER_AGENT']:'');
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($curl, CURLOPT_AUTOREFERER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);

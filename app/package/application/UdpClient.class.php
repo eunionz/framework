@@ -52,7 +52,7 @@ class UdpClient extends Kernel
     {
         if (empty($udp_config_name)) $udp_config_name = 'udp_service_default';
         $this->udp_config_name = $udp_config_name;
-        $udp_config = getConfig('udp', $this->udp_config_name);
+        $udp_config = self::getConfig('udp', $this->udp_config_name);
         $this->udp_host = isset($udp_config['host']) ? $udp_config['host'] : '127.0.0.1';
         $this->udp_port = isset($udp_config['port']) ? intval($udp_config['port']) : 9997;
         $this->udp_timeout = isset($udp_config['timeout']) ? $udp_config['timeout'] : 0.5;

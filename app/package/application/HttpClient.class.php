@@ -59,7 +59,7 @@ class HttpClient extends Kernel
         if (empty($http_host) || empty($http_port)) {
             $http_config_name = 'http_service_default';
             $this->http_config_name = $http_config_name;
-            $http_config = getConfig('http', $this->http_config_name);
+            $http_config = self::getConfig('http', $this->http_config_name);
             $this->http_host = isset($http_config['host']) ? $http_config['host'] : '127.0.0.1';
             $this->http_port = isset($http_config['port']) ? intval($http_config['port']) : 80;
             $this->http_timeout = isset($http_config['timeout']) ? $http_config['timeout'] : 0.5;
@@ -85,11 +85,11 @@ class HttpClient extends Kernel
     public function http_get($url, $params = array(), $is_admin = false, $add_headers = array())
     {
         if ($is_admin) {
-            $APP_SESSION_NAMES = getConfig('app', 'APP_SESSION_NAMES');
-            $APP_MANAGE_PARTITIONS = getConfig('app', 'APP_MANAGE_PARTITIONS');
+            $APP_SESSION_NAMES = self::getConfig('app', 'APP_SESSION_NAMES');
+            $APP_MANAGE_PARTITIONS = self::getConfig('app', 'APP_MANAGE_PARTITIONS');
             $session_header_name = $APP_SESSION_NAMES[$APP_MANAGE_PARTITIONS[0]];
         } else {
-            $session_header_name = getConfig('app', 'APP_DEFAULT_SESSION_NAME');
+            $session_header_name = self::getConfig('app', 'APP_DEFAULT_SESSION_NAME');
         }
         if ($params) {
             $param_str = '';
@@ -139,11 +139,11 @@ class HttpClient extends Kernel
     public function http_post($url, $params = array(), $is_admin = false, $add_headers = array(), $files = array())
     {
         if ($is_admin) {
-            $APP_SESSION_NAMES = getConfig('app', 'APP_SESSION_NAMES');
-            $APP_MANAGE_PARTITIONS = getConfig('app', 'APP_MANAGE_PARTITIONS');
+            $APP_SESSION_NAMES = self::getConfig('app', 'APP_SESSION_NAMES');
+            $APP_MANAGE_PARTITIONS = self::getConfig('app', 'APP_MANAGE_PARTITIONS');
             $session_header_name = $APP_SESSION_NAMES[$APP_MANAGE_PARTITIONS[0]];
         } else {
-            $session_header_name = getConfig('app', 'APP_DEFAULT_SESSION_NAME');
+            $session_header_name = self::getConfig('app', 'APP_DEFAULT_SESSION_NAME');
         }
         $headers = array(
             'Host' => $this->http_host,

@@ -31,7 +31,7 @@ class Mysqldump extends \cn\eunionz\core\Plugin
     public $dump_data_tables;
 
     public function db_dump($host,$user,$pwd,$db,$filename) {
-        $this->dump_data_tables = $this->getConfig('global','dump_data_tables');
+        $this->dump_data_tables = self::getConfig('global','dump_data_tables');
         set_time_limit(0);
         $mysqlconlink = mysqli_connect($host,$user,$pwd , $db);
         if (!$mysqlconlink){

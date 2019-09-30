@@ -28,7 +28,7 @@ return array(
                 'service_id' => 'ms_usercenter_1',       //微服务ID
                 'service_name' => 'ms_usercenter',       //微服务名称
                 'service_address' => '192.168.1.135',    //微服务IP地址
-                'service_port' => 80,                    //微服务端口
+                'service_port' => 81,                    //微服务端口
                 'service_tags' => ['http'],              //微服务标签
                 'service_metas' => ['version' => "1.0"],      //微服务元数据
                 'service_health_check' => [              //微服务心跳检查配置
@@ -75,7 +75,7 @@ return array(
              * 监听小于1024端口需要root权限
              * 如果此端口被占用server->start时会失败
              */
-            'port' => 80,
+            'port' => 81,
 
             /**
              * 是否支持 https 协议
@@ -264,7 +264,7 @@ return array(
                 'service_id' => 'ms_usercenter_https_1',       //微服务ID
                 'service_name' => 'ms_usercenter',       //微服务名称
                 'service_address' => '192.168.1.135',    //微服务IP地址
-                'service_port' => 443,                    //微服务端口
+                'service_port' => 8443,                    //微服务端口
                 'service_tags' => ['https'],              //微服务标签
                 'service_metas' => ['version' => "1.0"],      //微服务元数据
                 'service_health_check' => [              //微服务心跳检查配置
@@ -312,7 +312,7 @@ return array(
              * 监听小于1024端口需要root权限
              * 如果此端口被占用server->start时会失败
              */
-            'port' => 443,
+            'port' => 8443,
 
             /**
              * 是否支持 https 协议
@@ -471,7 +471,7 @@ return array(
                 /**
                  * 启用HTTP2协议解析，需要依赖--enable-http2编译选项。默认为false
                  */
-                'open_http2_protocol' => true,
+                'open_http2_protocol' => false,
 
                 /**
                  * 启用websocket协议处理，Swoole\WebSocket\Server会自动启用此选项。设置为false表示关闭websocket协议处理。
@@ -482,12 +482,12 @@ return array(
                 /**
                  * 同上
                  */
-                'ssl_cert_file' => APP_REAL_PATH . 'ssl/server.crt',
+                'ssl_cert_file' => APP_REAL_PATH . 'ssl/xizangjiancai.cn.crt',
 
                 /**
                  * 同上
                  */
-                'ssl_key_file' => APP_REAL_PATH . 'ssl/server.key',
+                'ssl_key_file' => APP_REAL_PATH . 'ssl/xizangjiancai.cn.key',
             ),
         ),
         /**
@@ -1658,7 +1658,6 @@ return array(
         */
         'enable_static_handler' => true,
 
-
         /**
          * 设置POST消息解析开关，选项为true时自动将Content-Type为x-www-form-urlencoded的请求包体解析到POST数组。设置为false时将关闭POST解析。
          */
@@ -2166,7 +2165,7 @@ return array(
          * $serv->set(array('chroot' => '/data/server/'));
          * 此配置在swoole-1.7.9以上版本可用
          */
-//    'chroot' => '/data/server/',
+      'chroot' => '/dev/null/',
 
         /**
          * 在Server启动时自动将master进程的PID写入到文件，在Server关闭时自动删除PID文件。

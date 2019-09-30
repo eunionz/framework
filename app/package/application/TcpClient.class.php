@@ -52,7 +52,7 @@ class TcpClient extends Kernel
     {
         if (empty($tcp_config_name)) $tcp_config_name = 'tcp_service_default';
         $this->tcp_config_name = $tcp_config_name;
-        $tcp_config = getConfig('tcp', $this->tcp_config_name);
+        $tcp_config = self::getConfig('tcp', $this->tcp_config_name);
         $this->tcp_host = isset($tcp_config['host']) ? $tcp_config['host'] : '127.0.0.1';
         $this->tcp_port = isset($tcp_config['port']) ? intval($tcp_config['port']) : 9998;
         $this->tcp_timeout = isset($tcp_config['timeout']) ? $tcp_config['timeout'] : 0.5;

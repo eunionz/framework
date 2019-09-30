@@ -28,14 +28,15 @@ class Yeepay extends \cn\eunionz\core\Plugin {
 
 
     function __construct() {
-        $payment = $this->loadService('shop_payment')->get_payment('yeepay', $_SESSION['PLATFORM_SHOP_ID']);
+        $SESSION = ctx()->session();
+        $payment = $this->loadService('shop_payment')->get_payment('yeepay', $SESSION['PLATFORM_SHOP_ID']);
         //先期固定
         //$payment['pay_config']['yeepay']['customernumber'] = '10000447996';
         //$payment['pay_config']['yeepay']['keyValue'] = 'jj3Q1h0H86FZ7CD46Z5Nr35p67L199WdkgETx85920n128vi2125T9KY2hzv';
 
         $sysConfig["customernumber"] = $payment['pay_config']['yeepay']['customernumber'];
         $sysConfig["keyValue"] = $payment['pay_config']['yeepay']['keyValue'];
-        if ($_SESSION['is_debug']) {
+        if ($SESSION['is_debug']) {
             $sysConfig["customernumber"] = '10000447996';
             $sysConfig["keyValue"] = "jj3Q1h0H86FZ7CD46Z5Nr35p67L199WdkgETx85920n128vi2125T9KY2hzv";
         }
@@ -57,14 +58,14 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         $pay_code['status'] = true;
 
         //根据支付的类型（网银，一键支付，账号支付，微信支付，无卡直连，将必填参数配置扩展）
-        if (!array_key_exists("payproducttype", $_REQUEST)) {
+        if (!array_key_exists("payproducttype", ctx()->request())) {
             throw new \ZGTException("payproducttype of request is not found.");
             $pay_code['error_desc'] = 'payproducttype of request is not found.';
             $pay_code['status'] = false;
             return $pay_code;
         }
         global $infConfig;
-        $infConfig[$method]["mustFillRequest"] = array_merge($infConfig[$method]["mustFillRequest"], $infConfig[$method]["mustFillRequest_" . strtoupper($_REQUEST["payproducttype"])]);
+        $infConfig[$method]["mustFillRequest"] = array_merge($infConfig[$method]["mustFillRequest"], $infConfig[$method]["mustFillRequest_" . strtoupper(ctx()->request("payproducttype"))]);
 
         //生成支付单号
 
@@ -77,17 +78,18 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         //拼接符号
         $str = $this->isInString("?", $pay_info['webcallbackurl']) ? "&" : "?";
         $pay_info['webcallbackurl'] = $pay_info['webcallbackurl'] . trim($str) . "requestid={$pay_info['requestid']}&amount={$pay_info['amount']}&pay_time=" . time();
-        if ($_SESSION['is_weixin_browser']) {
+        $SESSION = ctx()->session();
+        if ($SESSION['is_weixin_browser']) {
             // Wap
-            $this->loadCore('log')->write(APP_DEBUG, 'wx_browser:start', 'yeepay');
-            if (!isset($_SESSION['weixin_openid']) || empty($_SESSION['weixin_openid'])) {
+            $this->loadCore('log')->log(APP_DEBUG, 'wx_browser:start', 'yeepay');
+            if (!isset($SESSION['weixin_openid']) || empty($SESSION['weixin_openid'])) {
                 $pay_code['error_desc'] = '用户信息已过期';
                 $pay_code['status'] = false;
                 return $pay_code;
             }
 
             //$pay_info['payproducttype'] = 'WECHATU';
-            $pay_info['userno'] = $_SESSION['weixin_openid'];
+            $pay_info['userno'] = $SESSION['weixin_openid'];
 
             $req = new \RequestService($method);
             try {
@@ -96,7 +98,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             } catch (\Exception $err) {
                 $pay_code['status'] = false;
                 $pay_code['error_desc'] = "请检查支付接口配置";//$err->getMessage();
-                $this->loadCore('log')->write(APP_DEBUG, $err->getMessage(), 'yeepay');
+                $this->loadCore('log')->log(APP_DEBUG, $err->getMessage(), 'yeepay');
                 return $pay_code;
             }
             $request = $req->getRequest();
@@ -106,7 +108,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             //return $pay_code;
         } else {
             // PC
-            $this->loadCore('log')->write(APP_DEBUG, 'pc:start', 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, 'pc:start', 'yeepay');
 
 
             $req = new \RequestService($method);
@@ -116,7 +118,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             } catch (\Exception $err) {
                 $pay_code['status'] = false;
                 $pay_code['error_desc'] = "请检查支付接口配置";//$err->getMessage();
-                $this->loadCore('log')->write(APP_DEBUG, $err->getMessage(), 'yeepay');
+                $this->loadCore('log')->log(APP_DEBUG, $err->getMessage(), 'yeepay');
                 return $pay_code;
             }
             $request = $req->getRequest();
@@ -124,7 +126,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             $pay_code['result'] = $response;
             if ($request["payproducttype"] == "WECHATU") {
                 $img = hex2byte($response["payurl"]);
-                $path = APP_RUNTIME_REAL_PATH . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'order';
+                $path = ctx()->getAppRuntimeRealPath() . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'order';
                 $filename = @"$path" . '/' . $pay_info['requestid'] . '.png';    // 写入的文件   // 写入的文件
                 $file = fopen($filename, "w");//打开文件准备写入
                 fwrite($file, $img);//写入
@@ -154,14 +156,14 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         $pay_code['error_desc'] = "获取支付参数成功！";
         $pay_code['status'] = true;
         //根据支付的类型（网银，一键支付，账号支付，微信支付，无卡直连，将必填参数配置扩展）
-        if (!array_key_exists("payproducttype", $_REQUEST)) {
+        if (!array_key_exists("payproducttype",ctx()->request())) {
             throw new \ZGTException("payproducttype of request is not found.");
             $pay_code['error_desc'] = 'payproducttype of request is not found.';
             $pay_code['status'] = false;
             return $pay_code;
         }
         global $infConfig;
-        $infConfig[$method]["mustFillRequest"] = array_merge($infConfig[$method]["mustFillRequest"], $infConfig[$method]["mustFillRequest_" . strtoupper($_REQUEST["payproducttype"])]);
+        $infConfig[$method]["mustFillRequest"] = array_merge($infConfig[$method]["mustFillRequest"], $infConfig[$method]["mustFillRequest_" . strtoupper(ctx()->request("payproducttype"))]);
         //生成支付单号
         $pay_info['requestid'] = $this->loadService('order_pay_base')->distributor_get_opay_no($order_list, true); //'yee' . date("YmdHis") . rand(10000, 99999);
         $pay_info['callbackurl'] = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=distyeepay';//通知地址  return_url(basename(__FILE__, '.php'))
@@ -170,16 +172,18 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         //拼接符号
         $str = $this->isInString("?", $pay_info['webcallbackurl']) ? "&" : "?";
         $pay_info['webcallbackurl'] = $pay_info['webcallbackurl'] . trim($str) . "requestid={$pay_info['requestid']}&amount={$pay_info['amount']}&pay_time=" . time();
-        if ($_SESSION['is_weixin_browser']) {
+        $SESSION = ctx()->session();
+
+        if ($SESSION['is_weixin_browser']) {
             // Wap
-            $this->loadCore('log')->write(APP_DEBUG, 'wx_browser:start', 'yeepay');
-            if (!isset($_SESSION['weixin_openid']) || empty($_SESSION['weixin_openid'])) {
+            $this->loadCore('log')->log(APP_DEBUG, 'wx_browser:start', 'yeepay');
+            if (!isset($SESSION['weixin_openid']) || empty($SESSION['weixin_openid'])) {
                 $pay_code['error_desc'] = '用户信息已过期';
                 $pay_code['status'] = false;
                 return $pay_code;
             }
             //$pay_info['payproducttype'] = 'WECHATU';
-            $pay_info['userno'] = $_SESSION['weixin_openid'];
+            $pay_info['userno'] = $SESSION['weixin_openid'];
             $req = new \RequestService($method);
             try {
                 $req->sendRequest($pay_info);
@@ -187,7 +191,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             } catch (\Exception $err) {
                 $pay_code['status'] = false;
                 $pay_code['error_desc'] = "请检查支付接口配置";//$err->getMessage();
-                $this->loadCore('log')->write(APP_DEBUG, $err->getMessage(), 'yeepay');
+                $this->loadCore('log')->log(APP_DEBUG, $err->getMessage(), 'yeepay');
                 return $pay_code;
             }
             $request = $req->getRequest();
@@ -197,7 +201,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             //return $pay_code;
         } else {
             // PC
-            $this->loadCore('log')->write(APP_DEBUG, 'pc:start', 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, 'pc:start', 'yeepay');
             $req = new \RequestService($method);
             try {
                 $req->sendRequest($pay_info);
@@ -205,7 +209,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             } catch (\Exception $err) {
                 $pay_code['status'] = false;
                 $pay_code['error_desc'] = "请检查支付接口配置";//$err->getMessage();
-                $this->loadCore('log')->write(APP_DEBUG, $err->getMessage(), 'yeepay');
+                $this->loadCore('log')->log(APP_DEBUG, $err->getMessage(), 'yeepay');
                 return $pay_code;
             }
             $request = $req->getRequest();
@@ -213,7 +217,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             $pay_code['result'] = $response;
             if ($request["payproducttype"] == "WECHATU") {
                 $img = hex2byte($response["payurl"]);
-                $path = APP_RUNTIME_REAL_PATH . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'order_dist';
+                $path = ctx()->getAppRuntimeRealPath() . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'order_dist';
                 $filename = @"$path" . '/' . $pay_info['requestid'] . '.png';    // 写入的文件   // 写入的文件
                 $file = fopen($filename, "w");//打开文件准备写入
                 fwrite($file, $img);//写入
@@ -258,18 +262,18 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         $method = "pay";
         include_once("inc/config.php");
 
-        if (!isViaArray($_REQUEST, "data")) {
-            $this->loadCore('log')->write(APP_DEBUG, 'callback param data is null.', 'yeepay');
+        if (!isViaArray(ctx()->request(), "data")) {
+            $this->loadCore('log')->log(APP_DEBUG, 'callback param data is null.', 'yeepay');
             return false;
         }
-        $data = $_REQUEST["data"];
+        $data = ctx()->request("data");
         //解析返回值
         if (!isViaArray($infConfig)) {
-            $this->loadCore('log')->write(APP_DEBUG, 'infConfig is null.', 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, 'infConfig is null.', 'yeepay');
             return false;
         }
         if (!array_key_exists($method, $infConfig)) {
-            $this->loadCore('log')->write(APP_DEBUG, "biz of infConfig is not found[" . $method . "].", 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, "biz of infConfig is not found[" . $method . "].", 'yeepay');
             return false;
         }
 
@@ -280,7 +284,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
 
         $responseData = getDeAes($data, $keyForAES);
         $result = json_decode($responseData, true);
-        $this->loadCore('log')->write(APP_DEBUG, "result:" . print_r($result, true), 'yeepay');
+        $this->loadCore('log')->log(APP_DEBUG, "result:" . print_r($result, true), 'yeepay');
         //进行UTF-8->GBK转码
         /* $resultLocale = array();
         foreach ( $result as $rKey => $rValue ) {
@@ -289,15 +293,15 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         } */
 
         if ("1" != $result["code"]) {
-            $this->loadCore('log')->write(APP_DEBUG, "response error, errmsg = [" . $resultLocale["msg"] . "], errcode = [" . $resultLocale["code"] . "].", 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, "response error, errmsg = [" . $resultLocale["msg"] . "], errcode = [" . $resultLocale["code"] . "].", 'yeepay');
             return false;
         }
         if (array_key_exists("customError", $result) && "" != $result["customError"]) {
-            $this->loadCore('log')->write(APP_DEBUG, "response.customError error, errmsg = [" . $resultLocale["customError"] . "], errcode = [" . $resultLocale["code"] . "].", 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, "response.customError error, errmsg = [" . $resultLocale["customError"] . "], errcode = [" . $resultLocale["code"] . "].", 'yeepay');
             return false;
         }
         if ($result["customernumber"] != $customernumber) {
-            $this->loadCore('log')->write(APP_DEBUG, "customernumber not equals, request is [" . $customernumber . "], response is [" . $hmacData["customernumber"] . "].", 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, "customernumber not equals, request is [" . $customernumber . "], response is [" . $hmacData["customernumber"] . "].", 'yeepay');
             return false;
         }
         //验证返回签名
@@ -314,7 +318,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         }
         $hmac = getHmac($hmacData, $keyForHmac);
         if ($hmac != $result["hmac"]) {
-            $this->loadCore('log')->write(APP_DEBUG, "hmac not equals, response is [" . $result["hmac"] . "], gen is [" . $hmac . "].", 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, "hmac not equals, response is [" . $result["hmac"] . "], gen is [" . $hmac . "].", 'yeepay');
             return false;
         }
         if ("SERVER" == $result["notifytype"]) {
@@ -348,8 +352,8 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         $this->loadService('order_info')->order_paid($order_sn, isset($array_data['transaction_id']) ? $array_data['transaction_id'] : '');
         $this->loadService('order_info')->delete_payment_notice_data('wxpay', $order_sn);
 
-        if (file_exists(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx" . $order_id . "html")) {
-            @unlink(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx" . $order_id . "html");
+        if (file_exists(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx" . $order_id . "html")) {
+            @unlink(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx" . $order_id . "html");
         }
         return true;
     }
@@ -361,18 +365,18 @@ class Yeepay extends \cn\eunionz\core\Plugin {
     function distributor_respond($array_data) {
         $method = "pay";
         include_once("inc/config.php");
-        if (!isViaArray($_REQUEST, "data")) {
-            $this->loadCore('log')->write(APP_DEBUG, 'callback param data is null.', 'yeepay');
+        if (!isViaArray(ctx()->request(), "data")) {
+            $this->loadCore('log')->log(APP_DEBUG, 'callback param data is null.', 'yeepay');
             return false;
         }
-        $data = $_REQUEST["data"];
+        $data = ctx()->request("data");
         //解析返回值
         if (!isViaArray($infConfig)) {
-            $this->loadCore('log')->write(APP_DEBUG, 'infConfig is null.', 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, 'infConfig is null.', 'yeepay');
             return false;
         }
         if (!array_key_exists($method, $infConfig)) {
-            $this->loadCore('log')->write(APP_DEBUG, "biz of infConfig is not found[" . $method . "].", 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, "biz of infConfig is not found[" . $method . "].", 'yeepay');
             return false;
         }
 
@@ -383,7 +387,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
 
         $responseData = getDeAes($data, $keyForAES);
         $result = json_decode($responseData, true);
-        $this->loadCore('log')->write(APP_DEBUG, "result:" . print_r($result, true), 'yeepay');
+        $this->loadCore('log')->log(APP_DEBUG, "result:" . print_r($result, true), 'yeepay');
         //进行UTF-8->GBK转码
         /* $resultLocale = array();
         foreach ( $result as $rKey => $rValue ) {
@@ -392,15 +396,15 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         } */
 
         if ("1" != $result["code"]) {
-            $this->loadCore('log')->write(APP_DEBUG, "response error, errmsg = [" . $resultLocale["msg"] . "], errcode = [" . $resultLocale["code"] . "].", 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, "response error, errmsg = [" . $resultLocale["msg"] . "], errcode = [" . $resultLocale["code"] . "].", 'yeepay');
             return false;
         }
         if (array_key_exists("customError", $result) && "" != $result["customError"]) {
-            $this->loadCore('log')->write(APP_DEBUG, "response.customError error, errmsg = [" . $resultLocale["customError"] . "], errcode = [" . $resultLocale["code"] . "].", 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, "response.customError error, errmsg = [" . $resultLocale["customError"] . "], errcode = [" . $resultLocale["code"] . "].", 'yeepay');
             return false;
         }
         if ($result["customernumber"] != $customernumber) {
-            $this->loadCore('log')->write(APP_DEBUG, "customernumber not equals, request is [" . $customernumber . "], response is [" . $hmacData["customernumber"] . "].", 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, "customernumber not equals, request is [" . $customernumber . "], response is [" . $hmacData["customernumber"] . "].", 'yeepay');
             return false;
         }
         //验证返回签名
@@ -417,7 +421,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         }
         $hmac = getHmac($hmacData, $keyForHmac);
         if ($hmac != $result["hmac"]) {
-            $this->loadCore('log')->write(APP_DEBUG, "hmac not equals, response is [" . $result["hmac"] . "], gen is [" . $hmac . "].", 'yeepay');
+            $this->loadCore('log')->log(APP_DEBUG, "hmac not equals, response is [" . $result["hmac"] . "], gen is [" . $hmac . "].", 'yeepay');
             return false;
         }
         if ("SERVER" == $result["notifytype"]) {
@@ -498,14 +502,14 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             $retdata['msg'] = $response['msg'];
             $retdata['status'] = false;
             $retdata['code'] = $response['code'];
-            $this->loadCore('log')->write(APP_ERROR, print_r($retdata, true), 'yeepay');
+            $this->loadCore('log')->log(APP_ERROR, print_r($retdata, true), 'yeepay');
             return $retdata;
         }
         /* //修改退款单号的状态
         $orefund_way = 0;// 0:线上退款 1：线下退款
         //直接调用退款成功处理函数
         $ret = $this->loadService('order_info')->op_refund_by_order_sn($refund['order_sn'], $refund['orefund_amount'], $data['memo'], $refund['orefund_id'], $orefund_way, $order['order_shop_id']);
-        $this->loadCore('log')->write(APP_ERROR, "refund4:" . $ret['msg'], 'orderinfo_refund'); */
+        $this->loadCore('log')->log(APP_ERROR, "refund4:" . $ret['msg'], 'orderinfo_refund'); */
         $ret = $this->loadService('order_refunds')->do_refund_apply_success($refund['orefund_id'], $refund['orefund_shop_id'], $request["requestid"]);
         if ($ret === false) {
             $retdata['msg'] = "退款申请失败！";
@@ -542,7 +546,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             $req->sendRequest($data);
             $req->receviceResponse();
         } catch (\Exception $err) {
-            $this->loadCore('log')->write(APP_ERROR, $err->getMessage(), 'yeepay');
+            $this->loadCore('log')->log(APP_ERROR, $err->getMessage(), 'yeepay');
             $retdata['msg'] = $err->getMessage();
             $retdata['status'] = false;
             return $retdata;
@@ -560,14 +564,14 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             $retdata['msg'] = $response['msg'];
             $retdata['status'] = false;
             $retdata['code'] = $response['code'];
-            $this->loadCore('log')->write(APP_ERROR, print_r($retdata, true), 'yeepay');
+            $this->loadCore('log')->log(APP_ERROR, print_r($retdata, true), 'yeepay');
             return $retdata;
         }
         //修改退款单号的状态
         $orefund_way = 0;// 0:线上退款 1：线下退款
         //直接调用退款成功处理函数
         $ret = $this->loadService('order_info')->do_cancel_by_order_sn($order);
-        $this->loadCore('log')->write(APP_ERROR, "refund4:" . $ret, 'yeepay');
+        $this->loadCore('log')->log(APP_ERROR, "refund4:" . $ret, 'yeepay');
         if ($ret === false) {
             $retdata['msg'] = "退款申请失败！";
             $retdata['status'] = false;
@@ -619,11 +623,11 @@ class Yeepay extends \cn\eunionz\core\Plugin {
             $retdata['msg'] = $response['msg'];
             $retdata['status'] = false;
             $retdata['code'] = $response['code'];
-            $this->loadCore('log')->write(APP_ERROR, print_r($retdata, true), 'yeepay');
+            $this->loadCore('log')->log(APP_ERROR, print_r($retdata, true), 'yeepay');
             return $retdata;
         }
 
-        $this->loadCore('log')->write(APP_ERROR, "refund4:" . $ret['msg'], 'yeepay');
+        $this->loadCore('log')->log(APP_ERROR, "refund4:" . $ret['msg'], 'yeepay');
         return $retdata;
     }
 
@@ -765,7 +769,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         $retdata['data'] = null;
         $retdata['status'] = true;
 
-        $path = APP_RUNTIME_REAL_PATH . 'uploads' . APP_DS . 'yeepay' . APP_DS . 'ledger';
+        $path = ctx()->getAppRuntimeRealPath() . 'uploads' . APP_DS . 'yeepay' . APP_DS . 'ledger';
         if (!is_dir($path))
             @mkdir($path, 0777, true);
 
@@ -810,7 +814,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         $retdata['data'] = null;
         $retdata['status'] = true;
 
-        $path = APP_RUNTIME_REAL_PATH . str_ireplace('runtime/', '', $data['file_path']);
+        $path = ctx()->getAppRuntimeRealPath() . str_ireplace('runtime/', '', $data['file_path']);
         $data['file']['name'] = basename($path);
         $data['file']['file_path'] = $path;
 
@@ -850,7 +854,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
         $retdata['data'] = null;
         $retdata['status'] = true;
 
-        $path = APP_RUNTIME_REAL_PATH . 'uploads' . APP_DS . 'yeepay' . APP_DS . 'ledger';
+        $path = ctx()->getAppRuntimeRealPath() . 'uploads' . APP_DS . 'yeepay' . APP_DS . 'ledger';
         if (!is_dir($path))
             @mkdir($path, 0777, true);
 
@@ -1114,6 +1118,7 @@ class Yeepay extends \cn\eunionz\core\Plugin {
     }
 
     function get_platform_shopid() {
-        return (isset($_SESSION['PLATFORM_SHOP_ID'])) ? $_SESSION['PLATFORM_SHOP_ID'] : $this->getConfig('shop', 'SHOP_ID');
+        $SESSION = ctx()->session();
+        return (isset($SESSION['PLATFORM_SHOP_ID'])) ? $SESSION['PLATFORM_SHOP_ID'] : ctx()->getShopId();
     }
 }

@@ -1,9 +1,6 @@
 <?php
 declare(strict_types=1);
 
-const GRPC_DEFAULT_TIMEOUT = 3.0;
-const GRPC_ERROR_NO_RESPONSE = -1;
-
 /**
  * Eunionz PHP Framework global core function libaray
  * Created by PhpStorm.
@@ -26,7 +23,7 @@ require_once __DIR__ . APP_DS . 'constants.core.php';
  * @param bool $single 是否单例模式
  * @return object 组件对象
  */
-function C($class, bool $single = false)
+function C(string $class, bool $single = false): ?\cn\eunionz\core\Component
 {
     return (new \cn\eunionz\core\Kernel())->loadComponent($class, $single);
 }
@@ -37,7 +34,7 @@ function C($class, bool $single = false)
  * @param bool $single 是否单例模式
  * @return object 服务对象
  */
-function S($class, bool $single = false)
+function S(string $class, bool $single = false): ?\cn\eunionz\core\Service
 {
     return (new \cn\eunionz\core\Kernel())->loadService($class, $single);
 }
@@ -48,7 +45,7 @@ function S($class, bool $single = false)
  * @param bool $single 是否单例模式
  * @return object 插件对象
  */
-function P($class, bool $single = false)
+function P(string $class, bool $single = false): ?\cn\eunionz\core\Plugin
 {
     return (new \cn\eunionz\core\Kernel())->loadPlugin($class, $single);
 }
@@ -59,7 +56,7 @@ function P($class, bool $single = false)
  * @param bool $single 是否单例模式
  * @return object 模型对象
  */
-function M($class, bool $single = false)
+function M(string $class, bool $single = false): ?\cn\eunionz\core\Model
 {
     return (new \cn\eunionz\core\Kernel())->loadModel($class, $single);
 }
@@ -69,9 +66,9 @@ function M($class, bool $single = false)
  * @param $level  日志等级 APP_ERROR APP_WARNING APP_DEBUG APP_INFO
  * @param $message 日志内容
  * @param $filename 日志文件名不包括路径和扩展名
- * @return
+ * @return bool
  */
-function L($level = APP_ERROR, string $message, string $filename = '')
+function L(int $level = APP_ERROR, string $message, string $filename = ''): bool
 {
     return (new \cn\eunionz\core\Kernel())->loadCore('log')->log($level, $message, $filename);
 }
@@ -83,7 +80,7 @@ function L($level = APP_ERROR, string $message, string $filename = '')
  * @param $APP_ASSEMBLY_NAME 如果为null则使用当前程序集，''则为默认程序集，否则为指定程序集
  * @return mixed
  */
-function F($namespace, $key = '')
+function F(string $namespace, string $key = '')
 {
     return \cn\eunionz\core\Kernel::getConfig($namespace, $key);
 }
@@ -102,7 +99,7 @@ function ctx(): ?\cn\eunionz\core\Context
  * @param int $level
  * @param $msg
  */
-function console($msg, $level = 0)
+function console(string $msg, int $level = 0): string
 {
     return \cn\eunionz\core\Kernel::console($msg, $level);
 }
@@ -112,7 +109,7 @@ function console($msg, $level = 0)
  * @param int $level
  * @param $msg
  */
-function consoleln($msg, $level = 0)
+function consoleln(string $msg, int $level = 0): string
 {
     return \cn\eunionz\core\Kernel::consoleln($msg, $level);
 }
@@ -124,7 +121,7 @@ function consoleln($msg, $level = 0)
  * @param $APP_ASSEMBLY_NAME 如果为null则使用当前程序集，''则为默认程序集，否则为指定程序集
  * @return mixed
  */
-function getConfig($namespace, $key = '')
+function getConfig(string $namespace, string $key = '')
 {
     return \cn\eunionz\core\Kernel::getConfig($namespace, $key);
 }
@@ -136,7 +133,7 @@ function getConfig($namespace, $key = '')
  * @param $number    要处理的数字,可正可负
  * @param $position 0--截断到个位 1--到十位  2--百位   -1--小数点后1位  -2--小数点后2位
  */
-function truncate_number($number, $position = 2)
+function truncate_number(float $number, int $position = 2): float
 {
     $sign = 1;
     if ($number < 0) $sign = -1;
@@ -155,16 +152,16 @@ function truncate_number($number, $position = 2)
         $s1 = substr($integer, 0, strlen($integer) + $position);
         $s2 = substr($integer, strlen($integer) + $position);
         $s2 = str_pad('', strlen($s2), '0');
-        return sprintf("%d", $sign * intval($s1 . $s2));
+        return sprintf("%d", $sign * intval($s1 . $s2)) + 0;
     } else {
         //对小数部份处理，返回小数
         $s1 = substr($decimal, 0, $position);
         $number = abs($integer) + ('0.' . $s1);
-        return sprintf("%.{$position}f", $sign * $number);
+        return sprintf("%.{$position}f", $sign * $number) + 0;
     }
 }
 
-function do_Post($url, $fields, $extraheader = array())
+function do_Post(string $url, string $fields, array $extraheader = array())
 {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -177,7 +174,7 @@ function do_Post($url, $fields, $extraheader = array())
     return $output;
 }
 
-function do_PostJson($url, $fields)
+function do_PostJson(string $url, string $fields)
 {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -192,7 +189,7 @@ function do_PostJson($url, $fields)
     return $output;
 }
 
-function do_PostXml($url, $fields)
+function do_PostXml(string $url, string $fields)
 {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -208,7 +205,7 @@ function do_PostXml($url, $fields)
 }
 
 
-function do_Get($url, $extraheader = array())
+function do_Get(string $url, array $extraheader = array())
 {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -220,7 +217,7 @@ function do_Get($url, $extraheader = array())
     return $output;
 }
 
-function do_Put($url, $fields, $extraheader = array())
+function do_Put(string $url, string $fields, array $extraheader = array())
 {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -235,7 +232,7 @@ function do_Put($url, $fields, $extraheader = array())
     return $output;
 }
 
-function do_Delete($url, $fields, $extraheader = array())
+function do_Delete(string $url, string $fields, array $extraheader = array())
 {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -256,12 +253,12 @@ function do_Delete($url, $fields, $extraheader = array())
  * @param $port 端口
  * @param $url 要执行的url
  */
-function fsock_open($domain, $port, $url)
+function fsock_open(string $domain, int $port, string $url): void
 {
     //获取当前后台的地址
     $fp = fsockopen($domain, $port, $errno, $errstr, 10);
     if (!$fp) {
-        echo "$errstr ($errno)<br />\n";
+        consoleln("$errstr ($errno)<br />\n");
     } else {
         stream_set_blocking($fp, 0);
         $out = "GET " . $url . " HTTP/1.1\r\n";
@@ -277,11 +274,11 @@ function fsock_open($domain, $port, $url)
 
 /**
  * 如果$string1以$string2为结尾则返回true  否则返回false
- * @param $string1
- * @param $string2
+ * @param string $string1
+ * @param string $string2
  * @return bool
  */
-function endsWith($string1, $string2)
+function endsWith(string $string1, string $string2): bool
 {
     if (strlen($string1) < strlen($string2)) {  //若第一个字符串长度小于第二个的时候，必须指定返回false，
         return false;                                   //否则substr_compare遇到这种情况会返回0（即相当，与事实不符合）
@@ -292,22 +289,22 @@ function endsWith($string1, $string2)
 
 /**
  * 如果$string1以$string2为开始则返回true  否则返回false
- * @param $str
- * @param $needle
+ * @param string $string1
+ * @param string $string2
  * @return bool
  */
-function startsWith($string1, $string2)
+function startsWith(string $string1, string $string2): bool
 {
-    return stripos($string1, $string2) === 0;
+    return strpos($string1, $string2) === 0;
 }
 
 
 /**
  * 加载应用程序中常量文件
  */
-function loadConstrants()
+function loadConstrants() : void
 {
-    $constants_path = APP_PACKAGE_BASE_PATH . 'package' . APP_DS . 'constants';
+    $constants_path = APP_PACKAGE_REAL_PATH . 'constants';
     if (is_dir($constants_path)) {
         $dir = @opendir($constants_path);
         if ($dir) {
@@ -323,8 +320,7 @@ function loadConstrants()
     }
 }
 
-
-require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'cn' . APP_DS . 'eunionz' . APP_DS . 'core' . APP_DS . 'ClassAutoLoader.class.php';
+require_once APP_FRAMEWORK_REAL_PATH . 'cn' . APP_DS . 'eunionz' . APP_DS . 'core' . APP_DS . 'ClassAutoLoader.class.php';
 require_once APP_REAL_PATH . 'vendor' . APP_DS . 'autoload.php';
 spl_autoload_register(array('\cn\eunionz\core\ClassAutoLoader', 'autoload'));
 

@@ -8,6 +8,7 @@
 
 namespace package\controller\home;
 
+use cn\eunionz\component\activemq\Activemq;
 use cn\eunionz\component\amqpConsumer\AmqpConsumer;
 use cn\eunionz\component\consul\Consul;
 use cn\eunionz\component\elasticsearch\Elasticsearch;
@@ -536,7 +537,8 @@ class Home extends \cn\eunionz\core\Controller
         $opts['limit'] = 10;
         $rs = $this->cache(ctx()->getShopID() . '_short_url', array($opts));
         if (!$rs) {
-            $this->cdb()->start_trans();
+            $db = $this->loadModel('short_url')->current_db();
+            $db->start_trans();
             try {
 
 //            $opts['where']['id'] = 3072;
@@ -546,13 +548,13 @@ class Home extends \cn\eunionz\core\Controller
 //            $opts['field'] = ['id1'=>'(SELECT COUNT(* F{__field__}) FROM `short_url`)','id2'=>'(SELECT COUNT(* F{__field__}) FROM `short_url`)','n'=>'LEFT(F{short_url},10)','m'=>'NOW(F{__field__})'];
                 $rs = $this->loadModel('short_url')->find($opts);
                 $this->cache(ctx()->getShopID() . '_short_url', array($opts), $rs);
-                $this->write($this->cdb()->get_sql());
-                $this->cdb()->commit();
+                $this->write($db->get_sql());
+                $db->commit();
                 $this->write(print_r($rs, true));// . ' ' . $id2);
                 $this->write('success ' . count($rs));// . ' ' . $id2);
             } catch (\Exception $err) {
                 $this->write($err->getMessage());
-                $this->cdb()->rollback();
+                $db->rollback();
                 $this->write('fail');
             }
         } else {
@@ -940,4 +942,21 @@ class Home extends \cn\eunionz\core\Controller
         $this->write(" b : " . $b . "<br/>");
 
     }
+
+
+    public function _activemq(){
+        $this->write(" <meta charset=\"utf-8\">");
+        $activemq =new Activemq("test" , "admin" , "admin");
+        $arr = ["a"=>3,"b"=>"张三"];
+        $rs = $activemq->send($arr);
+        $this->write($rs . "<br/>");
+    }
+
+    public function _activemq_c(){
+        $this->write(" <meta charset=\"utf-8\">");
+        $activemq =new Activemq("test" , "admin" , "admin");
+        $arr = $activemq->consume();
+        $this->write(print_r($arr , true) . "<br/>");
+    }
+
 }

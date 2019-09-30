@@ -17,16 +17,19 @@ class ResponseHandler  {
     }
 
     function ResponseHandler() {
+        $GET = ctx()->get();
+        $POST = ctx()->post();
+
         $this->key = "";
         $this->parameters = array();
         $this->debugInfo = "";
 
         /* GET */
-        foreach($_GET as $k => $v) {
+        foreach($GET as $k => $v) {
             $this->setParameter($k, $v);
         }
         /* POST */
-        foreach($_POST as $k => $v) {
+        foreach($POST as $k => $v) {
             $this->setParameter($k, $v);
         }
     }

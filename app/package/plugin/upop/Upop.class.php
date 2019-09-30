@@ -38,14 +38,14 @@ class Upop extends \cn\eunionz\core\Plugin {
         include_once 'upop/func/log.class.php';
 
         \SDKConfig::$SDK_SIGN_CERT_PWD = $payment['pay_config']['wy']['security_key'];
-        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', APP_RUNTIME_REAL_PATH . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
-        \SDKConfig::$SDK_VERIFY_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
-        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
-        \SDKConfig::$SDK_VERIFY_CERT_DIR = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', ctx()->getAppRuntimeRealPath() . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
+        \SDKConfig::$SDK_VERIFY_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
+        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
+        \SDKConfig::$SDK_VERIFY_CERT_DIR = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
         \SDKConfig::$SDK_FRONT_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
         \SDKConfig::$SDK_BACK_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
-        \SDKConfig::$SDK_FILE_DOWN_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
-        \SDKConfig::$SDK_LOG_FILE_PATH = APP_RUNTIME_REAL_PATH;
+        \SDKConfig::$SDK_FILE_DOWN_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_LOG_FILE_PATH = ctx()->getAppRuntimeRealPath();
 
         /**
          * 消费交易-前台
@@ -111,14 +111,14 @@ class Upop extends \cn\eunionz\core\Plugin {
         include_once 'upop/func/log.class.php';
 
         \SDKConfig::$SDK_SIGN_CERT_PWD = $payment['pay_config']['wy']['security_key'];
-        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', APP_RUNTIME_REAL_PATH . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
-        \SDKConfig::$SDK_VERIFY_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
-        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
-        \SDKConfig::$SDK_VERIFY_CERT_DIR = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', ctx()->getAppRuntimeRealPath() . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
+        \SDKConfig::$SDK_VERIFY_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
+        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
+        \SDKConfig::$SDK_VERIFY_CERT_DIR = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
         \SDKConfig::$SDK_FRONT_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=distupop';
         \SDKConfig::$SDK_BACK_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=distupop';
-        \SDKConfig::$SDK_FILE_DOWN_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
-        \SDKConfig::$SDK_LOG_FILE_PATH = APP_RUNTIME_REAL_PATH;
+        \SDKConfig::$SDK_FILE_DOWN_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_LOG_FILE_PATH = ctx()->getAppRuntimeRealPath();
 
         // 初始化日志
         $params = array('version' => '5.0.0',                //版本号
@@ -171,17 +171,18 @@ class Upop extends \cn\eunionz\core\Plugin {
         include_once 'upop/func/log.class.php';
 
         \SDKConfig::$SDK_SIGN_CERT_PWD = $payment['pay_config']['wy']['security_key'];
-        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', APP_RUNTIME_REAL_PATH . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
-        \SDKConfig::$SDK_VERIFY_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
-        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
-        \SDKConfig::$SDK_VERIFY_CERT_DIR = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', ctx()->getAppRuntimeRealPath() . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
+        \SDKConfig::$SDK_VERIFY_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
+        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
+        \SDKConfig::$SDK_VERIFY_CERT_DIR = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
         \SDKConfig::$SDK_FRONT_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
         \SDKConfig::$SDK_BACK_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
-        \SDKConfig::$SDK_FILE_DOWN_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
-        \SDKConfig::$SDK_LOG_FILE_PATH = APP_RUNTIME_REAL_PATH;
+        \SDKConfig::$SDK_FILE_DOWN_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_LOG_FILE_PATH = ctx()->getAppRuntimeRealPath();
+        $POST = ctx()->post();
 
-        if ($_POST) {
-            $data = $_POST;
+        if ($POST) {
+            $data = $POST;
         } else {
             $data = $this->input();
             if (is_string($data)) {
@@ -234,14 +235,14 @@ class Upop extends \cn\eunionz\core\Plugin {
         include_once 'upop/func/log.class.php';
 
         \SDKConfig::$SDK_SIGN_CERT_PWD = $payment['pay_config']['wy']['security_key'];
-        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', APP_RUNTIME_REAL_PATH . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
-        \SDKConfig::$SDK_VERIFY_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
-        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
-        \SDKConfig::$SDK_VERIFY_CERT_DIR = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', ctx()->getAppRuntimeRealPath() . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
+        \SDKConfig::$SDK_VERIFY_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
+        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
+        \SDKConfig::$SDK_VERIFY_CERT_DIR = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
         \SDKConfig::$SDK_FRONT_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
         \SDKConfig::$SDK_BACK_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
-        \SDKConfig::$SDK_FILE_DOWN_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
-        \SDKConfig::$SDK_LOG_FILE_PATH = APP_RUNTIME_REAL_PATH;
+        \SDKConfig::$SDK_FILE_DOWN_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_LOG_FILE_PATH = ctx()->getAppRuntimeRealPath();
 
         $data = $post;
 
@@ -281,16 +282,18 @@ class Upop extends \cn\eunionz\core\Plugin {
         include_once 'upop/func/secureUtil.php';
         include_once 'upop/func/log.class.php';
         \SDKConfig::$SDK_SIGN_CERT_PWD = $payment['pay_config']['wy']['security_key'];
-        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', APP_RUNTIME_REAL_PATH . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
-        \SDKConfig::$SDK_VERIFY_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
-        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
-        \SDKConfig::$SDK_VERIFY_CERT_DIR = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', ctx()->getAppRuntimeRealPath() . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
+        \SDKConfig::$SDK_VERIFY_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
+        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
+        \SDKConfig::$SDK_VERIFY_CERT_DIR = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
         \SDKConfig::$SDK_FRONT_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=distupop';
         \SDKConfig::$SDK_BACK_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=distupop';
-        \SDKConfig::$SDK_FILE_DOWN_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
-        \SDKConfig::$SDK_LOG_FILE_PATH = APP_RUNTIME_REAL_PATH;
-        if ($_POST) {
-            $data = $_POST;
+        \SDKConfig::$SDK_FILE_DOWN_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_LOG_FILE_PATH = ctx()->getAppRuntimeRealPath();
+        $POST = ctx()->post();
+
+        if ($POST) {
+            $data = $POST;
         } else {
             $data = $this->input();
             if (is_string($data)) {
@@ -328,14 +331,14 @@ class Upop extends \cn\eunionz\core\Plugin {
         include_once 'upop/func/secureUtil.php';
         include_once 'upop/func/log.class.php';
         \SDKConfig::$SDK_SIGN_CERT_PWD = $payment['pay_config']['wy']['security_key'];
-        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', APP_RUNTIME_REAL_PATH . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
-        \SDKConfig::$SDK_VERIFY_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
-        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
-        \SDKConfig::$SDK_VERIFY_CERT_DIR = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', ctx()->getAppRuntimeRealPath() . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
+        \SDKConfig::$SDK_VERIFY_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
+        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
+        \SDKConfig::$SDK_VERIFY_CERT_DIR = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
         \SDKConfig::$SDK_FRONT_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=distupop';
         \SDKConfig::$SDK_BACK_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=distupop';
-        \SDKConfig::$SDK_FILE_DOWN_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
-        \SDKConfig::$SDK_LOG_FILE_PATH = APP_RUNTIME_REAL_PATH;
+        \SDKConfig::$SDK_FILE_DOWN_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_LOG_FILE_PATH = ctx()->getAppRuntimeRealPath();
         $data = $post;
         $order_sn = $data['orderId'];
         $rs = verify($data);
@@ -396,14 +399,14 @@ class Upop extends \cn\eunionz\core\Plugin {
         include_once 'upop/func/log.class.php';
 
         \SDKConfig::$SDK_SIGN_CERT_PWD = $payment['pay_config']['wy']['security_key'];
-        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', APP_RUNTIME_REAL_PATH . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
-        \SDKConfig::$SDK_VERIFY_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
-        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
-        \SDKConfig::$SDK_VERIFY_CERT_DIR = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', ctx()->getAppRuntimeRealPath() . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
+        \SDKConfig::$SDK_VERIFY_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
+        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
+        \SDKConfig::$SDK_VERIFY_CERT_DIR = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
         \SDKConfig::$SDK_FRONT_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
         \SDKConfig::$SDK_BACK_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
-        \SDKConfig::$SDK_FILE_DOWN_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
-        \SDKConfig::$SDK_LOG_FILE_PATH = APP_RUNTIME_REAL_PATH;
+        \SDKConfig::$SDK_FILE_DOWN_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_LOG_FILE_PATH = ctx()->getAppRuntimeRealPath();
 
         $refund['refundlog_remark'] = empty($refund['refundlog_remark']) ? '银联退款成功' : $refund['refundlog_remark'];
 
@@ -460,7 +463,7 @@ class Upop extends \cn\eunionz\core\Plugin {
                 //修改退款单号的状态
                 $orefund_id = $refund['orefund_id'];//退款单号
                 //查询退款订单-商品信息(包含订单信息)
-                $order_refund_info = $this->loadService('order_refunds')->findByID($orefund_id, $this->getConfig('shop', 'SHOP_ID'));
+                $order_refund_info = $this->loadService('order_refunds')->findByID($orefund_id, ctx()->getShopId());
                 $orefund_way = 0;// 0:线上退款 1：线下退款  
                 $this->loadCore('log')->write(APP_ERROR, "退款单号refund_id:{$orefund_id} 信息：" . print_r($order_refund_info, true), 'upop');
                 if ($order_refund_info['orefund_state'] == 4) {//防止重复修改
@@ -516,29 +519,31 @@ class Upop extends \cn\eunionz\core\Plugin {
         include_once 'upop/func/log.class.php';
 
         \SDKConfig::$SDK_SIGN_CERT_PWD = $payment['pay_config']['wy']['security_key'];
-        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', APP_RUNTIME_REAL_PATH . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
-        \SDKConfig::$SDK_VERIFY_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
-        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
-        \SDKConfig::$SDK_VERIFY_CERT_DIR = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', ctx()->getAppRuntimeRealPath() . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
+        \SDKConfig::$SDK_VERIFY_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
+        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
+        \SDKConfig::$SDK_VERIFY_CERT_DIR = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
         \SDKConfig::$SDK_FRONT_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
         \SDKConfig::$SDK_BACK_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
-        \SDKConfig::$SDK_FILE_DOWN_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
-        \SDKConfig::$SDK_LOG_FILE_PATH = APP_RUNTIME_REAL_PATH;
-        $reqReserved = $_POST['reqReserved'];//)?$_POST['reqReserved']:'银联退款成功';
+        \SDKConfig::$SDK_FILE_DOWN_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_LOG_FILE_PATH = ctx()->getAppRuntimeRealPath();
+        $POST = ctx()->post();
+
+        $reqReserved = $POST['reqReserved'];//)?$POST['reqReserved']:'银联退款成功';
         $data = explode('^', $reqReserved);
         $orefund_id = $data[0];//退款单号
         $refundlog_remark = (empty($data[1])) ? "银联退款成功" : $data[1];
-        if (isset ($_POST ['signature'])) {
-            echo verify($_POST) ? '验签成功' : '验签失败';
-            $orderId = $_POST ['orderId']; //其他字段也可用类似方式获取
-            if ($_POST['respCode'] == '00') {
+        if (isset ($POST['signature'])) {
+            echo verify($POST) ? '验签成功' : '验签失败';
+            $orderId = $POST['orderId']; //其他字段也可用类似方式获取
+            if ($POST['respCode'] == '00') {
                 //验签成功，进行处理
                 $this->loadCore('log')->write(APP_ERROR, "refund_id:{$orefund_id}  回调签名成功，进行处理", 'upop');
                 //业务数据处理
 
                 //修改退款单号的状态
                 //查询退款订单-商品信息(包含订单信息)
-                $order_refund_info = $this->loadService('order_refunds')->findByID($orefund_id, $this->getConfig('shop', 'SHOP_ID'));
+                $order_refund_info = $this->loadService('order_refunds')->findByID($orefund_id, ctx()->getShopId());
                 $orefund_way = 0;// 0:线上退款 1：线下退款  
                 $this->loadCore('log')->write(APP_ERROR, "退款单号refund_id:{$orefund_id} 信息：" . print_r($order_refund_info, true), 'upop');
 
@@ -583,14 +588,14 @@ class Upop extends \cn\eunionz\core\Plugin {
         include_once 'upop/func/httpClient.php';
 
         \SDKConfig::$SDK_SIGN_CERT_PWD = $payment['pay_config']['wy']['security_key'];
-        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', APP_RUNTIME_REAL_PATH . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
-        \SDKConfig::$SDK_VERIFY_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
-        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
-        \SDKConfig::$SDK_VERIFY_CERT_DIR = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_SIGN_CERT_PATH = str_ireplace('/runtime/', '/', str_ireplace('\\', '/', ctx()->getAppRuntimeRealPath() . str_replace('/', APP_DS, $payment['pay_config']['wy']['sign_cert_files'])));
+        \SDKConfig::$SDK_VERIFY_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'verify_cert.cer';
+        \SDKConfig::$SDK_ENCRYPT_CERT_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop' . APP_DS . 'encrypt_cert.cer';
+        \SDKConfig::$SDK_VERIFY_CERT_DIR = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
         \SDKConfig::$SDK_FRONT_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
         \SDKConfig::$SDK_BACK_NOTIFY_URL = $this->loadPlugin('common')->getDomain() . '/service/payment/respond.html?code=upop';
-        \SDKConfig::$SDK_FILE_DOWN_PATH = get_package_real_path() . APP_DS . 'cert' . APP_DS . 'upop';
-        \SDKConfig::$SDK_LOG_FILE_PATH = APP_RUNTIME_REAL_PATH;
+        \SDKConfig::$SDK_FILE_DOWN_PATH = APP_PACKAGE_REAL_PATH . 'cert' . APP_DS . 'upop';
+        \SDKConfig::$SDK_LOG_FILE_PATH = ctx()->getAppRuntimeRealPath();
 
         /**
          * 消费交易-前台
@@ -635,6 +640,7 @@ class Upop extends \cn\eunionz\core\Plugin {
     }
 
     function get_platform_shopid() {
-        return (isset($_SESSION['PLATFORM_SHOP_ID'])) ? $_SESSION['PLATFORM_SHOP_ID'] : $this->getConfig('shop', 'SHOP_ID');
+        $SESSION = ctx()->session();
+        return (isset($SESSION['PLATFORM_SHOP_ID'])) ? $SESSION['PLATFORM_SHOP_ID'] : ctx()->getShopId();
     }
 }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Eunionz PHP Framework I18n class
  * Created by PhpStorm.
@@ -9,6 +10,7 @@
 
 namespace cn\eunionz\core;
 
+defined('APP_IN') or exit('Access Denied');
 
 class I18n extends Kernel
 {
@@ -55,16 +57,18 @@ class I18n extends Kernel
 
     public function __construct()
     {
-        
+
     }
 
     /**
      * 获取当前浏览器语言
+     * @return string
+     * @throws \cn\eunionz\exception\FileNotFoundException
      */
-    public final function getLanguage()
+    public final function getLanguage(): string
     {
         $language = '';
-        if(ctx()) {
+        if (ctx()) {
             if (ctx()->getRequest()->get('APP_LANGUAGE')) {
                 $language = strtolower(ctx()->getRequest()->get('APP_LANGUAGE'));
             }
@@ -84,12 +88,12 @@ class I18n extends Kernel
             }
 
             if (!$language) {
-                $language = strtolower(getConfig('app', 'APP_DEFAULT_LANGUAGE'));
+                $language = strtolower(self::getConfig('app', 'APP_DEFAULT_LANGUAGE'));
             }
             $language = str_ireplace('-', '_', $language);
             if ($language == 'zh') $language = "zh_cn";
             if ($language == 'en') $language = "en_us";
-        }else{
+        } else {
             $language = 'en_us';
         }
         return $language;
@@ -97,13 +101,14 @@ class I18n extends Kernel
 
     /**
      * 获取默认语言
-     * @return mixed
+     * @return string
+     * @throws \cn\eunionz\exception\FileNotFoundException
      */
-    public final function getDefaultLanguage()
+    public final function getDefaultLanguage(): string
     {
-        if(ctx()){
-            return str_replace('-', '_', strtolower(getConfig('app', 'APP_DEFAULT_LANGUAGE')));
-        }else{
+        if (ctx()) {
+            return str_replace('-', '_', strtolower(self::getConfig('app', 'APP_DEFAULT_LANGUAGE')));
+        } else {
             return 'en_us';
         }
 
@@ -111,11 +116,13 @@ class I18n extends Kernel
 
     /**
      * 合并语言包数据
+     * @param array $langs
+     * @throws \cn\eunionz\exception\FileNotFoundException
      */
-    public final function mergeLang($langs)
+    public final function mergeLang(array $langs): void
     {
         $curr_language = $this->getLanguage();
-        if(!isset($this->_all_langs[$curr_language])){
+        if (!isset($this->_all_langs[$curr_language])) {
             $this->_all_langs[$curr_language] = [];
         }
         $this->_all_langs[$curr_language] = array_merge($this->_all_langs[$curr_language], $langs);
@@ -126,7 +133,7 @@ class I18n extends Kernel
      * 获取框架语言文件
      * @param $name 语言文件名
      */
-    public final function getCoreLang($name, $key = '')
+    public final function getCoreLang(string $name, string $key = '')
     {
         $curr_language = $this->getLanguage();
         if (!isset($this->_core_langs[$curr_language][$name])) {
@@ -161,7 +168,7 @@ class I18n extends Kernel
      * 获取全局语言文件
      * @param $name 语言文件名
      */
-    public final function getGlobalLang($name, $key = '')
+    public final function getGlobalLang(string $name, string $key = '')
     {
         $curr_language = $this->getLanguage();
 
@@ -197,7 +204,7 @@ class I18n extends Kernel
      * 获取控制器语言文件
      * @param $name 语言文件名
      */
-    public final function getControllerLang($classname, $key = '')
+    public final function getControllerLang(string $classname, string $key = '')
     {
         $curr_language = $this->getLanguage();
 
@@ -233,19 +240,19 @@ class I18n extends Kernel
      * 获取语言数据
      * @param string $key
      */
-    public final function getLang($key ='' , $args = null)
+    public final function getLang(string $key = '', $args = null)
     {
         $curr_language = $this->getLanguage();
         $params = [];
         if ($args) {
-            if(!is_array($args)){
+            if (!is_array($args)) {
                 $params = array($args);
-            }else{
+            } else {
                 $params = $args;
             }
         }
         if (empty($key)) {
-            return isset($this->_all_langs[$curr_language])?$this->_all_langs[$curr_language]:[];
+            return isset($this->_all_langs[$curr_language]) ? $this->_all_langs[$curr_language] : [];
         }
 
         if (isset($this->_all_langs[$curr_language][$key])) {

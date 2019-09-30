@@ -19,18 +19,14 @@ class Hook extends Kernel
 
     /**
      * call hook
-     *
-     * trigger an hook event
-     *
-     * return result is true, Continue to perform, else break.
-     *
      * @param string $event
-     *
-     * @return mixed
+     * @throws MethodNotFoundException
+     * @throws \ReflectionException
+     * @throws \cn\eunionz\exception\FileNotFoundException
      */
-    public function call_hook($event)
+    public function call_hook(string $event)
     {
-        $hooks = getConfig('app', 'APP_HOOKS');
+        $hooks = self::getConfig('app', 'APP_HOOKS');
         if (isset($hooks[$event]) && !empty($hooks[$event])) {
             foreach ($hooks[$event] as $hook) {
                 list($class, $method, $params) = $hook;

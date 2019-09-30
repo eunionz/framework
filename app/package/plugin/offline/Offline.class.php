@@ -40,7 +40,7 @@ class Offline extends \cn\eunionz\core\Plugin {
         $orefund_way = 1;// 0:线上退款 1：线下退款  
         //直接调用退款成功处理函数
         $ret = $this->loadService('order_info')->op_refund_by_order_sn($order_info['order_sn'], $order_refund_info['orefund_amount'], "线下退款成功", $order_refund_info['orefund_id'], $orefund_way);
-        $this->loadCore('log')->write(APP_ERROR, "退款处理:" . $ret['msg'], 'offline');
+        $this->loadCore('log')->log(APP_ERROR, "退款处理:" . $ret['msg'], 'offline');
 
         return $ret;
     }

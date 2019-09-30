@@ -75,8 +75,8 @@ class PHPMailerTest extends PHPUnit_Framework_TestCase
         $this->Mail->Priority = 3;
         $this->Mail->Encoding = '8bit';
         $this->Mail->CharSet = 'iso-8859-1';
-        if (array_key_exists('mail_from', $_REQUEST)) {
-            $this->Mail->From = $_REQUEST['mail_from'];
+        if (array_key_exists('mail_from', ctx()->request())) {
+            $this->Mail->From = ctx()->request('mail_from');
         } else {
             $this->Mail->From = 'unit_test@phpmailer.example.com';
         }
@@ -86,13 +86,13 @@ class PHPMailerTest extends PHPUnit_Framework_TestCase
         $this->Mail->Body = '';
         $this->Mail->AltBody = '';
         $this->Mail->WordWrap = 0;
-        if (array_key_exists('mail_host', $_REQUEST)) {
-            $this->Mail->Host = $_REQUEST['mail_host'];
+        if (array_key_exists('mail_host', ctx()->request())) {
+            $this->Mail->Host = ctx()->request('mail_host');
         } else {
             $this->Mail->Host = 'mail.example.com';
         }
-        if (array_key_exists('mail_port', $_REQUEST)) {
-            $this->Mail->Port = $_REQUEST['mail_port'];
+        if (array_key_exists('mail_port', ctx()->request())) {
+            $this->Mail->Port = ctx()->request('mail_port');
         } else {
             $this->Mail->Port = 25;
         }
@@ -107,11 +107,11 @@ class PHPMailerTest extends PHPUnit_Framework_TestCase
         } else {
             $this->Mail->Mailer = 'mail';
         }
-        if (array_key_exists('mail_to', $_REQUEST)) {
-            $this->setAddress($_REQUEST['mail_to'], 'Test User', 'to');
+        if (array_key_exists('mail_to',ctx()->request())) {
+            $this->setAddress(ctx()->request('mail_to'), 'Test User', 'to');
         }
-        if (array_key_exists('mail_cc', $_REQUEST) and strlen($_REQUEST['mail_cc']) > 0) {
-            $this->setAddress($_REQUEST['mail_cc'], 'Carbon User', 'cc');
+        if (array_key_exists('mail_cc', ctx()->request()) and strlen(ctx()->request('mail_cc')) > 0) {
+            $this->setAddress(ctx()->request('mail_cc'), 'Carbon User', 'cc');
         }
     }
 
@@ -1420,7 +1420,7 @@ EOT;
         $this->assertTrue($this->Mail->send() == false, 'send succeeded');
         $this->assertTrue($this->Mail->isError(), 'No error found');
         $this->assertEquals('You must provide at least one recipient email address.', $this->Mail->ErrorInfo);
-        $this->Mail->addAddress($_REQUEST['mail_to']);
+        $this->Mail->addAddress(ctx()->request('mail_to'));
         $this->assertTrue($this->Mail->send(), 'send failed');
     }
 
@@ -2124,13 +2124,13 @@ EOT;
         $this->Mail->Host = "ssl://localhost:12345;tls://localhost:587;10.10.10.10:54321;localhost:12345;10.10.10.10";
         $this->assertFalse($this->Mail->smtpConnect(), 'SMTP bad multi-connect succeeded');
         $this->Mail->smtpClose();
-        $this->Mail->Host = "localhost:12345;10.10.10.10:54321;" . $_REQUEST['mail_host'];
+        $this->Mail->Host = "localhost:12345;10.10.10.10:54321;" . ctx()->request('mail_host');
         $this->assertTrue($this->Mail->smtpConnect(), 'SMTP multi-connect failed');
         $this->Mail->smtpClose();
-        $this->Mail->Host = " localhost:12345 ; " . $_REQUEST['mail_host'] . ' ';
+        $this->Mail->Host = " localhost:12345 ; " . ctx()->request('mail_host') . ' ';
         $this->assertTrue($this->Mail->smtpConnect(), 'SMTP hosts with stray spaces failed');
         $this->Mail->smtpClose();
-        $this->Mail->Host = $_REQUEST['mail_host'];
+        $this->Mail->Host = ctx()->request('mail_host');
         //Need to pick a harmless option so as not cause problems of its own! socket:bind doesn't work with Travis-CI
         $this->assertTrue(
             $this->Mail->smtpConnect(array('ssl' => array('verify_depth' => 10))),

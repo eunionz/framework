@@ -7,21 +7,50 @@ declare(strict_types=1);
 ///////    create at 2015-04-30                                         ///////
 ///////////////////////////////////////////////////////////////////////////////
 
-//define APP_DS to directory path separator  //定义 APP_DS 常量值为当前系统路径分隔符，用于进行路径分隔
+//定制路径分隔符常量
 define('APP_DS', DIRECTORY_SEPARATOR);
-//define APP_IN to current filename          //定义 APP_IN 值为当前PHP脚本执行文件名，用于检查系统所有php文件是否通过单一入口页面加载防止黑客攻击
+
+//定义 APP_IN 常量，用于防止未经 index.php 单一入口文件的非法访问
 define('APP_IN', basename(__FILE__));
-//define APP_REAL_PATH to app phisycal path  //定义 APP_REAL_PATH 指向当前应用物理路径(即单一入口页面index.php所在物理路径)
+
+//定义当前应用物理路径(即单一入口文件index.php所在物理路径)
 define('APP_REAL_PATH', __DIR__ . APP_DS);
 
-//define App program name  //定义 APP_PROGRAM_NAME 常量为应用程序代码文件夹名称，其路径应为： APP_REAL_PATH . APP_DS . APP_PROGRAM_NAME
+//定义应用程序代码所在文件夹名称，应用程序代码均位于APP_REAL_PATH 下的 APP_PROGRAM_NAME 文件夹中
 define('APP_PROGRAM_NAME', 'app');
 
-//define App PACKAGE BASE phisycal path      //定义 PACKAGE BASE 基物理路径，在该路径下将包含framework框架文件夹，以及默认应用文件夹package以及其它应用如shop/package文件夹
+//定义应用程序包基础物理路径(即package的父物理路径)，应用程序包基础物理路径即 APP_PROGRAM_NAME 对应文件夹物理路径
 define('APP_PACKAGE_BASE_PATH', APP_REAL_PATH . APP_PROGRAM_NAME . APP_DS);
 
+//定义框架物理路径，即 APP_PACKAGE_BASE_PATH 下 framework 文件夹物理路径
+define('APP_FRAMEWORK_REAL_PATH', APP_PACKAGE_BASE_PATH . 'framework' . APP_DS);
+
+//定义应用程序包package物理路径，即 APP_PACKAGE_BASE_PATH 下 package 文件夹物理路径
+define('APP_PACKAGE_REAL_PATH', APP_PACKAGE_BASE_PATH . 'package' . APP_DS);
+
+//定义字体文件夹物理路径，即 APP_FRAMEWORK_REAL_PATH 下 fonts 文件夹物理路径
+define('APP_FONT_REAL_PATH', APP_FRAMEWORK_REAL_PATH . 'fonts' . APP_DS);
+
+//定义存储文件夹名称(存储文件夹用于存放运行时生成或上传文件，也包括站点视图文件)，存储文件夹必须与单一入口文件index.php同层
+define('APP_STORAGE_NAME', 'storage');
+
+//定义存储文件夹物理路径，存储文件夹必须可读可写
+define('APP_STORAGE_REAL_PATH', APP_REAL_PATH . APP_STORAGE_NAME . APP_DS);
+
+//定义框架是否在SWOOLE中
+define('APP_IS_IN_SWOOLE', true);
+
+//定义运行时文件夹名称，运行时文件夹必须位于 APP_STORAGE_REAL_PATH 文件夹下，在未获取到SHOP_ID时对应 /storage/runtime的获取到  SHOP_ID之后，对应/storage/{SHOP_ID}/runtime文件夹
+define('APP_RUNTIME_NAME',  'runtime');
+
+//定义PHP中$_REQUEST数组中变量优先级  G--GET  P--POST  C--COOKIE
+define('APP_PHP_REQUEST_ORDER' , 'PGC');
+
+//定义 URL后缀
+define('URL_HTML_SUFFIX' , '.shtml');
+
+
 //包含全局函数以及注册类加载器
-require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'cn' . APP_DS . 'eunionz' . APP_DS . 'global' . APP_DS . 'functions.core.php';
-require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'cn' . APP_DS . 'eunionz' . APP_DS . 'core' . APP_DS . 'Kernel.class.php';
-require_once APP_PACKAGE_BASE_PATH . 'framework' . APP_DS . 'cn' . APP_DS . 'eunionz' . APP_DS . 'core' . APP_DS . 'Launcher.class.php';
+require_once APP_FRAMEWORK_REAL_PATH . 'cn' . APP_DS . 'eunionz' . APP_DS . 'global' . APP_DS . 'functions.core.php';
+//启动应用
 new \cn\eunionz\core\Launcher();

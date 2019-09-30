@@ -30,30 +30,32 @@ class Log extends Kernel
 
     public function __construct()
     {
-        $this->_log_enable = getConfig('app', 'APP_LOG');
+        $this->_log_enable = self::getConfig('app', 'APP_LOG');
         if (!ctx()) {
-            $this->_log_path = $GLOBALS['APP_RUNTIME_REAL_PATH'] . getConfig('app', 'APP_LOG_DIR') . APP_DS;
+            $this->_log_path = $GLOBALS['APP_RUNTIME_REAL_PATH'] . self::getConfig('app', 'APP_LOG_DIR') . APP_DS;
         } else {
-            if(empty(ctx()->getAppRuntimeRealPath())){
-                $this->_log_path = $GLOBALS['APP_RUNTIME_REAL_PATH'] . getConfig('app', 'APP_LOG_DIR') . APP_DS;
+            if(ctx()->getAppRuntimeRealPath()){
+                $this->_log_path = ctx()->getAppRuntimeRealPath() . self::getConfig('app', 'APP_LOG_DIR') . APP_DS;
             }else{
-                $this->_log_path = ctx()->getAppRuntimeRealPath() . getConfig('app', 'APP_LOG_DIR') . APP_DS;
+                $this->_log_path = $GLOBALS['APP_RUNTIME_REAL_PATH'] . self::getConfig('app', 'APP_LOG_DIR') . APP_DS;
             }
         }
-        $this->_log_level = getConfig('app', 'APP_LOG_LEVEL');
+        $this->_log_level = self::getConfig('app', 'APP_LOG_LEVEL');
     }
+
+
 
     /**
      * Write Log
      *
-     * Write an log message to log file
-     *
      * @param int $level 1--ERROR  2--WARNING  3--DEBUG  4--INFO   5--ALL
      * @param string $message
-     *
+     * @param string $filename
      * @return bool
+     * @throws LogException
+     * @throws \cn\eunionz\exception\FileNotFoundException
      */
-    public function log($level = APP_ERROR, $message, $filename = '')
+    public function log(int $level = APP_ERROR,string $message, string $filename = '') : bool
     {
 
         if ($this->_log_enable === false)
@@ -89,7 +91,7 @@ class Log extends Kernel
         if (!file_exists($file_path))
             $message_str = "<?php  defined('APP_IN') or exit('Access Denied'); ?>" . PHP_EOL . PHP_EOL;
 
-        if (file_exists($file_path) && @filesize($file_path) > getConfig('app', 'APP_LOG_MAXSIZE')) {
+        if (file_exists($file_path) && @filesize($file_path) > self::getConfig('app', 'APP_LOG_MAXSIZE')) {
             @unlink($file_path);
             $message_str = "<?php  defined('APP_IN') or exit('Access Denied'); ?>" . PHP_EOL . PHP_EOL;
         }
@@ -105,7 +107,59 @@ class Log extends Kernel
         flock($fp, LOCK_UN);
         fclose($fp);
         @chmod($file_path, 0666);
-        return true;
+        return  true;
     }
 
+    /**
+     * Write error Log
+     * @param string $message
+     * @param string $filename
+     * @return bool
+     * @throws LogException
+     * @throws \cn\eunionz\exception\FileNotFoundException
+     */
+    public function error(string $message,string $filename = '')
+    {
+        return $this->log(APP_ERROR , $message, $filename);
+    }
+
+    /**
+     * Write warn Log
+     * @param string $message
+     * @param string $filename
+     * @return bool
+     * @throws LogException
+     * @throws \cn\eunionz\exception\FileNotFoundException
+     */
+    public function warn(string $message,string $filename = '')
+    {
+        return $this->log(APP_WARNING , $message, $filename);
+    }
+
+    /**
+     * Write debug Log
+     * @param string $message
+     * @param string $filename
+     * @return bool
+     * @throws LogException
+     * @throws \cn\eunionz\exception\FileNotFoundException
+     */
+
+    public function debug(string $message,string $filename = '')
+    {
+        return $this->log(APP_DEBUG , $message, $filename);
+    }
+
+    /**
+     * Write info Log
+     * @param string $message
+     * @param string $filename
+     * @return bool
+     * @throws LogException
+     * @throws \cn\eunionz\exception\FileNotFoundException
+     */
+    public function info(string $message,string $filename = '')
+    {
+        return $this->log(APP_INFO , $message, $filename);
+    }
 }

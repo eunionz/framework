@@ -40,12 +40,12 @@ class Blade extends \cn\eunionz\core\Component
         require_once __DIR__ . "/src/Engines/PhpEngine.php";
         require_once __DIR__ . "/src/Engines/CompilerEngine.php";
 
-        $config = getConfig('view');
+        $config = self::getConfig('view');
         $this->_view_vars = $config['VIEW_VARS'];
         $this->_view_vars['APP_PATH'] = APP_PATH;
-        $this->_view_vars['APP_VERSION'] = getConfig('version', 'APP_VERSION');
+        $this->_view_vars['APP_VERSION'] = self::getConfig('version', 'APP_VERSION');
 
-        $this->_view_vars['APP_DEVENV'] = getConfig('app', 'APP_DEVENV');
+        $this->_view_vars['APP_DEVENV'] = self::getConfig('app', 'APP_DEVENV');
         $this->_view_vars['APP_DS'] = APP_DS;
         $this->_view_vars['Router'] = ctx()->getRouter();
         $this->_view_vars['APP_PARTITION_NAME'] = strtolower(ctx()->getPartitionName());
@@ -86,23 +86,23 @@ class Blade extends \cn\eunionz\core\Component
         $single_file = ctx()->getAppStorageRealPath() . 'view' . APP_DS . $app_theme . APP_DS . ltrim(str_ireplace('/', APP_DS, $page), APP_DS);
 
         //判断分区是否为后台管理分区，如果为后台管理分区则为统一视图文件，否则各分站独立视图文件
-        if (in_array($partition_name, getConfig('app', 'APP_MANAGE_PARTITIONS')) || !(is_file($single_file . '.tpl') || is_file($single_file . '.tpl.php'))) {
+        if (in_array($partition_name, self::getConfig('app', 'APP_MANAGE_PARTITIONS')) || !(is_file($single_file . '.tpl') || is_file($single_file . '.tpl.php'))) {
             //是后台管理分区 或独立视图文件不存在 则使用统一视图文件
             $this->_view_dir = APP_PACKAGE_BASE_PATH . 'package' . APP_DS . 'view';
             $this->_view_vars['APP_THEME_PATH'] = rtrim(APP_PATH, '/') . '/' . APP_PROGRAM_NAME . '/package/view/' . $app_theme;
             $this->_view_vars['APP_THEME_PATH'] = str_replace('//', '/', $this->_view_vars['APP_THEME_PATH']);
             $this->_view_vars['APP_THEME_PATH_NO_CDN'] = $this->_view_vars['APP_THEME_PATH'];
-            if (getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS')) {
-                $this->_view_vars['APP_THEME_PATH'] = trim(getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS'), '/') . '/' . ltrim($this->_view_vars['APP_THEME_PATH'], '/');
+            if (self::getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS')) {
+                $this->_view_vars['APP_THEME_PATH'] = trim(self::getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS'), '/') . '/' . ltrim($this->_view_vars['APP_THEME_PATH'], '/');
             }
             $this->_view_vars['APP_THEME_REALPATH'] = $this->_view_dir . APP_DS . $app_theme;
         } else {
             //不是后台管理分区且独立视图文件存在，则使用独立视图文件
             $this->_view_dir = ctx()->getAppStorageRealPath() . 'view';
             $this->_view_vars['APP_THEME_PATH_NO_CDN'] = rtrim(APP_PATH, '/') . '/' . APP_STORAGE_NAME . '/' . ctx()->getSiteName() . '/view/' . $app_theme;
-            if (getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS')) {
+            if (self::getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS')) {
                 //如果启用了CDN
-                $this->_view_vars['APP_THEME_PATH'] = trim(getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS'), '/') . rtrim(APP_PATH, '/') . '/' . APP_STORAGE_NAME . '/' . ctx()->getSiteName() . '/view/' . $app_theme;
+                $this->_view_vars['APP_THEME_PATH'] = trim(self::getConfig('app', 'APP_STATIC_CONTENT_CDN_SITE_DOMAIN_URLS'), '/') . rtrim(APP_PATH, '/') . '/' . APP_STORAGE_NAME . '/' . ctx()->getSiteName() . '/view/' . $app_theme;
             } else {
                 //如果没有启用CDN
                 $this->_view_vars['APP_THEME_PATH'] = rtrim(APP_PATH, '/') . '/' . APP_STORAGE_NAME . '/' . ctx()->getSiteName() . '/view/' . $app_theme;

@@ -16,7 +16,7 @@ namespace package\model;
 
 use cn\eunionz\core\Model;
 
-class sessions extends Model
+class Sessions extends Model
 {
     public $db_config_name='db';
     public $db_cluster_name='default';

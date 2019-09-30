@@ -211,6 +211,7 @@ cC8fmng2zrGq05G1QL9Gg8/Hnq5DVoAASh6fSZ0PtA==
      */
     public function notify(){
         require_once(APP_REAL_PATH . 'package/plugin/alipay_quick_mobile/lib/alipay_notify.class.php');
+        $POST = ctx()->post();
 
         //计算得出通知验证结果
         $alipayNotify = new \AlipayNotify($this->alipay_config);
@@ -228,11 +229,11 @@ cC8fmng2zrGq05G1QL9Gg8/Hnq5DVoAASh6fSZ0PtA==
             //注意：该功能PHP5环境及以上支持，需开通curl、SSL等PHP配置环境。建议本地调试时使用PHP开发软件
             $doc = new DOMDocument();
             if ($this->alipay_config['sign_type'] == 'MD5') {
-                $doc->loadXML($_POST['notify_data']);
+                $doc->loadXML($POST['notify_data']);
             }
 
             if ($this->alipay_config['sign_type'] == '0001') {
-                $doc->loadXML($alipayNotify->decrypt($_POST['notify_data']));
+                $doc->loadXML($alipayNotify->decrypt($POST['notify_data']));
             }
 
             if( ! empty($doc->getElementsByTagName( "notify" )->item(0)->nodeValue) ) {
@@ -293,7 +294,7 @@ cC8fmng2zrGq05G1QL9Gg8/Hnq5DVoAASh6fSZ0PtA==
      */
     public function front_notify(){
         require_once(APP_REAL_PATH . 'package/plugin/alipay_quick_mobile/lib/alipay_notify.class.php');
-
+        $GET = ctx()->get();
         //计算得出通知验证结果
         $alipayNotify = new \AlipayNotify($this->alipay_config);
         $verify_result = $alipayNotify->verifyReturn();
@@ -305,13 +306,13 @@ cC8fmng2zrGq05G1QL9Gg8/Hnq5DVoAASh6fSZ0PtA==
             //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表
 
             //商户订单号
-            $out_trade_no = $_GET['out_trade_no'];
+            $out_trade_no = $GET['out_trade_no'];
 
             //支付宝交易号
-            $trade_no = $_GET['trade_no'];
+            $trade_no = $GET['trade_no'];
 
             //交易状态
-            $result = $_GET['result'];
+            $result = $GET['result'];
 
 
             //判断该笔订单是否在商户网站中已经做过处理

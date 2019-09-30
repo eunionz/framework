@@ -78,4 +78,10 @@ return array(
     // 数据库表中自动修改赋值日期时间字段后缀，当修改记录时这样后缀的字段将自动使用当前日期时间值
     'APP_DB_TABLE_AUTO_UPDATE_DATETIME_FIELD_SUFFIX' => ['_updated'],
 
+    /**
+     * Model默认是否使用协程数据库
+     * false--非协程   true--协程，协程数据库仅支持本地事务
+     */
+    'APP_MODEL_IS_COROUTINE' => false,
+
 );

@@ -18,8 +18,8 @@ class Cryptaes extends \cn\eunionz\core\Plugin{
     protected $key = '';
     protected $iv = '';
     public function __construct(){
-        $this->iv = substr($this->getConfig('app','ENCRYPT_KEY'),0,16);
-        $this->key =substr($this->getConfig('app',"APP_KEY"),0,16);
+        $this->iv = substr(self::getConfig('app','ENCRYPT_KEY'),0,16);
+        $this->key =substr(self::getConfig('app',"APP_KEY"),0,16);
     }
 
     public function init($secret_key , $iv){

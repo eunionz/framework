@@ -41,14 +41,14 @@ class Bosclient extends \cn\eunionz\core\Plugin
 	public function __construct()
     {
         require_once 'BaiduBce/index.php';
-        $this->bucketName=$this->getConfig('global','BOS_BUCKET_NAME');
+        $this->bucketName=self::getConfig('global','BOS_BUCKET_NAME');
 
         error_reporting(-1);
         date_default_timezone_set('UTC');
 
         define('__BOS_CLIENT_ROOT', dirname(__DIR__));
 
-        $this->bos_config = $this->getConfig('global','BOS_CONFIG');
+        $this->bos_config = self::getConfig('global','BOS_CONFIG');
         $STDERR = fopen('php://stderr', 'w+');
         $__handler = new \Monolog\Handler\StreamHandler($STDERR, \Monolog\Logger::DEBUG);
         $__handler->setFormatter(

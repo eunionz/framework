@@ -54,7 +54,6 @@ class Excel extends \cn\eunionz\core\Plugin
      */
     public function volumes($data, $filename)
     {
-
         require 'PHPExcel/Writer/IWriter.php';
         require 'PHPExcel/Writer/Excel5.php';
         error_reporting(0);

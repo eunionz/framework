@@ -493,10 +493,10 @@ class Image extends \cn\eunionz\core\Component
             if($water_path){
                 $WATER_MARK_IMAGE= $water_path;
             }else{
-                $WATER_MARK_IMAGE= APP_REAL_PATH . $this->getConfig('params','WATER_MARK_IMAGE');
+                $WATER_MARK_IMAGE= APP_REAL_PATH . self::getConfig('params','WATER_MARK_IMAGE');
             }
-            $WATER_MARK_IMAGE_POSITION=$this->getConfig('params','WATER_MARK_IMAGE_POSITION');
-            $WATER_MARK_IMAGE_TRANSPARENCY=$this->getConfig('params','WATER_MARK_IMAGE_TRANSPARENCY');
+            $WATER_MARK_IMAGE_POSITION=self::getConfig('params','WATER_MARK_IMAGE_POSITION');
+            $WATER_MARK_IMAGE_TRANSPARENCY=self::getConfig('params','WATER_MARK_IMAGE_TRANSPARENCY');
             if($WATER_MARK_IMAGE && $WATER_MARK_IMAGE_POSITION>0){
                 //有水印图，且水印位置不为无，则添加水印
                 $this->add_image_watermark($WATER_MARK_IMAGE,$WATER_MARK_IMAGE_POSITION,$WATER_MARK_IMAGE_TRANSPARENCY /100,$offset_x,$offset_y);
@@ -1167,23 +1167,23 @@ class Image extends \cn\eunionz\core\Component
             $del_upfiles[]=$oldfilename . '_xl.jpg';
         }
         $this->loadComponent('image')->load($original_img);
-        $this->loadComponent('image')->resize(true,60,60,$this->getConfig('params','SMALL_THUMB_QUALITY'),$upload_path . '/' . $filename. '_xs.jpg',$IS_WATER_MARK);
+        $this->loadComponent('image')->resize(true,60,60,self::getConfig('params','SMALL_THUMB_QUALITY'),$upload_path . '/' . $filename. '_xs.jpg',$IS_WATER_MARK);
         $upfiles[]=$upload_path . '/' . $filename.'_xs.jpg';
 
         $this->loadComponent('image')->load($original_img);
-        $this->loadComponent('image')->resize(true,120,120,$this->getConfig('params','SMALL_THUMB_QUALITY'),$upload_path . '/' . $filename. '_sm.jpg',$IS_WATER_MARK);
+        $this->loadComponent('image')->resize(true,120,120,self::getConfig('params','SMALL_THUMB_QUALITY'),$upload_path . '/' . $filename. '_sm.jpg',$IS_WATER_MARK);
         $upfiles[]=$upload_path . '/' . $filename. '_sm.jpg';
 
         $this->loadComponent('image')->load($original_img);
-        $this->loadComponent('image')->resize(true,240,240,$this->getConfig('params','SMALL_THUMB_QUALITY'),$upload_path . '/' . $filename. '_md.jpg',$IS_WATER_MARK);
+        $this->loadComponent('image')->resize(true,240,240,self::getConfig('params','SMALL_THUMB_QUALITY'),$upload_path . '/' . $filename. '_md.jpg',$IS_WATER_MARK);
         $upfiles[]=$upload_path . '/' . $filename. '_md.jpg';
 
         $this->loadComponent('image')->load($original_img);
-        $this->loadComponent('image')->resize(true,480,480,$this->getConfig('params','SMALL_THUMB_QUALITY'),$upload_path . '/' . $filename. '_lg.jpg',$IS_WATER_MARK);
+        $this->loadComponent('image')->resize(true,480,480,self::getConfig('params','SMALL_THUMB_QUALITY'),$upload_path . '/' . $filename. '_lg.jpg',$IS_WATER_MARK);
         $upfiles[]=$upload_path . '/' . $filename. '_lg.jpg';
 
         $this->loadComponent('image')->load($original_img);
-        $this->loadComponent('image')->resize(true,960,960,$this->getConfig('params','SMALL_THUMB_QUALITY'),$upload_path . '/' . $filename. '_xl.jpg',$IS_WATER_MARK);
+        $this->loadComponent('image')->resize(true,960,960,self::getConfig('params','SMALL_THUMB_QUALITY'),$upload_path . '/' . $filename. '_xl.jpg',$IS_WATER_MARK);
         $upfiles[]=$upload_path . '/' . $filename . '_xl.jpg';
 
     }

@@ -32,8 +32,8 @@ class Sms extends \cn\eunionz\core\Plugin
     public function sms_send($Phones,$Content,$is_now_send=0,$is_yingxiao=0,$smslog_kms_msl_id=0,$smslog_id=0){
 
         $params['success'] = 1;//0--成功   1--失败
-        $APP_SMS_SERVICE_PROVIDERS=$this->getConfig('sms','APP_SMS_SERVICE_PROVIDERS');
-        $APP_SMS_SERVICE_PROVIDER_ENABLED_TYPES=$this->getConfig('sms','APP_SMS_SERVICE_PROVIDER_ENABLED_TYPES');
+        $APP_SMS_SERVICE_PROVIDERS=self::getConfig('sms','APP_SMS_SERVICE_PROVIDERS');
+        $APP_SMS_SERVICE_PROVIDER_ENABLED_TYPES=self::getConfig('sms','APP_SMS_SERVICE_PROVIDER_ENABLED_TYPES');
         shuffle($APP_SMS_SERVICE_PROVIDER_ENABLED_TYPES);
         $available_sms_providers=$is_yingxiao?$APP_SMS_SERVICE_PROVIDERS['sale_category_apis']:$APP_SMS_SERVICE_PROVIDERS['verification_code_apis'];
 
@@ -186,7 +186,7 @@ class Sms extends \cn\eunionz\core\Plugin
         try{
             //检查要发送的短信是否有效
 //            $rs=$this->loadService('shop_base')->validate_sms_content($params['KID'],$params['Phones'],$params['Content'],$params['time']);
-//            $this->loadCore('log')->write(APP_DEBUG,print_r($rs,true),'sms1');
+//            $this->loadCore('log')->log(APP_DEBUG,print_r($rs,true),'sms1');
 //            if($rs['status']==-1){
 //                //验证码类，拒绝发送
 //                throw new \Exception($rs['msg']);
@@ -196,7 +196,7 @@ class Sms extends \cn\eunionz\core\Plugin
             $rs = $this->sms_send($Phones,$Content,$is_now_send,$is_yingxiao,$smslog_id);
             if($rs['success']==1){
                 //发送失败，调用kms总平台接口将 kid以及该条记录的发送记录标识为发送失败
-                $APP_KMS_SMS_LOG_STATUS_UPDATE_URL=$this->getConfig('params','APP_KMS_SMS_LOG_STATUS_UPDATE_URL');
+                $APP_KMS_SMS_LOG_STATUS_UPDATE_URL=self::getConfig('params','APP_KMS_SMS_LOG_STATUS_UPDATE_URL');
                 if($smslog_id){
                     $sms_update_url=str_ireplace('@kid@',$KID,$APP_KMS_SMS_LOG_STATUS_UPDATE_URL);
                     $sms_update_url=str_ireplace('@msl_id@',$smslog_id,$sms_update_url);

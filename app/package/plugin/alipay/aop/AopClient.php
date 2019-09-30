@@ -251,7 +251,8 @@ class AopClient {
 
 
 	protected function logCommunicationError($apiName, $requestUrl, $errorCode, $responseTxt) {
-		$localIp = isset ($_SERVER["SERVER_ADDR"]) ? $_SERVER["SERVER_ADDR"] : "CLI";
+        $SERVER = ctx()->server();
+		$localIp = isset ($SERVER["SERVER_ADDR"]) ? $SERVER["SERVER_ADDR"] : "CLI";
 		$logger = new LtLogger;
 		$logger->conf["log_file"] = rtrim(AOP_SDK_WORK_DIR, '\\/') . '/' . "logs/aop_comm_err_" . $this->appId . "_" . date("Y-m-d") . ".log";
 		$logger->conf["separator"] = "^_^";

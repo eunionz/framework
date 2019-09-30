@@ -224,17 +224,17 @@ class Pdo extends \cn\eunionz\core\Component
     public function init($config = 'db', $cluster_name = 'default')
     {
         $this->curr_config = $config;
-        $this->APP_DB_TYPE = getConfig($config, 'APP_DB_TYPE');
-        $this->APP_DB_DEPLOY = getConfig($config, 'APP_DB_DEPLOY');
-        $this->APP_DB_RW_SEPARATE = getConfig($config, 'APP_DB_RW_SEPARATE');
-        $this->APP_DB_PCONNECT = getConfig($config, 'APP_DB_PCONNECT');
-        $this->APP_DB_SELECT_LOG_ENABLED = getConfig($config, 'APP_DB_SELECT_LOG_ENABLED');
-        $this->APP_DB_SELECT_LOG_TABLE_NAME = getConfig($config, 'APP_DB_SELECT_LOG_TABLE_NAME');
-        $this->APP_DB_CHAR = getConfig($config, 'APP_DB_CHAR');
-        $this->APP_DB_SERVERS = getConfig($config, 'APP_DB_SERVERS');
-        $this->APP_DB_STRUCTURE_CACHE = getConfig($config, 'APP_DB_STRUCTURE_CACHE');
-        $this->APP_DB_DATA_STATEMENT_CACHE = getConfig($config, 'APP_DB_DATA_STATEMENT_CACHE');
-        $this->APP_DB_DATA_STATEMENT_CACHE_EXPIRES = getConfig($config, 'APP_DB_DATA_STATEMENT_CACHE_EXPIRES');
+        $this->APP_DB_TYPE = self::getConfig($config, 'APP_DB_TYPE');
+        $this->APP_DB_DEPLOY = self::getConfig($config, 'APP_DB_DEPLOY');
+        $this->APP_DB_RW_SEPARATE = self::getConfig($config, 'APP_DB_RW_SEPARATE');
+        $this->APP_DB_PCONNECT = self::getConfig($config, 'APP_DB_PCONNECT');
+        $this->APP_DB_SELECT_LOG_ENABLED = self::getConfig($config, 'APP_DB_SELECT_LOG_ENABLED');
+        $this->APP_DB_SELECT_LOG_TABLE_NAME = self::getConfig($config, 'APP_DB_SELECT_LOG_TABLE_NAME');
+        $this->APP_DB_CHAR = self::getConfig($config, 'APP_DB_CHAR');
+        $this->APP_DB_SERVERS = self::getConfig($config, 'APP_DB_SERVERS');
+        $this->APP_DB_STRUCTURE_CACHE = self::getConfig($config, 'APP_DB_STRUCTURE_CACHE');
+        $this->APP_DB_DATA_STATEMENT_CACHE = self::getConfig($config, 'APP_DB_DATA_STATEMENT_CACHE');
+        $this->APP_DB_DATA_STATEMENT_CACHE_EXPIRES = self::getConfig($config, 'APP_DB_DATA_STATEMENT_CACHE_EXPIRES');
         if (!$this->APP_DB_DEPLOY) $cluster_name = 'default';
         $this->curr_cluster_name = $cluster_name;
 
@@ -480,7 +480,7 @@ class Pdo extends \cn\eunionz\core\Component
     {
         if ($this->APP_DB_SELECT_LOG_ENABLED && $this->APP_DB_SELECT_LOG_TABLE_NAME) {
             try {
-                $shop_id = getConfig('app', 'SHOP_ID');
+                $shop_id = ctx()->getShopId();
                 $visit_url = str_replace("'", "\\'", ($this->server('REQUEST_SCHEME') ? $this->server('REQUEST_SCHEME') : 'http') . "://" . $this->server('HTTP_HOST') . $this->server('REQUEST_URI'));
                 $querylog_type = 0;
                 $sql = str_replace("'", "\\'", $this->get_sql());

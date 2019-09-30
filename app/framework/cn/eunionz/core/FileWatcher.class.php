@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace cn\eunionz\core;
+
+defined('APP_IN') or exit('Access Denied');
 
 /**
  * 文件监视器类
@@ -70,9 +73,10 @@ class FileWatcher extends Kernel
 
     /**
      * 递归将文件夹下的所有子文件夹加入监听
-     * @param $path
+     * @param string $path
+     * @param int $my_event
      */
-    public static function recursion_add_dir($path, $my_event)
+    public static function recursion_add_dir(string $path, int $my_event): void
     {
         self::$inotify_watch_folder_handles[$path] = inotify_add_watch(self::$inotify_handle, $path, $my_event);
         $dir = opendir($path);
@@ -91,7 +95,7 @@ class FileWatcher extends Kernel
     /**
      * 应用程序针对指定文件夹启动监控初始化方法
      */
-    public static function inotify_Init()
+    public static function inotify_Init(): void
     {
         self::$event_lists = array();
         self::$events = F('inotify', 'APP_INOFITY_EVENTS');
@@ -118,9 +122,9 @@ class FileWatcher extends Kernel
 
     /**
      * 应用程序针对指定文件夹监控事件处理方法
-     * @param $evet_list
+     * @param array $evet_list
      */
-    public static function inotify_Handle($evet_list)
+    public static function inotify_Handle(array $evet_list): void
     {
         foreach ($evet_list as $event) {
             $mask = $event['mask'];
@@ -148,17 +152,17 @@ class FileWatcher extends Kernel
         }
         if (self::$event_lists && is_dir(self::$APP_SWOOLE_MASTER_PID_DIR)) {
             $dir = opendir(self::$APP_SWOOLE_MASTER_PID_DIR);
-            if($dir){
-                while($name = readdir($dir)){
+            if ($dir) {
+                while ($name = readdir($dir)) {
                     $filename = self::$APP_SWOOLE_MASTER_PID_DIR . $name;
-                    if($name!='.' && $name !='..' && is_file($filename)){
+                    if ($name != '.' && $name != '..' && is_file($filename)) {
                         $master_id = file_get_contents($filename);
                         if ($master_id) {
                             if (time() - self::$APP_INOFITY_LAST_TIME > self::$APP_INOFITY_SECONDS) {
                                 foreach (self::$event_lists as $msg) {
                                     consoleln($msg);
                                 }
-                                if(endsWith($name , 'manager.pid.php')){
+                                if (endsWith($name, 'manager.pid.php')) {
                                     //管理进程则使用USR1以及USR2进行平滑重启
                                     exec('sudo kill -USR1 ' . $master_id, $a, $b);
                                     if ($b == 1) {
@@ -176,7 +180,7 @@ class FileWatcher extends Kernel
                                     } else {
                                         console("[USR2  ] " . date("Y-m-d H:i:s") . ": 重启所有TASK进程 【主进程 PID={$master_id}】成功");
                                     }
-                                }else{
+                                } else {
                                     //其它启动进程直接杀死
                                     exec('sudo kill -9 ' . $master_id, $a, $b);
                                     if ($b == 1) {

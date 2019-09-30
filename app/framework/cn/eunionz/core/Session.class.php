@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Eunionz PHP Framework Session class
  * Created by PhpStorm.
@@ -25,16 +26,15 @@ class Session extends Kernel
     private $_session_handler = null;
 
 
-
     public function getSessionHandler(): SessionHandler
     {
         if (!$this->_session_handler) {
-            $mode = getConfig('app', 'APP_SESSION_MODE');
-            $lefttime = getConfig('app', 'APP_SESSION_LIFETIME_SECONDS');
-            $redis_config = getConfig('app', 'APP_SESSION_REDIS_CONFIG');
-            $session_dir = getConfig('app', 'APP_SESSION_DIR');
-            $session_table = getConfig('app', 'APP_SESSION_TABLE_NAME');
-            $mysql_config = getConfig('app', 'APP_SESSION_MYSQL_CONFIG');
+            $mode = self::getConfig('app', 'APP_SESSION_MODE');
+            $lefttime = self::getConfig('app', 'APP_SESSION_LIFETIME_SECONDS');
+            $redis_config = self::getConfig('app', 'APP_SESSION_REDIS_CONFIG');
+            $session_dir = self::getConfig('app', 'APP_SESSION_DIR');
+            $session_table = self::getConfig('app', 'APP_SESSION_TABLE_NAME');
+            $mysql_config = self::getConfig('app', 'APP_SESSION_MYSQL_CONFIG');
             $this->_session_handler = new SessionHandler($mode, $lefttime, $redis_config, $session_dir, $session_table, $mysql_config);
         }
         return $this->_session_handler;
@@ -58,7 +58,7 @@ class Session extends Kernel
             }
         }
         $this->SESSION = $this->getSessionHandler()->read($this->session_id());
-        return $this->SESSION??[];
+        return $this->SESSION ?? [];
     }
 
     /**
@@ -152,8 +152,8 @@ class Session extends Kernel
         if (function_exists('com_create_guid')) {
             $uuid = com_create_guid();
         } else {
-            mt_srand((double)microtime() * 10000);//optional for php 4.2.0 and up.
-            $charid = strtoupper(md5(uniqid(rand(), true)));
+            mt_srand(intval(microtime(true) * 10000));//optional for php 4.2.0 and up.
+            $charid = strtoupper(md5(uniqid(strval(rand()), true)));
             $hyphen = chr(45);// "-"
             $uuid = chr(123)// "{"
                 . substr($charid, 0, 8) . $hyphen
@@ -164,7 +164,7 @@ class Session extends Kernel
                 . chr(125);// "}"
         }
         $strtime = microtime();  //当前的时间
-        mt_srand((double)microtime() * 10000);//optional for php 4.2.0 and up.
+        mt_srand(intval(microtime(true) * 10000));//optional for php 4.2.0 and up.
         $uuid = ctx()->getShopId() . self::getRequestUniqueId() . ctx()->getRequest()->getRequestId() . $host . $ip . $uuid . $strtime . rand();
         return md5($uuid);
     }
@@ -267,10 +267,11 @@ class Session extends Kernel
      * 设置或获取session_name
      * @param null $name
      */
-    public final function session_name($name= null){
-        if(empty($name)){
+    public final function session_name($name = null)
+    {
+        if (empty($name)) {
             return $this->session_name;
-        }else{
+        } else {
             return $this->session_name = $name;
         }
     }
@@ -283,10 +284,14 @@ class Session extends Kernel
      * 设置或获取 session_id
      * @param null $session_id
      */
-    public final function session_id($session_id = null){
-        if(empty($session_id)){
+    public final function session_id($session_id = null)
+    {
+        if (empty($session_id)) {
+            if(empty($this->session_id)){
+                $this->session_id = $this->makeSessionId();
+            }
             return $this->session_id;
-        }else{
+        } else {
             return $this->session_id = $session_id;
         }
     }

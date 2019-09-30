@@ -33,7 +33,8 @@ class Kdniao extends \cn\eunionz\core\Plugin
 
     public function __construct()
     {
-        $shop_id = isset($_SESSION['PLATFORM_SHOP_ID'])?$_SESSION['PLATFORM_SHOP_ID']:$this->getConfig('shop','SHOP_ID');
+        $SESSION = ctx()->session();
+        $shop_id = isset($SESSION['PLATFORM_SHOP_ID'])?$SESSION['PLATFORM_SHOP_ID']:ctx()->getShopId();
         $this->_EBussinessID = $this->loadService('shop_params')->get_value_by_key('KD_USER_ID',$shop_id);
         $this->_AppKey = $this->loadService('shop_params')->get_value_by_key('KD_API_KEY',$shop_id);
     }
@@ -145,7 +146,7 @@ class Kdniao extends \cn\eunionz\core\Plugin
     public function do_print($order_infos){
         //OrderCode:需要打印的订单号，和调用快递鸟电子面单的订单号一致，PortName：本地打印机名称，请参考使用手册设置打印机名称。支持多打印机同时打印。
         $request_data =$order_infos;//
-        $this->loadCore('log')->write(APP_ERROR,var_export($order_infos,true),'kdniao');
+        $this->loadCore('log')->log(APP_ERROR,var_export($order_infos,true),'kdniao');
         $ip=$this->getip();
         $data_sign = $this->encrypt($ip.$request_data, $this->_AppKey);
         //是否预览，0-不预览 1-预览
@@ -172,14 +173,16 @@ class Kdniao extends \cn\eunionz\core\Plugin
      */
     private function getip() {
         //获取客户端IP
+        $SERVER = ctx()->server();
+
         if(getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
             $ip = getenv('HTTP_CLIENT_IP');
         } elseif(getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
             $ip = getenv('HTTP_X_FORWARDED_FOR');
         } elseif(getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
             $ip = getenv('REMOTE_ADDR');
-        } elseif(isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
-            $ip = $_SERVER['REMOTE_ADDR'];
+        } elseif(isset($SERVER['REMOTE_ADDR']) && $SERVER['REMOTE_ADDR'] && strcasecmp($SERVER['REMOTE_ADDR'], 'unknown')) {
+            $ip = $SERVER['REMOTE_ADDR'];
         }
         if($ip){
             $ip = str_replace('::ffff:','',$ip);

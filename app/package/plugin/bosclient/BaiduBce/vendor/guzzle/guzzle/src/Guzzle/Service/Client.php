@@ -79,7 +79,7 @@ class Client extends HttpClient implements ClientInterface
     public function getCommand($name, array $args = array())
     {
         // Add global client options to the command
-        if ($options = $this->getConfig(self::COMMAND_PARAMS)) {
+        if ($options = self::getConfig(self::COMMAND_PARAMS)) {
             $args += $options;
         }
 

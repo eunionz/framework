@@ -26,7 +26,7 @@ class Weixinjssdk extends \cn\eunionz\core\Plugin
     {
         $this->appId = $appId;
         $this->appSecret = $appSecret;
-        $this->SHOP_ID = $this->getConfig('shop', 'SHOP_ID');
+        $this->SHOP_ID = ctx()->getShopId();
         return $this;
     }
 

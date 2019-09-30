@@ -22,6 +22,7 @@ require_once("lib/alipay_notify.class.php");
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <?php
 //计算得出通知验证结果
+$GET = ctx()->get();
 $alipayNotify = new AlipayNotify($alipay_config);
 $verify_result = $alipayNotify->verifyReturn();
 if($verify_result) {//验证成功
@@ -32,13 +33,13 @@ if($verify_result) {//验证成功
     //获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表
 
 	//商户订单号
-	$out_trade_no = $_GET['out_trade_no'];
+	$out_trade_no = $GET['out_trade_no'];
 
 	//支付宝交易号
-	$trade_no = $_GET['trade_no'];
+	$trade_no = $GET['trade_no'];
 
 	//交易状态
-	$result = $_GET['result'];
+	$result = $GET['result'];
 
 
 	//判断该笔订单是否在商户网站中已经做过处理

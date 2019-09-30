@@ -339,10 +339,12 @@ class UnifiedOrder_pub extends Wxpay_client_pub
 				$this->parameters["openid"] == NULL){
 				throw new SDKRuntimeException("统一支付接口中，缺少必填参数openid！trade_type为JSAPI时，openid为必填参数！"."<br>");
 			}
+			$SERVER = ctx()->server();
+
 		   	$this->parameters["appid"] = WxPayConf_pub::$APPID;//公众账号ID
 		   	$this->parameters["mch_id"] = WxPayConf_pub::$MCHID;//商户号
 		   	if(empty($this->parameters["spbill_create_ip"])){
-                $this->parameters["spbill_create_ip"] = $_SERVER['REMOTE_ADDR'];//终端ip
+                $this->parameters["spbill_create_ip"] = $SERVER['REMOTE_ADDR'];//终端ip
             }	    
 		    $this->parameters["nonce_str"] = $this->createNoncestr();//随机字符串
 		    $this->parameters["sign"] = $this->getSign($this->parameters);//签名
@@ -360,11 +362,6 @@ class UnifiedOrder_pub extends Wxpay_client_pub
 	{
 		$this->postXml();
 		$this->result = $this->xmlToArray($this->response);
-        //file_put_contents(APP_RUNTIME_REAL_PATH."/json/pay_prepayid_log.txt"," \n appwxpay time:".date('y-m-d h:i:s',time()),FILE_APPEND);
-        //file_put_contents(APP_RUNTIME_REAL_PATH."/json/pay_prepayid_log.txt"," \n key:".WxPayConf_pub::$KEY,FILE_APPEND);
-        //file_put_contents(APP_RUNTIME_REAL_PATH."/json/pay_prepayid_log.txt"," \n appid:".WxPayConf_pub::$APPID,FILE_APPEND);
-        //file_put_contents(APP_RUNTIME_REAL_PATH."/json/pay_prepayid_log.txt"," \n secret:".WxPayConf_pub::$APPSECRET,FILE_APPEND);
-        //file_put_contents(APP_RUNTIME_REAL_PATH."/json/pay_prepayid_log.txt"," \n patnerno:".WxPayConf_pub::$MCHID,FILE_APPEND);
         $retdata['ret_code'] = $this->result['return_code'];
         $retdata['ret_msg'] = $this->result['return_msg'];
         $retdata['err_code_des'] = $this->result['err_code_des'];

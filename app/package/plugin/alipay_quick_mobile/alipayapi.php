@@ -49,25 +49,26 @@ $notify_url = "http://商户网关地址/WS_WAP_PAYWAP-PHP-UTF-8/notify_url.php"
 //页面跳转同步通知页面路径
 $call_back_url = "http://127.0.0.1:8800/WS_WAP_PAYWAP-PHP-UTF-8/call_back_url.php";
 //需http://格式的完整路径，不允许加?id=123这类自定义参数
+$POST = ctx()->post();
 
 //操作中断返回地址
 $merchant_url = "http://127.0.0.1:8800/WS_WAP_PAYWAP-PHP-UTF-8/xxxx.php";
 //用户付款中途退出返回商户的地址。需http://格式的完整路径，不允许加?id=123这类自定义参数
 
 //卖家支付宝帐户
-$seller_email = $_POST['WIDseller_email'];
+$seller_email = $POST['WIDseller_email'];
 //必填
 
 //商户订单号
-$out_trade_no = $_POST['WIDout_trade_no'];
+$out_trade_no = $POST['WIDout_trade_no'];
 //商户网站订单系统中唯一订单号，必填
 
 //订单名称
-$subject = $_POST['WIDsubject'];
+$subject = $POST['WIDsubject'];
 //必填
 
 //付款金额
-$total_fee = $_POST['WIDtotal_fee'];
+$total_fee = $POST['WIDtotal_fee'];
 //必填
 
 //请求业务参数详细

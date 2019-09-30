@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace cn\eunionz\core;
 defined('APP_IN') or exit('Access Denied');
@@ -36,7 +37,7 @@ class Response extends Component
 
     private $response;
 
-    public function __construct(\Swoole\Http\Response $response)
+    public function __construct($response = null)
     {
         $this->response = $response;
     }
@@ -44,7 +45,7 @@ class Response extends Component
 
     /**
      * 基于当前请求ID设置$_COOKIE变量
-     * @param $key
+     * @param string $key
      * @param string $value
      * @param int $expire
      * @param string $path
@@ -53,10 +54,10 @@ class Response extends Component
      * @param bool $httponly
      * @return string
      */
-    public final function setcookie($key, $value = '', $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = true)
+    public final function setcookie(string $key, string $value = '', int $expire = 0, string $path = '/', string $domain = '', bool $secure = false, bool $httponly = true)
     {
+        ctx()->getRequest()->cookie($key, $value);
         if ($this->response) {
-            ctx()->getRequest()->cookie($key, $value);
             $this->response->cookie($key, $value, $expire, $path, $domain, $secure, $httponly);
         }
         return $value;
@@ -64,9 +65,9 @@ class Response extends Component
 
     /**
      * 分段输出内容
-     * @param $content 内容不能为空，内容不超过2M
+     * @param string $content 内容不能为空，内容不超过2M
      */
-    public function write($content)
+    public function write(string $content): void
     {
         if ($this->response && $content) {
             $this->response->write($content);
@@ -75,9 +76,9 @@ class Response extends Component
 
     /**
      * 发送Http响应体，并结束请求处理
-     * @param null $content
+     * @param string $content
      */
-    public function end($content = null)
+    public function end(?string $content = null): void
     {
         if ($this->response) {
             if ($content) {
@@ -93,10 +94,10 @@ class Response extends Component
      * 发送HTTP状态码
      * @param $code 200 302
      */
-    public function status($code)
+    public function status(int $code): void
     {
         if ($this->response) {
-            $this->response->status(intval($code));
+            $this->response->status($code);
         }
     }
 
@@ -106,7 +107,7 @@ class Response extends Component
      * @param int $offset 偏移 发送文件的偏移量，可以指定从文件的中间部分开始传输数据。此特性可用于支持断点续传。
      * @param int $length 长度 发送数据的尺寸，默认为整个文件的尺寸
      */
-    public function sendfile($filename, $offset = 0, $length = 0)
+    public function sendfile(string $filename, int $offset = 0, int $length = 0): void
     {
         if ($this->response) {
             $this->response->sendfile($filename, $offset, $length);
@@ -118,7 +119,7 @@ class Response extends Component
      * @param $name  头部信息名称
      * @param $value  头部信息值
      */
-    public function addHeader($name, $value)
+    public function addHeader(string $name, string $value)
     {
         if ($this->response) {
             return $this->response->header($name, $value);
@@ -128,8 +129,9 @@ class Response extends Component
 
     /**
      * 开启输出缓冲区
+     * @return bool
      */
-    public function ob_start()
+    public function ob_start(): bool
     {
         if (!$this->_is_ob_start) return false;
         if (empty($this->output_buffer)) {
@@ -147,8 +149,9 @@ class Response extends Component
     /**
      * 刷新输出缓冲区到下一层输出缓冲区，如果为最底层缓冲区直接输出到浏览器
      * 并不结束当前缓冲区
+     * @return string
      */
-    public function ob_flush()
+    public function ob_flush(): string
     {
         $buffer = '';
         if (!$this->_is_ob_start) return $buffer;
@@ -174,8 +177,9 @@ class Response extends Component
     /**
      * 刷新输出缓冲区到下一层输出缓冲区，如果为最底层缓冲区直接输出到浏览器
      * 同时结束当前层缓冲区
+     * @return string
      */
-    public function ob_end_flush()
+    public function ob_end_flush(): string
     {
         $buffer = '';
         if (!$this->_is_ob_start) return $buffer;
@@ -203,13 +207,15 @@ class Response extends Component
 
     /**
      * 向当前输出缓冲区写入内容
+     * @param string $string
+     * @return bool
      */
-    public function ob_write($string)
+    public function ob_write(?string $string): bool
     {
         if (empty($string)) return false;
         if (!$this->_is_ob_start) {
             $this->write($string);
-        }else{
+        } else {
             if (!isset($this->output_buffer[$this->ob_level])) {
                 $this->output_buffer[$this->ob_level] = '';
             }
@@ -220,8 +226,9 @@ class Response extends Component
 
     /**
      * 清除输出缓冲区并不输出到浏览器
+     * @return string
      */
-    public function ob_end_clean()
+    public function ob_end_clean(): string
     {
         $buffer = '';
         if (!$this->_is_ob_start) return $buffer;
@@ -242,8 +249,9 @@ class Response extends Component
 
     /**
      * 获取输出缓冲区内容
+     * @return string
      */
-    public function ob_get_contents()
+    public function ob_get_contents(): string
     {
         if (!$this->_is_ob_start) return '';
         if (isset($this->output_buffer[$this->ob_level])) {
@@ -253,20 +261,30 @@ class Response extends Component
     }
 
 
-    public function trailer($trailer_name, $trailer_value){
+    /**
+     * @param $trailer_name
+     * @param $trailer_value
+     * @return |null
+     */
+    public function trailer($trailer_name, $trailer_value)
+    {
         if ($this->response) {
             return $this->response->trailer($trailer_name, $trailer_value);
         }
         return null;
     }
 
-    public function get_HttpResponse(){
+    /**
+     * 获取\Swoole\Http\Response
+     * @return \Swoole\Http\Response|null
+     */
+    public function get_HttpResponse(): ?\Swoole\Http\Response
+    {
         if ($this->response) {
             return $this->response;
         }
         return null;
     }
-
 
 
 }

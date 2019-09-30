@@ -30,13 +30,13 @@ class Weibooauth extends \cn\eunionz\core\Plugin
     }
 
     public function clear_login(){
-
-        if(isset($_SESSION['token']) && isset($_SESSION['token']['access_token']) ){
+        $SESSION = ctx()->session();
+        if(isset($SESSION['token']) && isset($SESSION['token']['access_token']) ){
             include_once( 'config.php' );
             include_once( 'saetv2.ex.class.php' );
             $this->weibo = new \SaeTOAuthV2( WB_AKEY , WB_SKEY );
-            $this->weibo->revokeoauth2($_SESSION['token']['access_token']);
-            $_SESSION['token'] = null;
+            $this->weibo->revokeoauth2($SESSION['token']['access_token']);
+            ctx()->session('token' , null);
             setcookie( 'weibojs_'.$this->weibo->client_id, '');
         }
     }
@@ -46,9 +46,10 @@ class Weibooauth extends \cn\eunionz\core\Plugin
         include_once( 'saetv2.ex.class.php' );
         $this->weibo = new \SaeTOAuthV2( WB_AKEY , WB_SKEY );
         $token="";
-        if (isset($_GET['code'])) {
+        $GET = ctx()->get();
+        if (isset($GET['code'])) {
             $keys = array();
-            $keys['code'] = $_GET['code'];
+            $keys['code'] = $GET['code'];
             $keys['redirect_uri'] = WB_CALLBACK_URL;
             try {
                 $token = $this->weibo->getAccessToken( 'code', $keys ) ;
@@ -59,12 +60,12 @@ class Weibooauth extends \cn\eunionz\core\Plugin
         }
 
         if ($token) {
-            $_SESSION['token'] = $token;
+            ctx()->session('token' , $token);
             //setcookie( 'weibojs_'.$this->weibo->client_id, http_build_query($token) );
             //授权完成
+            $SESSION = ctx()->session();
 
-
-            $c = new \SaeTClientV2( WB_AKEY , WB_SKEY , $_SESSION['token']['access_token'] );
+            $c = new \SaeTClientV2( WB_AKEY , WB_SKEY , $SESSION['token']['access_token'] );
             $ms  = $c->home_timeline(); // done
             $uid_get = $c->get_uid();
             if(isset($uid_get['uid'])){

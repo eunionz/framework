@@ -321,7 +321,7 @@ class Validation extends \cn\eunionz\core\Plugin
     function validPara($data)
     {
         $err = "";
-        $check_rule = $this->getConfig('api', $this->getRouter('path'));
+        $check_rule = self::getConfig('api', $this->getRouter('path'));
         $act = $this->getRouter('act');
         if (isset($check_rule[$act])) {
             $rules = $check_rule[$act];

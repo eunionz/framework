@@ -17,7 +17,7 @@ defined('APP_IN') or exit('Access Denied');
 class Crypt extends \cn\eunionz\core\Plugin{
     private $crypt_key='Ajd$29*34_16BkA';//密钥
     public function __construct(){
-        $this->crypt_key= $this->getConfig('app',"APP_KEY");
+        $this->crypt_key= self::getConfig('app',"APP_KEY");
     }
 
     public function init($crypt_key){
@@ -25,7 +25,7 @@ class Crypt extends \cn\eunionz\core\Plugin{
     }
 
     public function encrypt($txt){
-        $encrypt_key=$this->getConfig('app','ENCRYPT_KEY');
+        $encrypt_key=self::getConfig('app','ENCRYPT_KEY');
         $ctr=0;
         $tmp='';
         for($i=0;$i<strlen($txt);$i++){

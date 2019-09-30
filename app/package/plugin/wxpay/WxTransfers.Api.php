@@ -458,11 +458,12 @@ class WxTransfers
 	public function getServerIp()
 	{
 		$server_ip = '127.0.0.1';
-		if (isset($_SERVER)) {
-			if (isset($_SERVER['SERVER_ADDR']) && $_SERVER['SERVER_ADDR']) {
-				$server_ip = $_SERVER['SERVER_ADDR'];
-			} elseif (isset($_SERVER['LOCAL_ADDR']) && $_SERVER['LOCAL_ADDR']) {
-				$server_ip = $_SERVER['LOCAL_ADDR'];
+        $SERVER = ctx()->server();
+		if (isset($SERVER)) {
+			if (isset($SERVER['SERVER_ADDR']) && $SERVER['SERVER_ADDR']) {
+				$server_ip = $SERVER['SERVER_ADDR'];
+			} elseif (isset($SERVER['LOCAL_ADDR']) && $SERVER['LOCAL_ADDR']) {
+				$server_ip = $SERVER['LOCAL_ADDR'];
 			}
 		} else {
 			$server_ip = getenv('SERVER_ADDR');

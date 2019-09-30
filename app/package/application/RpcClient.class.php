@@ -65,7 +65,7 @@ class RpcClient extends Kernel
         if (empty($rpc_host) || empty($rpc_port)){
             $rpc_config_name = 'rpc_service_default';
             $this->rpc_config_name = $rpc_config_name;
-            $rpc_config = getConfig('rpc', $this->rpc_config_name);
+            $rpc_config = self::getConfig('rpc', $this->rpc_config_name);
             $this->rpc_host = isset($rpc_config['host']) ? $rpc_config['host'] : '127.0.0.1';
             $this->rpc_port = isset($rpc_config['port']) ? intval($rpc_config['port']) : 8899;
             $this->rpc_timeout = isset($rpc_config['timeout']) ? $rpc_config['timeout'] : 0.5;

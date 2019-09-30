@@ -3218,10 +3218,12 @@ class PHPMailer
     protected function serverHostname()
     {
         $result = 'localhost.localdomain';
+        $SERVER = ctx()->server();
+
         if (!empty($this->Hostname)) {
             $result = $this->Hostname;
-        } elseif (isset($_SERVER) and array_key_exists('SERVER_NAME', $_SERVER) and !empty($_SERVER['SERVER_NAME'])) {
-            $result = $_SERVER['SERVER_NAME'];
+        } elseif (isset($SERVER) and array_key_exists('SERVER_NAME', $SERVER) and !empty($SERVER['SERVER_NAME'])) {
+            $result = $SERVER['SERVER_NAME'];
         } elseif (function_exists('gethostname') && gethostname() !== false) {
             $result = gethostname();
         } elseif (php_uname('n') !== false) {

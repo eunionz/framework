@@ -16,7 +16,7 @@
 <p class="error_icon text-center"><i class="icon iconfont icon-iconjinggao01"></i></p>
 <div class="error_wen text-center">
     @getLang('app_404_error_content')
-    <a href="/admin/home/index.html">>>@getLang('app_404_error_title',#28; 2+4 #29;,$_SESSION['CLIENT_TYPE'])</a>
+    <a href="/admin/home/index.html">>>@getLang('app_404_error_title',#28; 2+4 #29;,$SESSION['CLIENT_TYPE'])</a>
 </div>
 @endsection
 

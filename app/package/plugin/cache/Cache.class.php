@@ -49,16 +49,16 @@ class Cache extends \cn\eunionz\core\Plugin
 
 
     public function __construct(){
-        $this->is_cache=$this->getConfig('db','APP_DB_DATA_QUERY_CACHE');
-        $this->cache_type=$this->getConfig('db','APP_DB_DATA_CACHE_TYPE');
-        $this->cache_life_seconds=$this->getConfig('db','APP_DB_DATA_QUERY_CACHE_EXPIRES');
+        $this->is_cache=self::getConfig('db','APP_DB_DATA_QUERY_CACHE');
+        $this->cache_type=self::getConfig('db','APP_DB_DATA_CACHE_TYPE');
+        $this->cache_life_seconds=self::getConfig('db','APP_DB_DATA_QUERY_CACHE_EXPIRES');
         if($this->cache_type=='file'){
-            $this->cache_driver_data['cache_dir']= APP_RUNTIME_REAL_PATH . $this->getConfig('db','APP_DB_DATA_QUERY_CACHE_TEMP_PATH');
+            $this->cache_driver_data['cache_dir']= ctx()->getAppRuntimeRealPath() . self::getConfig('db','APP_DB_DATA_QUERY_CACHE_TEMP_PATH');
             if(!file_exists($this->cache_driver_data['cache_dir'])){
                 @mkdir($this->cache_driver_data['cache_dir'],0777,true);
             }
         }else if($this->cache_type=='memcached'){
-            $this->cache_driver_data = $this->getConfig('db','APP_DB_DATA_CACHE_DRIVER');
+            $this->cache_driver_data = self::getConfig('db','APP_DB_DATA_CACHE_DRIVER');
             $this->cache_link_id = new \Memcache();
             if(!$this->cache_link_id->connect($this->cache_driver_data['server'],$this->cache_driver_data['port'])){
                 die('Memchaced 连接失败，请检查Memchaed服务器【' . $this->cache_driver_data['server'].':' . $this->cache_driver_data['port'] .'】是否正常运行!');
@@ -85,7 +85,7 @@ class Cache extends \cn\eunionz\core\Plugin
 
         }else if($this->cache_type=='redis'){
 
-            $this->cache_driver_data = $this->getConfig('db','APP_DB_DATA_CACHE_DRIVER');
+            $this->cache_driver_data = self::getConfig('db','APP_DB_DATA_CACHE_DRIVER');
 
             $this->_isUseCluster=$this->cache_driver_data['isUseCluster'];
 
@@ -129,7 +129,8 @@ class Cache extends \cn\eunionz\core\Plugin
     }
 
     public function setCacheByKey($prefix,$key,$data,$expires=null){
-        $shop_id = isset($_SESSION['PLATFORM_SHOP_ID'])?$_SESSION['PLATFORM_SHOP_ID']:$this->getConfig('shop','SHOP_ID');
+        $SESSION = ctx()->session();
+        $shop_id = isset($SESSION['PLATFORM_SHOP_ID'])?$SESSION['PLATFORM_SHOP_ID']:ctx()->getShopId();
         if(preg_match('/^(shop_)(\d+)(_.*)/',$prefix,$arr)){
             $prefix = $arr[1].$shop_id.$arr[3];
         }
@@ -219,7 +220,8 @@ class Cache extends \cn\eunionz\core\Plugin
     }
 
     public function getCacheByKey($prefix,$key,$expires=null){
-        $shop_id = isset($_SESSION['PLATFORM_SHOP_ID'])?$_SESSION['PLATFORM_SHOP_ID']:$this->getConfig('shop','SHOP_ID');
+        $SESSION = ctx()->session();
+        $shop_id = isset($SESSION['PLATFORM_SHOP_ID'])?$SESSION['PLATFORM_SHOP_ID']:ctx()->getShopId();
         if(preg_match('/^(shop_)(\d+)(_.*)/',$prefix,$arr)){
             $prefix = $arr[1].$shop_id.$arr[3];
         }
@@ -297,7 +299,8 @@ class Cache extends \cn\eunionz\core\Plugin
 
 
     public function clearCacheByKey($prefix='',$key=''){
-        $shop_id = isset($_SESSION['PLATFORM_SHOP_ID'])?$_SESSION['PLATFORM_SHOP_ID']:$this->getConfig('shop','SHOP_ID');
+        $SESSION = ctx()->session();
+        $shop_id = isset($SESSION['PLATFORM_SHOP_ID'])?$SESSION['PLATFORM_SHOP_ID']:ctx()->getShopId();
         if(preg_match('/^(shop_)(\d+)(_.*)/',$prefix,$arr)){
             $prefix = $arr[1].$shop_id.$arr[3];
         }
@@ -427,7 +430,7 @@ class Cache extends \cn\eunionz\core\Plugin
     }
 
     public function clear($shop_id=null){
-        if($shop_id==null) $shop_id = $this->getConfig('shop','SHOP_ID');
+        if($shop_id==null) $shop_id = ctx()->getShopId();
         switch($this->cache_type) {
             case 'file':
                 if($shop_id<=0){
@@ -887,7 +890,7 @@ class Cache extends \cn\eunionz\core\Plugin
      * @return boolean
      */
     public function  redis_clear($is_clear=false){
-        if($this->getConfig('shop','SHOP_ID')<=0 || $is_clear){
+        if(ctx()->getShopId()<=0 || $is_clear){
             return $this->getRedis()->flushdb();
         }
         return 1;
@@ -1003,7 +1006,7 @@ class Cache extends \cn\eunionz\core\Plugin
     }
 
     public function clearAll(){
-        $shop_id = $this->getConfig('shop','SHOP_ID');
+        $shop_id = ctx()->getShopId();
         switch($this->cache_type) {
             case 'file':
                 if($shop_id<=0){

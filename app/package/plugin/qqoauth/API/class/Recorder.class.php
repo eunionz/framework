@@ -13,6 +13,7 @@ class Recorder{
 
     public function __construct(){
         $this->error = new ErrorCase();
+        $SESSION = ctx()->session();
 
         //-------读取配置文件
         $incFileContents = file(ROOT."comm/inc.php");
@@ -22,10 +23,10 @@ class Recorder{
             $this->error->showError("20001");
         }
 
-        if(empty($_SESSION['QC_userData'])){
+        if(empty($SESSION['QC_userData'])){
             self::$data = array();
         }else{
-            self::$data = $_SESSION['QC_userData'];
+            self::$data = $SESSION['QC_userData'];
         }
     }
 
@@ -54,6 +55,6 @@ class Recorder{
     }
 
     function __destruct(){
-        $_SESSION['QC_userData'] = self::$data;
+        ctx()->session('QC_userData' , self::$data);
     }
 }

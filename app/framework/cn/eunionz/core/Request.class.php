@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace cn\eunionz\core;
 
-use mysql_xdevapi\Exception;
-
 defined('APP_IN') or exit('Access Denied');
 
 /**
@@ -26,10 +24,10 @@ class Request extends Component
     private $HEADER = [];
 
 
-    public function __construct(\Swoole\Http\Request $http_request = null, $cfg = null)
+    public function __construct($http_request = null, $cfg = null)
     {
         $this->cfg = $cfg;
-        if ($http_request){
+        if ($http_request) {
             $this->http_request = $http_request;
             $this->SERVER = $this->http_request->server;
             $this->SERVER['REQUEST_SCHEME'] = 'http';
@@ -40,7 +38,7 @@ class Request extends Component
             $this->SERVER['HTTP_ACCEPT'] = isset($this->http_request->header['accept']) ? $this->http_request->header['accept'] : '';
             $this->SERVER['HTTP_ACCEPT_CHARSET'] = isset($this->http_request->header['accept-charset']) ? $this->http_request->header['accept-charset'] : '';
             $this->SERVER['HTTP_ACCEPT_ENCODING'] = isset($this->http_request->header['accept-encoding']) ? $this->http_request->header['accept-encoding'] : '';
-            $this->SERVER['HTTP_ACCEPT_LANGUAGE'] = isset($this->http_request->header['accept-language']) ? $this->http_request->header['accept-language'] : getConfig('app', 'APP_DEFAULT_LANGUAGE');
+            $this->SERVER['HTTP_ACCEPT_LANGUAGE'] = isset($this->http_request->header['accept-language']) ? $this->http_request->header['accept-language'] : self::getConfig('app', 'APP_DEFAULT_LANGUAGE');
             $this->SERVER['HTTP_CONNECTION'] = isset($this->http_request->header['connection']) ? $this->http_request->header['connection'] : '';
             $this->SERVER['SERVER_NAME'] = isset($this->http_request->header['host']) ? $this->http_request->header['host'] : $cfg['host'];
             $this->SERVER['HTTP_HOST'] = isset($this->http_request->header['host']) ? $this->http_request->header['host'] : $cfg['host'];
@@ -58,14 +56,14 @@ class Request extends Component
             $this->SERVER['HTTP_X_PROXY_SCHEME'] = isset($this->http_request->header['x-proxy-scheme']) ? strtolower($this->http_request->header['x-proxy-scheme']) : 'http';
             $this->SERVER['HTTP_X_PROXY_SERVER_PORT'] = isset($this->http_request->header['x-proxy-server-port']) ? $this->http_request->header['x-proxy-server-port'] : '';
 
-            if($this->SERVER['HTTP_X_PROXY_SCHEME']=='http'){
-                if($this->SERVER['HTTP_X_PROXY_SERVER_PORT']!='' && $this->SERVER['HTTP_X_PROXY_SERVER_PORT']!=80){
-                    $this->SERVER['HTTP_HOST']  .= ':' . $this->SERVER['HTTP_X_PROXY_SERVER_PORT'];
+            if ($this->SERVER['HTTP_X_PROXY_SCHEME'] == 'http') {
+                if ($this->SERVER['HTTP_X_PROXY_SERVER_PORT'] != '' && $this->SERVER['HTTP_X_PROXY_SERVER_PORT'] != 80) {
+                    $this->SERVER['HTTP_HOST'] .= ':' . $this->SERVER['HTTP_X_PROXY_SERVER_PORT'];
                 }
             }
-            if($this->SERVER['HTTP_X_PROXY_SCHEME']=='https'){
-                if($this->SERVER['HTTP_X_PROXY_SERVER_PORT']!='' && $this->SERVER['HTTP_X_PROXY_SERVER_PORT']!=443){
-                    $this->SERVER['HTTP_HOST']  .= ':' . $this->SERVER['HTTP_X_PROXY_SERVER_PORT'];
+            if ($this->SERVER['HTTP_X_PROXY_SCHEME'] == 'https') {
+                if ($this->SERVER['HTTP_X_PROXY_SERVER_PORT'] != '' && $this->SERVER['HTTP_X_PROXY_SERVER_PORT'] != 443) {
+                    $this->SERVER['HTTP_HOST'] .= ':' . $this->SERVER['HTTP_X_PROXY_SERVER_PORT'];
                 }
             }
 
@@ -112,25 +110,106 @@ class Request extends Component
                     break;
             }
         }
-
     }
 
 
-    public function getRequestId()
+    /**
+     * 重新初始化 Request
+     */
+    public function initialize(){
+        $this->REQUEST = array();
+        switch (strtolower(APP_PHP_REQUEST_ORDER)) {
+            case 'gcp':
+                $this->REQUEST = array_merge($this->POST, $this->COOKIE, $this->GET);
+                break;
+            case 'pgc':
+                $this->REQUEST = array_merge($this->COOKIE, $this->GET, $this->POST);
+                break;
+            case 'pcg':
+                $this->REQUEST = array_merge($this->GET, $this->COOKIE, $this->POST);
+                break;
+            case 'cgp':
+                $this->REQUEST = array_merge($this->POST, $this->GET, $this->COOKIE);
+                break;
+            case 'cpg':
+                $this->REQUEST = array_merge($this->GET, $this->POST, $this->COOKIE);
+                break;
+            default:
+                $this->REQUEST = array_merge($this->COOKIE, $this->POST, $this->GET);
+                break;
+        }
+    }
+
+
+    /**
+     * 获取所有头部信息或指定头部信息
+     * @param null $header_name 如果为空则获取所有头部信息，否则为指定名称的头部信息
+     * @return mixed
+     */
+    private function _getallheaders(string $header_name = null)
+    {
+        $headers = array();
+        if (!function_exists('getallheaders')) {
+            if ($header_name) {
+                foreach ($_SERVER as $name => $value) {
+                    if (substr($name, 0, 5) == 'HTTP_') {
+                        $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+                    }
+                    if ($header_name && strtolower($name) == strtolower($header_name)) {
+                        return $value;
+                    }
+                }
+                return '';
+            } else {
+                foreach ($_SERVER as $name => $value) {
+                    if (substr($name, 0, 5) == 'HTTP_') {
+                        $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+                    }
+                }
+                return $headers;
+            }
+        } else {
+            $headers = getallheaders();
+            if ($header_name) {
+                foreach ($headers as $name => $value) {
+                    if ($header_name && strtolower($name) == strtolower($header_name)) {
+                        return $value;
+                    }
+                }
+                return '';
+            } else {
+                return $headers;
+            }
+        }
+        return '';
+    }
+
+
+    /**
+     * 获取请求ID
+     * @return int
+     */
+    public function getRequestId(): int
     {
         return $this->http_request->fd ?? 0;
+
     }
 
-    public function gettWorkerId()
+    /**
+     * 获取工作进程ID
+     * @return int
+     */
+    public function gettWorkerId(): int
     {
         return self::getCurrentWorkerId();
     }
 
     /**
      * 设置当前请求的$SERVER数组
-     * @param $server
+     * @param array $server
+     * @return bool
      */
-    public function setServer($server)
+    public function setServer(array $server): bool
     {
         if (is_array($server)) {
             $this->SERVER = $server;
@@ -141,11 +220,11 @@ class Request extends Component
 
     /**
      * 获取/设置 SERVER数据
-     * @param null $key
-     * @param null $value
-     * @return array|mixed
+     * @param string|null $key
+     * @param string|null $value
+     * @return array|mixed|string
      */
-    public function server($key = null, $value = null)
+    public function server(string $key = null, string $value = null)
     {
         if ($key) {
             if ($value !== null) {
@@ -160,9 +239,10 @@ class Request extends Component
 
     /**
      * 设置当前请求的$GET数组
-     * @param $get
+     * @param array $get
+     * @return bool
      */
-    public function setGet($get)
+    public function setGet(array $get): bool
     {
         if (is_array($get)) {
             $this->GET = $get;
@@ -173,11 +253,11 @@ class Request extends Component
 
     /**
      * 获取/设置 GET数据
-     * @param null $key
+     * @param string $key
      * @param null $value
      * @return array|mixed
      */
-    public function get($key = null, $value = null)
+    public function get(string $key = null, $value = null)
     {
         if ($key) {
             if ($value !== null) {
@@ -192,9 +272,10 @@ class Request extends Component
 
     /**
      * 设置当前请求的$POST数组
-     * @param $post
+     * @param array $post
+     * @return bool
      */
-    public function setPost($post)
+    public function setPost(array $post): bool
     {
         if (is_array($post)) {
             $this->POST = $post;
@@ -205,11 +286,11 @@ class Request extends Component
 
     /**
      * 获取/设置 POST数据
-     * @param null $key
+     * @param string $key
      * @param null $value
      * @return array|mixed
      */
-    public function post($key = null, $value = null)
+    public function post(string $key = null, $value = null)
     {
         if ($key) {
             if ($value !== null) {
@@ -224,9 +305,10 @@ class Request extends Component
 
     /**
      * 设置当前请求的$COOKIE数组
-     * @param $cookie
+     * @param array $cookie
+     * @return bool
      */
-    public function setCookie($cookie)
+    public function setCookie(array $cookie): bool
     {
         if (is_array($cookie)) {
             $this->COOKIE = $cookie;
@@ -237,11 +319,11 @@ class Request extends Component
 
     /**
      * 获取/设置 COOKIE数据
-     * @param null $key
-     * @param null $value
+     * @param string $key
+     * @param string $value
      * @return array|mixed
      */
-    public function cookie($key = null, $value = null)
+    public function cookie(string $key = null, string $value = null)
     {
         if ($key) {
             if ($value !== null) {
@@ -256,9 +338,10 @@ class Request extends Component
 
     /**
      * 设置当前请求的$REQUEST数组
-     * @param $request
+     * @param array $request
+     * @return bool
      */
-    public function setRequest($request)
+    public function setRequest(array $request): bool
     {
         if (is_array($request)) {
             $this->REQUEST = $request;
@@ -269,11 +352,11 @@ class Request extends Component
 
     /**
      * 获取 REQUEST数据
-     * @param null $key
+     * @param string $key
      * @param null $value
      * @return array|mixed
      */
-    public function request($key = null, $value = null)
+    public function request(string $key = null, $value = null)
     {
         if ($key) {
             if ($value !== null) {
@@ -287,9 +370,10 @@ class Request extends Component
 
     /**
      * 设置当前请求的$HEADER数组
-     * @param $header
+     * @param array $header
+     * @return bool
      */
-    public function setHeader($header)
+    public function setHeader(array $header): bool
     {
         if (is_array($header)) {
             $this->HEADER = $header;
@@ -300,10 +384,10 @@ class Request extends Component
 
     /**
      * 获取 HEADER数据
-     * @param null $key
+     * @param string $key
      * @return array|mixed
      */
-    public function header($key = null)
+    public function header(string $key = null)
     {
         if ($key) {
             return $this->HEADER[$key] ?? '';
@@ -314,9 +398,10 @@ class Request extends Component
 
     /**
      * 设置当前请求的$FILES数组
-     * @param $files
+     * @param array $files
+     * @return bool
      */
-    public function setFiles($files)
+    public function setFiles(array $files): bool
     {
         if (is_array($files)) {
             $this->FILES = $files;
@@ -327,20 +412,19 @@ class Request extends Component
 
     /**
      * 获取 FILES数据
-     * @param null $key
-     * @return array|mixed
+     * @return array
      */
-    public function files()
+    public function files(): array
     {
         return $this->FILES ?? [];
     }
 
     /**
      * 获取所有头部信息或指定头部信息
-     * @param null $header_name 如果为空则获取所有头部信息，否则为指定名称的头部信息
+     * @param string|null $header_name 如果为空则获取所有头部信息，否则为指定名称的头部信息
      * @return mixed
      */
-    public function getallheaders($header_name = null)
+    public function getallheaders(string $header_name = null)
     {
         $headers = $this->header();
         if ($header_name) {
@@ -358,6 +442,7 @@ class Request extends Component
 
     /**
      * 获取当前应用客户端版本号，版本号格式为：0.01  0.21   1.01  依次类推
+     * @return float
      */
     public function getClinetVersion(): float
     {
@@ -372,7 +457,7 @@ class Request extends Component
      * 获取当前请求中客户端类型 pc--PC  wap--WAP  wx-WXP  app- weapp
      * @return string
      */
-    public function getClinetType()
+    public function getClinetType(): string
     {
         $clienttype = 'pc';
         if ($this->header('clienttype')) {
@@ -385,15 +470,25 @@ class Request extends Component
         return $clienttype;
     }
 
-    public function rawContent(){
-        if($this->http_request){
+    /**
+     * 获取 rawContent
+     * @return |null
+     */
+    public function rawContent()
+    {
+        if ($this->http_request) {
             return $this->http_request->rawContent();
         }
         return null;
     }
 
-    public function getHttpRequest(){
-        if($this->http_request){
+    /**
+     * 获取 http_request
+     * @return |null
+     */
+    public function getHttpRequest()
+    {
+        if ($this->http_request) {
             return $this->http_request;
         }
         return null;

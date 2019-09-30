@@ -21,8 +21,9 @@ class ChromePHPHandlerTest extends TestCase
 {
     protected function setUp()
     {
+        $SERVER = ctx()->server();
         TestChromePHPHandler::reset();
-        $_SERVER['HTTP_USER_AGENT'] = 'Monolog Test; Chrome/1.0';
+        $SERVER['HTTP_USER_AGENT'] = 'Monolog Test; Chrome/1.0';
     }
 
     public function testHeaders()

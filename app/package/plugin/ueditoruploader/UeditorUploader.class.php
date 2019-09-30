@@ -45,7 +45,8 @@ class UeditorUploader extends \cn\eunionz\core\Plugin
      * @return mixed
      */
     private function upFile() {
-        $file = $this->file = $_FILES[$this->fileField];
+        $FILES = ctx()->files();
+        $file = $this->file = $FILES[$this->fileField];
         if (!$file) {
             $this->stateInfo = $this->getStateInfo("ERROR_FILE_NOT_FOUND");
             return;
@@ -165,7 +166,8 @@ class UeditorUploader extends \cn\eunionz\core\Plugin
      */
     private function getFilePath() {
         $fullname = $this->fullName;
-        $rootPath = $_SERVER['DOCUMENT_ROOT'];
+        $SERVER = ctx()->server();
+        $rootPath = $SERVER['DOCUMENT_ROOT'];
         if (substr($fullname, 0, 1) != '/') {
             $fullname = '/' . $fullname;
         }

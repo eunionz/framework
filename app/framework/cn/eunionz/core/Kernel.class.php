@@ -9,9 +9,7 @@
 
 namespace cn\eunionz\core;
 
-
 use cn\eunionz\exception\ControllerNotFoundException;
-use cn\eunionz\exception\MethodNotFoundException;
 
 defined('APP_IN') or exit('Access Denied');
 
@@ -66,7 +64,6 @@ class Kernel
      */
     private static $_model_objects = array();
 
-    public const APP_FRAMEWORK_VERSION = "1.0.0";
 
     /**
      * 基于当前请求FD保存的单例模式的上下文对像集合
@@ -86,7 +83,7 @@ class Kernel
      */
     private const FONT_LOGO = "
     _ _ _ _                
-   |  _ _ _|   _     _    _ _ _ _    _     ___     _ _ _ _    _ _ _ _   Version " . self::APP_FRAMEWORK_VERSION . "
+   |  _ _ _|   _     _    _ _ _ _    _     ___     _ _ _ _    _ _ _ _   Version " . APP_FRAMEWORK_VERSION . "
    | |_ _ _   | |   | |  | | _ | |  |_|   / _ \   | | _ | |  |_ _ _  | 
    |  _ _ _|  | |   | |  | |   | |  | |  | ( ) |  | |   | |      /  /
    | |_ _ _   | | _ | |  | |   | |  | |  | (_) |  | |   | |    /  /_ 
@@ -101,14 +98,14 @@ class Kernel
     private static $background_colors = ['black' => '40', 'red' => '41', 'green' => '42', 'yellow' => '43', 'blue' => '44', 'magenta' => '45', 'cyan' => '46', 'light_gray' => '47',];
 
 
-    public static function showLogo()
+    public static function showLogo(): void
     {
         self::console(self::FONT_LOGO);
     }
 
 
     // Returns colored string
-    public static function getColoredString($string, $foreground_color = 'light_green', $background_color = null)
+    public static function getColoredString(string $string, string $foreground_color = 'light_green', string $background_color = null): string
     {
         $colored_string = "";
 
@@ -133,7 +130,7 @@ class Kernel
 
     }
 
-    public static function setContext(Context $ctx)
+    public static function setContext(Context $ctx): void
     {
         self::$contexts[self::getRequestFd()] = $ctx;
     }
@@ -146,7 +143,7 @@ class Kernel
         return null;
     }
 
-    public static function destoryContext()
+    public static function destoryContext(): void
     {
         if (isset(self::$contexts[self::getRequestFd()])) {
             unset(self::$contexts[self::getRequestFd()]);
@@ -161,9 +158,9 @@ class Kernel
      * 获取框架版本号
      * @return string
      */
-    public function getVersion()
+    public function getVersion(): string
     {
-        return self::APP_FRAMEWORK_VERSION;
+        return APP_FRAMEWORK_VERSION;
     }
 
     /**
@@ -172,7 +169,7 @@ class Kernel
      * @param bool $single 是否单例模式
      * @return mixed 返回对像
      */
-    public final function loadCore($class, $single = true)
+    public final function loadCore(string $class, bool $single = true): ?Kernel
     {
         if (strpos($class, '\\') === false) {
             $class = "\\cn\\eunionz\\core\\" . ucfirst($class);
@@ -180,17 +177,13 @@ class Kernel
         if ($single && isset(self::$_core_objects[$class])) {
             return self::$_core_objects[$class];
         }
-        if (!$single) {
-            $obj = new $class;
-            if (method_exists($obj, 'initialize')) {
-                $obj->initialize();
-            }
 
-            return $obj;
-        }
         $obj = new $class;
         if (method_exists($obj, 'initialize')) {
             $obj->initialize();
+        }
+        if (!$single) {
+            return $obj;
         }
         self::$_core_objects[$class] = $obj;
         return self::$_core_objects[$class];
@@ -202,7 +195,7 @@ class Kernel
      * @param bool $single
      * @return mixed
      */
-    public function loadComponent($class, $single = true)
+    public function loadComponent(string $class, bool $single = true): ?Component
     {
         if (false === stripos($class, "\\")) {
             $class = "\\cn\\eunionz\\component\\" . strtolower($class) . '\\' . ucfirst($class);
@@ -231,7 +224,7 @@ class Kernel
      * @param bool $single
      * @return Service
      */
-    public function loadService($class, $single = true)
+    public function loadService(string $class, bool $single = true): ?Service
     {
         if (stripos($class, "\\") === false) {
             $class = "\\package\\service\\" . strtolower($class) . '\\' . ucfirst($class);
@@ -269,7 +262,7 @@ class Kernel
      * @param bool $single
      * @return Plugin
      */
-    public function loadPlugin($class, $single = true)
+    public function loadPlugin(string $class, bool $single = true): ?Plugin
     {
         if (stripos($class, "\\") === false) {
             $class = "\\package\\plugin\\" . strtolower($class) . '\\' . ucfirst($class);
@@ -307,7 +300,7 @@ class Kernel
      * @param null $APP_ASSEMBLY_NAME
      * @return Model
      */
-    public function loadModel($class, $single = true)
+    public function loadModel(string $class, bool $single = true): ?Model
     {
         if (stripos($class, "\\") === false) {
             $class = "\\package\\model\\" . ucfirst($class);
@@ -349,7 +342,7 @@ class Kernel
      * @return mixed
      * @throws \ReflectionException
      */
-    public function loadActionByUrl($url, $get = array(), $post = array(), $files = array(), $request = array())
+    public function loadActionByUrl(string $url, array $get = array(), array $post = array(), array $files = array(), array $request = array())
     {
         $old_request = ctx()->getRequest()->request();
         $old_get = ctx()->getRequest()->get();
@@ -386,7 +379,7 @@ class Kernel
         if ($clinetVersion > 0) {
             $client_version_suffixs = $this->cache('shop_0_shop_actions', array($classes, $action, $clinetVersion));
             if (!is_array($client_version_suffixs)) {
-                $APP_SHOP_VERSION_LISTS = getConfig('version', 'APP_VERSION_LISTS');
+                $APP_SHOP_VERSION_LISTS = self::getConfig('version', 'APP_VERSION_LISTS');
                 if ($APP_SHOP_VERSION_LISTS) {
                     for ($i = count($APP_SHOP_VERSION_LISTS) - 1; $i >= 0; $i--) {
                         $version = $APP_SHOP_VERSION_LISTS[$i];
@@ -459,9 +452,8 @@ class Kernel
      * @return mixed
      * @throws \ReflectionException
      */
-    public function loadAction($classes, $action, $params = array(), $get = array(), $post = array(), $files = array(), $request = array())
+    public function loadAction(string $classes, string $action, array $params = array(), array $get = array(), array $post = array(), array $files = array(), array $request = array())
     {
-
         if (!class_exists($classes)) {
             throw new ControllerNotFoundException(ctx()->getI18n()->getLang('error_router_title'), ctx()->getI18n()->getLang('error_router_controller', $classes));
         }
@@ -477,9 +469,9 @@ class Kernel
     /**
      * 加载常量
      */
-    public function loadConstrants()
+    public function loadConstrants(): void
     {
-        $constants_path = APP_PACKAGE_BASE_PATH . 'package' . APP_DS . 'constants';
+        $constants_path = APP_PACKAGE_REAL_PATH . 'constants';
         if (is_dir($constants_path)) {
             $dir = opendir($constants_path);
             if ($dir) {
@@ -499,15 +491,25 @@ class Kernel
 
     /**
      * getServer 获取server对象
-     * @return   object
+     * @param string $index
+     * @return mixed|null
      */
-    public static function getServer($index = 0)
+    public static function getServer(string $index = 'main')
     {
-        if ($index <= 0 && self::$_swoole_main_server) {
-            return self::$_swoole_main_server;
+        if (!APP_IS_IN_SWOOLE) return null;
+        if (APP_IS_ONLY_ONE_SERVER) {
+            if (self::$_swoole_main_server) {
+                return self::$_swoole_main_server;
+            }
         } else {
-            if (isset(self::$_swoole_other_servers[$index]) && self::$_swoole_other_servers[$index])
-                return self::$_swoole_other_servers[$index];
+            if ($index == 'main') {
+                if (self::$_swoole_main_server) {
+                    return self::$_swoole_main_server;
+                }
+            } else {
+                if (isset(self::$_swoole_other_servers[$index]) && self::$_swoole_other_servers[$index])
+                    return self::$_swoole_other_servers[$index];
+            }
         }
         return null;
     }
@@ -515,9 +517,10 @@ class Kernel
 
     /**
      * getConnections 获取指定服务器当前所有的连接
-     * @return  object
+     * @param string $index
+     * @return array
      */
-    public static function getConnections($index = 0)
+    public static function getConnections(string $index = 'main')
     {
         if (self::getServer($index)) {
             return self::getServer($index)->connections;
@@ -529,62 +532,79 @@ class Kernel
      * 获取当前worker的进程PID
      * @return int
      */
-    public static function getCurrentWorkerPid()
+    public static function getCurrentWorkerPid(): int
     {
-        return posix_getpid();
+        if (APP_IS_IN_SWOOLE) {
+            return posix_getpid();
+        }
+        return 1;
     }
 
     /**
      * 获取当前服务器主进程的PID
      * @return   int
      */
-    public static function getMasterPid()
+    public static function getMasterPid(): int
     {
-        return self::getServer()->master_pid;
+        if (APP_IS_IN_SWOOLE) {
+            return self::getServer()->master_pid;
+        }
+        return 1;
     }
 
     /**
      * 获取当前服务器管理进程的PID
      * @return   int
      */
-    public static function getManagerPid()
+    public static function getManagerPid(): int
     {
-        return self::getServer()->manager_pid;
+        if (APP_IS_IN_SWOOLE) {
+            return self::getServer()->manager_pid;
+        }
+        return 1;
+
     }
 
     /**
      * 获取当前处理的worker_id
      * @return   int
      */
-    public static function getCurrentWorkerId()
+    public static function getCurrentWorkerId(): int
     {
-        $workerId = self::getServer()->worker_id;
-        return $workerId;
+        if (APP_IS_IN_SWOOLE) {
+            return self::getServer()->worker_id;
+        }
+        return 1;
     }
 
-    public static function getRequestUniqueId()
+    public static function getRequestUniqueId(): string
     {
-        return self::getCurrentWorkerPid() . '_' . \Swoole\Coroutine::getUid();
+        if (APP_IS_IN_SWOOLE) {
+            return self::getCurrentWorkerPid() . '_' . \Swoole\Coroutine::getUid();
+        } else {
+            return "1";
+        }
+
     }
 
     /**
      * 设置当前协程对应的请求FD
      * @param $fd
      */
-    public static function setRequestFd($fd)
+    public static function setRequestFd(int $fd): void
     {
-        return self::$request_fds[self::getRequestUniqueId()] = $fd;
+        self::$request_fds[self::getRequestUniqueId()] = $fd;
     }
 
     /**
      * 获取当前协程对应的请求FD
      */
-    public static function getRequestFd()
+    public static function getRequestFd(): int
     {
         if (isset(self::$request_fds[self::getRequestUniqueId()])) {
             return self::$request_fds[self::getRequestUniqueId()];
         } else {
-            return 0;
+            return 1;
         }
     }
 
@@ -608,7 +628,7 @@ class Kernel
      * @param $key 配置变量名
      * @param $value 值
      */
-    public static function setConfig($names, $key, $value)
+    public static function setConfig(string $names, string $key, $value): void
     {
         self::$_app_config_settings[self::getRequestUniqueId()][$names][$key] = $value;
     }
@@ -621,7 +641,7 @@ class Kernel
      *
      * @return mixed
      */
-    public static function getConfig($names, $key = '')
+    public static function getConfig(string $names, string $key = '')
     {
         $config_files = array();
         if (!isset(self::$_app_config_types[$names])) {
@@ -679,7 +699,7 @@ class Kernel
      *
      * @return mixed
      */
-    public static function reloadConfig($names, $key = '')
+    public static function reloadConfig(string $names, string $key = '')
     {
         unset(self::$_app_config_types[$names]);
         unset(self::$_app_config_settings[self::getRequestUniqueId()][$names]);
@@ -696,7 +716,7 @@ class Kernel
      *
      * @return bool
      */
-    public function log($level = APP_ERROR, $message, $filename = '')
+    public function log(int $level = APP_ERROR, string $message, string $filename = ''): bool
     {
         return $this->loadCore('log')->log($level, $message, $filename);
     }
@@ -707,9 +727,9 @@ class Kernel
      * @param int $level
      * @param $msg
      */
-    public static function console($msg, $level = 0, $is_br = '')
+    public static function console(string $msg, int $level = 0, string $is_br = ''): string
     {
-        if (getConfig('app', 'APP_LOG')) {
+        if (self::getConfig('app', 'APP_LOG')) {
             switch ($level) {
                 case APP_ERROR:
                     $title = '[ERROR  ]  ' . date('Y-m-d H:i:s') . ': ';
@@ -739,13 +759,14 @@ class Kernel
                     $color = '';
                     break;
             }
-            if ($level > getConfig('app', 'APP_LOG_LEVEL'))
-                return false;
+            if ($level > self::getConfig('app', 'APP_LOG_LEVEL'))
+                return "";
 
             $str = self::getColoredString($title . $msg, $color);
-            echo $str . $is_br;
+            @file_put_contents("php://stdout", $str . $is_br);
             return $str . $is_br;
         }
+        return "";
     }
 
     /**
@@ -753,7 +774,7 @@ class Kernel
      * @param int $level
      * @param $msg
      */
-    public static function consoleln($msg, $level = 0)
+    public static function consoleln(string $msg, int $level = 0): string
     {
         return self::console($msg, $level, PHP_EOL);
     }
@@ -763,7 +784,7 @@ class Kernel
      * @param $controller_class
      * @return string
      */
-    public static function getRouterPathByControllerClass($controller_class)
+    public static function getRouterPathByControllerClass(string $controller_class): string
     {
         $path = trim($controller_class, "\\");
         $path = str_replace("\\", "/", str_replace("package\\controller\\", "", $path));
@@ -781,7 +802,7 @@ class Kernel
      * @return array|mixed              返回HTTP服务器url输出结果
      * @throws \cn\eunionz\exception\BaseException
      */
-    public function http_get_call($serice_conf_name, $url, $params = array(), $is_admin = false, $add_headers = array())
+    public function http_get_call(string $serice_conf_name, string $url, array $params = array(), bool $is_admin = false, array $add_headers = array())
     {
         $config = self::getConfig('http', $serice_conf_name);
         $httpclient = new \package\application\HttpClient($config['host'], $config['port'], $config['is_ssl'], $config['timeout']);
@@ -799,7 +820,7 @@ class Kernel
      * @return array|mixed              返回HTTP服务器url输出结果
      * @throws \cn\eunionz\exception\BaseException
      */
-    public function http_post_call($serice_conf_name, $url, $params = array(), $is_admin = false, $add_headers = array(), $files = array())
+    public function http_post_call(string $serice_conf_name, string $url, array $params = array(), bool $is_admin = false, array $add_headers = array(), array $files = array())
     {
         $config = self::getConfig('http', $serice_conf_name);
         $httpclient = new \package\application\HttpClient($config['host'], $config['port'], $config['is_ssl'], $config['timeout']);
@@ -814,7 +835,7 @@ class Kernel
      * @return array|mixed       返回RPC服务类服务方法返回结果
      * @throws \cn\eunionz\exception\BaseException
      */
-    public function rpc_client($serice_conf_name, $service_class, $add_headers = array())
+    public function rpc_client(string $serice_conf_name, string $service_class, array $add_headers = array())
     {
         $config = self::getConfig('rpc', $serice_conf_name);
         $rpcclient = new \package\application\RpcClient($config['host'], $config['port'], $config['timeout']);
@@ -832,7 +853,7 @@ class Kernel
      * @return array|mixed       返回RPC服务类服务方法返回结果
      * @throws \cn\eunionz\exception\BaseException
      */
-    public function rpc_call($serice_conf_name, $service_class, $service_method, $params = array(), $add_headers = array())
+    public function rpc_call(string $serice_conf_name, string $service_class, string $service_method, array $params = array(), array $add_headers = array())
     {
         $config = self::getConfig('rpc', $serice_conf_name);
         $rpcclient = new \package\application\RpcClient($config['host'], $config['port'], $config['timeout']);
@@ -844,7 +865,7 @@ class Kernel
      * 检查指定进程名称进程是否存在
      * @param $process_name
      */
-    public static function checkProcessExistsByName($process_name)
+    public static function checkProcessExistsByName(string $process_name): bool
     {
         @exec("ps -ef|grep {$process_name}", $result);
         $sum = count($result);

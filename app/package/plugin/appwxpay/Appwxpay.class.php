@@ -13,7 +13,8 @@ namespace package\plugin\appwxpay;
 
 defined('APP_IN') or exit('Access Denied');
 
-class Appwxpay extends \cn\eunionz\core\Plugin {
+class Appwxpay extends \cn\eunionz\core\Plugin
+{
 
     /**
      * 微信支付APP_ID
@@ -54,7 +55,8 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
     private $SSLKEY_PATH = "";
 
 
-    function __construct() {
+    function __construct()
+    {
 
         $payment = $this->loadService('shop_payment')->get_payment('appwxpay');
         if (isset($payment)) {
@@ -75,16 +77,19 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
 
     /**
      * 生成支付代码
-     * @param   array $order 订单信息
-     * @param   array $payment 支付方式信息
+     * @param array $order 订单信息
+     * @param array $payment 支付方式信息
      */
-    public function get_code($order, $payment, $front_url = '') {
+    public function get_code($order, $payment, $front_url = '')
+    {
         include_once("wxpay/WxPayPubHelper.php");
         \WxPayConf_pub::$APPID = $this->wxpay_app_id;
         \WxPayConf_pub::$APPSECRET = $this->wxpay_app_secret;
         \WxPayConf_pub::$MCHID = $this->wxpay_partnerid;
         \WxPayConf_pub::$KEY = $this->wxpay_partnerkey;
-        if ($_SESSION['is_weixin_browser']) {
+        $SESSION = ctx()->session();
+        $SERVER = ctx()->server();
+        if ($SESSION['is_weixin_browser']) {
             // Wap
 
             $charset = 'utf-8';
@@ -95,9 +100,9 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
             //http://demo3.s1.shop.iwanqi.cn/mobile/order.php?act=done&code=021072b846514da6f4bb71028b6910d-&state=STATE
             //通过code获得openid
             //http://demo3.s1.shop.iwanqi.cn/mobile/order.php?act=done&code=021072b846514da6f4bb71028b6910d-&state=STATE
-            if (!isset($_SESSION['weixin_openid']) || empty($_SESSION['weixin_openid'])) {
-                if (!isset($_SESSION['code'])) {
-                    $__url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            if (!isset($SESSION['weixin_openid']) || empty($SESSION['weixin_openid'])) {
+                if (!isset($SESSION['code'])) {
+                    $__url = 'http://' . $SERVER['HTTP_HOST'] . $SERVER['REQUEST_URI'];
                     //触发微信返回code码
                     $url = $jsApi->createOauthUrlForCode($__url, $this->wxpay_app_id);
                     //return "<button style='width:300px; height:44px; background-color:#FE6714; border:0px #FE6714 solid; cursor: pointer;  color:white;  font-size:16px;' type='button' onClick='callpay()' >立即支付</button>";
@@ -106,19 +111,19 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
 
                 } else {
                     //获取code码，以获取openid
-                    $code = $_SESSION['code'];
+                    $code = $SESSION['code'];
                     $jsApi->setCode($code);
                     $openid = $jsApi->getOpenId($this->wxpay_app_id, $this->wxpay_app_secret);
                     if (!is_null($openid)) {
-                        $_SESSION['openid'] = $openid;
-                        $_SESSION['weixin_openid'] = $openid;
+                        ctx()->session('openid', $openid);
+                        ctx()->session('weixin_openid', $openid);
                     }
                 }
             } else {
-                $_SESSION['openid'] = $_SESSION['weixin_openid'];
+                ctx()->session('openid' , $SESSION['weixin_openid']);
             }
 
-            $openid = (isset($_SESSION['openid'])) ? $_SESSION['openid'] : ((isset($openid)) ? $openid : '');
+            $openid = (isset($SESSION['openid'])) ? $SESSION['openid'] : ((isset($openid)) ? $openid : '');
 
             //=========步骤2：使用统一支付接口，获取prepay_id============
             $unifiedOrder = new \UnifiedOrder_pub();
@@ -239,11 +244,11 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
             }
 
 
-            if (!file_exists(APP_RUNTIME_REAL_PATH . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'order')) {
-                @mkdir(APP_RUNTIME_REAL_PATH . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'order');
+            if (!file_exists(ctx()->getAppRuntimeRealPath() . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'order')) {
+                @mkdir(ctx()->getAppRuntimeRealPath() . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'order');
             }
 
-            $this->loadPlugin('phpqrcode')->create($code_url, APP_RUNTIME_REAL_PATH . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'order' . APP_DS . $order['order_id'] . '.png', false, 'L', true, 10, false);
+            $this->loadPlugin('phpqrcode')->create($code_url, ctx()->getAppRuntimeRealPath() . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'order' . APP_DS . $order['order_id'] . '.png', false, 'L', true, 10, false);
             return array('result' => $this->loadPlugin('common')->getDomain() . '/runtime/uploads/qrcode/order/' . $order['order_id'] . '.png');
 
         }
@@ -254,37 +259,41 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
     /**
      * 分销订单生成
      * */
-    public function distributor_get_code($order, $payment, $front_url = '') {
+    public function distributor_get_code($order, $payment, $front_url = '')
+    {
         include_once("wxpay/WxPayPubHelper.php");
         \WxPayConf_pub::$APPID = $this->wxpay_app_id;
         \WxPayConf_pub::$APPSECRET = $this->wxpay_app_secret;
         \WxPayConf_pub::$MCHID = $this->wxpay_partnerid;
         \WxPayConf_pub::$KEY = $this->wxpay_partnerkey;
-        if ($_SESSION['is_weixin_browser']) {// Wap
+        $SESSION = ctx()->session();
+        $SERVER = ctx()->server();
+
+        if ($SESSION['is_weixin_browser']) {// Wap
             $charset = 'utf-8';
             $jsApi = new \JsApi_pub();
             //=========步骤1：网页授权获取用户openid============
-            if (!isset($_SESSION['weixin_openid']) || empty($_SESSION['weixin_openid'])) {
-                if (!isset($_SESSION['code'])) {
-                    $__url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            if (!isset($SESSION['weixin_openid']) || empty($SESSION['weixin_openid'])) {
+                if (!isset($SESSION['code'])) {
+                    $__url = 'http://' . $SERVER['HTTP_HOST'] . $SERVER['REQUEST_URI'];
                     //触发微信返回code码
                     $url = $jsApi->createOauthUrlForCode($__url, $this->wxpay_app_id);
                     header("Location: $url");
                 } else {
                     //获取code码，以获取openid
-                    $code = $_SESSION['code'];
+                    $code = $SESSION['code'];
                     $jsApi->setCode($code);
                     $openid = $jsApi->getOpenId($this->wxpay_app_id, $this->wxpay_app_secret);
                     if (!is_null($openid)) {
-                        $_SESSION['openid'] = $openid;
-                        $_SESSION['weixin_openid'] = $openid;
+                        ctx()->session('openid', $openid);
+                        ctx()->session('weixin_openid', $openid);
                     }
                 }
             } else {
-                $_SESSION['openid'] = $_SESSION['weixin_openid'];
+                ctx()->session('openid', $SESSION['weixin_openid']);
             }
 
-            $openid = (isset($_SESSION['openid'])) ? $_SESSION['openid'] : ((isset($openid)) ? $openid : '');
+            $openid = (isset($SESSION['openid'])) ? $SESSION['openid'] : ((isset($openid)) ? $openid : '');
 
             //=========步骤2：使用统一支付接口，获取prepay_id============
             $unifiedOrder = new \UnifiedOrder_pub();
@@ -401,16 +410,17 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
             if ($error_desc) {
                 return array('result' => false, 'error_desc' => $error_desc);
             }
-            if (!file_exists(APP_RUNTIME_REAL_PATH . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'dist_order')) {
-                @mkdir(APP_RUNTIME_REAL_PATH . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'dist_order');
+            if (!file_exists(ctx()->getAppRuntimeRealPath() . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'dist_order')) {
+                @mkdir(ctx()->getAppRuntimeRealPath() . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'dist_order');
             }
-            $this->loadPlugin('phpqrcode')->create($code_url, APP_RUNTIME_REAL_PATH . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'dist_order' . APP_DS . $order['order_id'] . '.png', false, 'L', true, 10, false);
+            $this->loadPlugin('phpqrcode')->create($code_url, ctx()->getAppRuntimeRealPath() . 'uploads' . APP_DS . 'qrcode' . APP_DS . 'dist_order' . APP_DS . $order['order_id'] . '.png', false, 'L', true, 10, false);
             return array('result' => $this->loadPlugin('common')->getDomain() . '/runtime/uploads/qrcode/dist_order/' . $order['order_id'] . '.png');
         }
     }
 
     //获取url后面字符
-    function getParameter($url, $keys) {
+    function getParameter($url, $keys)
+    {
         $arr = array();
         $arrvalue = array();
         $url = substr($url, strpos($url, "?") + 1, strlen($url));
@@ -428,10 +438,11 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
     /**
      * 响应操作
      */
-    function respond($array_data) {
+    function respond($array_data)
+    {
         $payment = $this->loadService('shop_payment')->get_payment('wxpay');
         if ($this->loadPlugin('common')->is_mobile_browser()) {
-            $this->loadCore('log')->write(APP_DEBUG, 'respond:mobile', 'appwxpay');
+            $this->loadCore('log')->log(APP_DEBUG, 'respond:mobile', 'appwxpay');
             /*取返回参数*/
             $fields = 'bank_billno,bank_type,discount,fee_type,input_charset,notify_id,out_trade_no,partner,product_fee' . ',sign_type,time_end,total_fee,trade_mode,trade_state,transaction_id,transport_fee,result_code,return_code';
             $arr = null;
@@ -461,7 +472,7 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
 
         } else {
             //pc
-            $this->loadCore('log')->write(APP_DEBUG, 'respond:pc', 'appwxpay');
+            $this->loadCore('log')->log(APP_DEBUG, 'respond:pc', 'appwxpay');
             /*取返回参数*/
             $fields = 'appid,bank_type,cash_fee,code,fee_type,is_subscribe,mch_id,nonce_str,openid' . ',out_trade_no,result_code,return_code,sign,time_end,total_fee,trade_type,transaction_id';
             $arr = null;
@@ -489,8 +500,8 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
             $this->loadService('order_info')->order_paid($order_sn);
             $this->loadService('order_info')->delete_payment_notice_data('appwxpay', $order_sn);
 
-            if (file_exists(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx" . $order_id . "html")) {
-                @unlink(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx" . $order_id . "html");
+            if (file_exists(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx" . $order_id . "html")) {
+                @unlink(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx" . $order_id . "html");
             }
             return true;
 
@@ -501,7 +512,8 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
     /**
      * 自动响应操作
      */
-    function auto_respond($post) {
+    function auto_respond($post)
+    {
         $payment = $this->loadService('shop_payment')->get_payment('wxpay');
         $arr = $post;
         $order_sn = $arr['out_trade_no'];
@@ -522,8 +534,8 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
         $this->loadService('order_info')->order_paid($order_sn);
         $this->loadService('order_info')->delete_payment_notice_data('appwxpay', $order_sn);
 
-        if (file_exists(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx" . $order_id . "html")) {
-            @unlink(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx" . $order_id . "html");
+        if (file_exists(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx" . $order_id . "html")) {
+            @unlink(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx" . $order_id . "html");
         }
         return true;
 
@@ -532,11 +544,12 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
     /**
      * 响应操作
      */
-    function distributor_respond($array_data) {
-        $platform_shopid=$this->get_platform_shopid();
-        $payment = $this->loadService('shop_payment')->get_payment('wxpay',$platform_shopid);
+    function distributor_respond($array_data)
+    {
+        $platform_shopid = $this->get_platform_shopid();
+        $payment = $this->loadService('shop_payment')->get_payment('wxpay', $platform_shopid);
         if ($this->loadPlugin('common')->is_mobile_browser()) {
-            $this->loadCore('log')->write(APP_DEBUG, 'respond:mobile', 'appwxpay');
+            $this->loadCore('log')->log(APP_DEBUG, 'respond:mobile', 'appwxpay');
             /*取返回参数*/
             $fields = 'bank_billno,bank_type,discount,fee_type,input_charset,notify_id,out_trade_no,partner,product_fee' . ',sign_type,time_end,total_fee,trade_mode,trade_state,transaction_id,transport_fee,result_code,return_code';
             $arr = null;
@@ -552,7 +565,7 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
                 return false;
             }
             /* 检查支付的金额是否相符 */
-            if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee'] / 100,$platform_shopid)) {
+            if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee'] / 100, $platform_shopid)) {
                 return false;
             }
             /* 改变订单状态 */
@@ -561,7 +574,7 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
             return true;
         } else {
             //pc
-            $this->loadCore('log')->write(APP_DEBUG, 'respond:pc', 'appwxpay');
+            $this->loadCore('log')->log(APP_DEBUG, 'respond:pc', 'appwxpay');
             /*取返回参数*/
             $fields = 'appid,bank_type,cash_fee,code,fee_type,is_subscribe,mch_id,nonce_str,openid' . ',out_trade_no,result_code,return_code,sign,time_end,total_fee,trade_type,transaction_id';
             $arr = null;
@@ -572,20 +585,20 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
             }
             $order_sn = $arr['out_trade_no'];
             $this->loadService('distributor_buy_log')->save_payment_notice_data('appwxpay', $order_sn, $arr);
-            $order_id = $this->loadService('distributor_buy_log')->get_order_id_by_order_sn($order_sn,$platform_shopid);
+            $order_id = $this->loadService('distributor_buy_log')->get_order_id_by_order_sn($order_sn, $platform_shopid);
             /* 如果trade_state大于0则表示支付失败 */
             if ($arr['result_code'] != "SUCCESS" || $arr['return_code'] != "SUCCESS") {
                 return false;
             }
             /* 检查支付的金额是否相符 */
-            if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee'] / 100,$platform_shopid)) {
+            if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee'] / 100, $platform_shopid)) {
                 return false;
             }
             /* 改变订单状态 */
             $this->loadService('distributor_buy_log')->order_paid($order_sn);
             $this->loadService('distributor_buy_log')->delete_payment_notice_data('appwxpay', $order_sn);
-            if (file_exists(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx_dist" . $order_id . "html")) {
-                @unlink(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx_dist" . $order_id . "html");
+            if (file_exists(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx_dist" . $order_id . "html")) {
+                @unlink(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx_dist" . $order_id . "html");
             }
             return true;
         }
@@ -594,8 +607,9 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
     /**
      * 自动响应操作
      */
-    function distributor_auto_respond($post) {
-        $platform_shopid=$this->get_platform_shopid();
+    function distributor_auto_respond($post)
+    {
+        $platform_shopid = $this->get_platform_shopid();
         $payment = $this->loadService('shop_payment')->get_payment('wxpay');
         $arr = $post;
         $order_sn = $arr['out_trade_no'];
@@ -605,14 +619,14 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
             return false;
         }
         /* 检查支付的金额是否相符 */
-        if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee'] / 100,$platform_shopid)) {
+        if (!$this->loadService('distributor_buy_log')->check_order_pay_money($order_sn, $arr['total_fee'] / 100, $platform_shopid)) {
             return false;
         }
         /* 改变订单状态 */
         $this->loadService('distributor_buy_log')->order_paid($order_sn);
         $this->loadService('distributor_buy_log')->delete_payment_notice_data('appwxpay', $order_sn);
-        if (file_exists(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx_dist" . $order_id . "html")) {
-            @unlink(APP_RUNTIME_REAL_PATH . "data/wxhtml/wx_dist" . $order_id . "html");
+        if (file_exists(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx_dist" . $order_id . "html")) {
+            @unlink(ctx()->getAppRuntimeRealPath() . "data/wxhtml/wx_dist" . $order_id . "html");
         }
         return true;
     }
@@ -625,9 +639,10 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
      * @param array $refund 退款单数据
      * @return bool true--成功  false--失败
      */
-    public function refund($order, $refund) {
+    public function refund($order, $refund)
+    {
         $obj = null;//new \stdClass();
-        $this->loadCore('log')->write(APP_ERROR, 'appwxpay: ' . print_r($refund, true), 'appwxpay');
+        $this->loadCore('log')->log(APP_ERROR, 'appwxpay: ' . print_r($refund, true), 'appwxpay');
 
         $payment = $this->loadService('shop_payment')->get_payment('appwxpay');
         require_once "wxlib/WxPay.Api.php";
@@ -670,13 +685,13 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
             }
 
             //业务数据处理
-            $this->loadCore('log')->write(APP_ERROR, "refund3:", 'appwxpay');
+            $this->loadCore('log')->log(APP_ERROR, "refund3:", 'appwxpay');
 
             //修改退款单号的状态
             $orefund_way = 0;// 0:线上退款 1：线下退款  
             //直接调用退款成功处理函数
             $ret = $this->loadService('order_info')->op_refund_by_order_sn($refund['order_sn'], $refund['orefund_amount'], $remarket, $refund['orefund_id'], $orefund_way);
-            $this->loadCore('log')->write(APP_ERROR, "refund4:" . $ret['msg'], 'appwxpay');
+            $this->loadCore('log')->log(APP_ERROR, "refund4:" . $ret['msg'], 'appwxpay');
             return $ret;
         } else {
 
@@ -712,13 +727,13 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
             }
 
             //业务数据处理
-            $this->loadCore('log')->write(APP_ERROR, "refund3:", 'appwxpay');
+            $this->loadCore('log')->log(APP_ERROR, "refund3:", 'appwxpay');
 
             //修改退款单号的状态
             $orefund_way = 0;// 0:线上退款 1：线下退款  
             //直接调用退款成功处理函数
             $ret = $this->loadService('order_info')->op_refund_by_order_sn($refund['order_sn'], $refund['orefund_amount'], $remarket, $refund['orefund_id'], $orefund_way);
-            $this->loadCore('log')->write(APP_ERROR, "refund4:" . $ret['msg'], 'appwxpay');
+            $this->loadCore('log')->log(APP_ERROR, "refund4:" . $ret['msg'], 'appwxpay');
             return $ret;
         }
 
@@ -732,7 +747,8 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
      * @param array $order 订单数据
      * @param array $refund_transfer 退款转帐申请数据
      */
-    public function refund_notify() {
+    public function refund_notify()
+    {
 
         return true;
     }
@@ -742,7 +758,8 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
      * 创建sign
      * @return string
      */
-    public function create_sign($arr) {
+    public function create_sign($arr)
+    {
         $para = $this->parafilter($arr);
         $para = $this->argsort($para);
         $signValue = $this->createlinkstring($para);
@@ -756,7 +773,8 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
      * @param $para 需要拼接的数组
      * return 拼接完成以后的字符串
      */
-    public function createlinkstring($para) {
+    public function createlinkstring($para)
+    {
         $arg = "";
         foreach ($para as $key => $val) {
             $arg .= strtolower($key) . "=" . $val . "&";
@@ -779,7 +797,8 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
      * return 去掉空值与签名参数后的新签名参数组
      */
 
-    public function parafilter($para) {
+    public function parafilter($para)
+    {
         $para_filter = array();
         foreach ($para as $key => $val) {
             if ($key == "sign_method" || $key == "sign" || $val == "")
@@ -793,7 +812,8 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
      * @param $para 排序前的数组
      * return 排序后的数组
      */
-    public function argsort($para) {
+    public function argsort($para)
+    {
         ksort($para);
         reset($para);
         return $para;
@@ -803,7 +823,8 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
      * 从xml中获取数组
      * @return array
      */
-    public function getXmlArray() {
+    public function getXmlArray()
+    {
         $postStr = @$this->input();
         if ($postStr) {
             $postObj = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
@@ -817,8 +838,10 @@ class Appwxpay extends \cn\eunionz\core\Plugin {
         }
     }
 
-    function get_platform_shopid() {
-        return (isset($_SESSION['PLATFORM_SHOP_ID'])) ? $_SESSION['PLATFORM_SHOP_ID'] : $this->getConfig('shop', 'SHOP_ID');
+    function get_platform_shopid()
+    {
+        $SESSION = ctx()->session();
+        return (isset($SESSION['PLATFORM_SHOP_ID'])) ? $SESSION['PLATFORM_SHOP_ID'] : ctx()->getShopId();
     }
 
 }

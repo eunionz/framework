@@ -43,14 +43,14 @@ class Ftp extends \cn\eunionz\core\Plugin
     public function __construct($UPLOAD_REOMTE_SHARE_DIR='',$FTP_HOST='',$FTP_PORT='',$FTP_USER='',$FTP_PASS='',$INIT_DIR='')
     {
         if(!$INIT_DIR){
-            $this->init_dir= $this->getConfig('app','UPLOAD_REMOTE_INIT_DIR');
+            $this->init_dir= self::getConfig('app','UPLOAD_REMOTE_INIT_DIR');
         }else{
             $this->init_dir=$INIT_DIR;
         }
 
-        if($UPLOAD_REOMTE_SHARE_DIR || $this->getConfig('app','UPLOAD_REOMTE_SHARE_DIR')){
+        if($UPLOAD_REOMTE_SHARE_DIR || self::getConfig('app','UPLOAD_REOMTE_SHARE_DIR')){
             $this->mode=1;
-            $this->share_dir = $UPLOAD_REOMTE_SHARE_DIR?$UPLOAD_REOMTE_SHARE_DIR:$this->getConfig('app','UPLOAD_REOMTE_SHARE_DIR');
+            $this->share_dir = $UPLOAD_REOMTE_SHARE_DIR?$UPLOAD_REOMTE_SHARE_DIR:self::getConfig('app','UPLOAD_REOMTE_SHARE_DIR');
             $this->share_dir = str_ireplace("\\",'/',$this->share_dir);
             if(@chdir($this->share_dir)){
                 $this->curr_dir_path = $this->share_dir;
@@ -58,27 +58,27 @@ class Ftp extends \cn\eunionz\core\Plugin
             }
         }else{
             if(!$FTP_HOST){
-                $this->ftp_host=$this->getConfig('app','UPLOAD_REOMTE_FTP_SERVER');
+                $this->ftp_host=self::getConfig('app','UPLOAD_REOMTE_FTP_SERVER');
             }else{
                 $this->ftp_host=$FTP_HOST;
             }
 
             if(!$FTP_PORT){
-                $this->ftp_port=$this->getConfig('app','UPLOAD_REOMTE_FTP_PORT');
+                $this->ftp_port=self::getConfig('app','UPLOAD_REOMTE_FTP_PORT');
             }else{
                 $this->ftp_port=$FTP_PORT;
             }
 
 
             if(!$FTP_USER){
-                $this->ftp_user=$this->getConfig('app','UPLOAD_REMOTE_FTP_USER');
+                $this->ftp_user=self::getConfig('app','UPLOAD_REMOTE_FTP_USER');
             }else{
                 $this->ftp_user=$FTP_USER;
             }
 
 
             if(!$FTP_PASS){
-                $this->ftp_pass=$this->getConfig('app','UPLOAD_REMOTE_FTP_PASSWORD');
+                $this->ftp_pass=self::getConfig('app','UPLOAD_REMOTE_FTP_PASSWORD');
             }else{
                 $this->ftp_pass=$FTP_PASS;
             }

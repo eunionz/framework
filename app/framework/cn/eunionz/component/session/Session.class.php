@@ -39,7 +39,7 @@ class Session extends \cn\eunionz\core\Component implements \SessionHandlerInter
     }
 
     function __construct(){
-        $this->table = $this->getConfig('app','APP_SESSION_TABLE_NAME');
+        $this->table = self::getConfig('app','APP_SESSION_TABLE_NAME');
         $this->SESS_LIFE=get_cfg_var("session.gc_maxlifetime");//得到session的最大有效期。
         session_set_save_handler(
             array($this,"open"),
@@ -62,10 +62,10 @@ class Session extends \cn\eunionz\core\Component implements \SessionHandlerInter
     function read($key)
     {
         try{
-            $sql = "SELECT `sess_value` FROM `" . $this->table  . "` WHERE sess_shop_id=" . $this->getConfig('app','SHOP_ID') ." AND sess_key='" . str_replace("'","\\'",$key) ."' AND sess_expiry > ".time();
+            $sql = "SELECT `sess_value` FROM `" . $this->table  . "` WHERE sess_shop_id=" . ctx()->getShopId() ." AND sess_key='" . str_replace("'","\\'",$key) ."' AND sess_expiry > ".time();
             $rs = $this->loadComponent('db')->query($sql);
             if($rs){
-                //$sql="UPDATE `" . $this->table  . "` SET `sess_expiry`=" . time() ."  WHERE sess_shop_id=" . $this->getConfig('app','SHOP_ID') ." AND `sess_key`='{$key}'";
+                //$sql="UPDATE `" . $this->table  . "` SET `sess_expiry`=" . time() ."  WHERE sess_shop_id=" . self::getConfig('app','SHOP_ID') ." AND `sess_key`='{$key}'";
                 //$this->loadComponent('db')->exec($sql);
                 return $rs[0]['sess_value'];
             }else{
@@ -83,7 +83,7 @@ class Session extends \cn\eunionz\core\Component implements \SessionHandlerInter
     {
         try{
             $expiry=time()+$this->SESS_LIFE;
-            $sql="REPLACE INTO `" . $this->table  . "` SET `sess_key`='" . str_replace("'","\\'",$key) ."', `sess_shop_id`=" .  $this->getConfig('app','SHOP_ID') ." , `sess_expiry`={$expiry}, `sess_value`='" . str_replace("'","\\'",$value) ."'";
+            $sql="REPLACE INTO `" . $this->table  . "` SET `sess_key`='" . str_replace("'","\\'",$key) ."', `sess_shop_id`=" .  ctx()->getShopId() ." , `sess_expiry`={$expiry}, `sess_value`='" . str_replace("'","\\'",$value) ."'";
             return $this->loadComponent('db')->exec($sql);
         }catch (\Exception $err){
             $this -> loadCore('log') -> write(APP_ERROR, $err -> getMessage());
@@ -95,7 +95,7 @@ class Session extends \cn\eunionz\core\Component implements \SessionHandlerInter
     function destroy($key)
     {
         try{
-            $sql = "DELETE FROM `" . $this->table  . "` WHERE `sess_key` ='" . str_replace("'","\\'",$key) ."' AND `sess_shop_id`=" .  $this->getConfig('app','SHOP_ID');
+            $sql = "DELETE FROM `" . $this->table  . "` WHERE `sess_key` ='" . str_replace("'","\\'",$key) ."' AND `sess_shop_id`=" .  ctx()->getShopId();
             return $this->loadComponent('db')->exec($sql);
         }catch (\Exception $err){
             $this -> loadCore('log') -> write(APP_ERROR, $err -> getMessage());
@@ -110,7 +110,7 @@ class Session extends \cn\eunionz\core\Component implements \SessionHandlerInter
     function gc($maxlifetime)
     {
         try{
-            $sql="DELETE FROM `" . $this->table  . "` WHERE `sess_expiry` < ".time() . ' AND `sess_shop_id`=' .  $this->getConfig('app','SHOP_ID');
+            $sql="DELETE FROM `" . $this->table  . "` WHERE `sess_expiry` < ".time() . ' AND `sess_shop_id`=' .  ctx()->getShopId();
             return $this->loadComponent('db')->exec($sql);
         }catch (\Exception $err){
             //throw $err;

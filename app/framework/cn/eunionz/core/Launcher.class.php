@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace cn\eunionz\core;
 
 use cn\eunionz\component\consul\Consul;
+use cn\eunionz\exception\ControllerNotFoundException;
+use cn\eunionz\exception\MethodNotFoundException;
 use RuntimeException;
 
 defined('APP_IN') or exit('Access Denied');
@@ -27,7 +29,13 @@ class Launcher extends \cn\eunionz\core\Kernel
     private $sub_actions = ['start', 'stop', 'restart'];
     private $console_line = "--------------------------------------------------------------------------------------------------------------------";
 
-    private function stop_monitor_server($monitor_process_name, $monitor_pid_file)
+
+    public function __construct()
+    {
+        $this->SwooleLauncher();
+    }
+
+    private function stop_monitor_server(string $monitor_process_name, string $monitor_pid_file): void
     {
         if (self::checkProcessExistsByName($monitor_process_name)) {
             if (is_file($monitor_pid_file)) {
@@ -42,15 +50,21 @@ class Launcher extends \cn\eunionz\core\Kernel
         }
     }
 
-    public function __construct()
+    /**
+     * 基于Swoole框架时的启动方法
+     * @throws \ReflectionException
+     * @throws \cn\eunionz\exception\FileNotFoundException
+     */
+    private function SwooleLauncher(): void
     {
         //define runtime dir
-        $GLOBALS['APP_RUNTIME_REAL_PATH'] = APP_REAL_PATH . APP_STORAGE_NAME . APP_DS . APP_RUNTIME_NAME . APP_DS;
+        $GLOBALS['APP_RUNTIME_REAL_PATH'] = APP_STORAGE_REAL_PATH . APP_RUNTIME_NAME . APP_DS;
         $GLOBALS['APP_KID_SPLIT_DATABASE_CONFIG_RULES'] = F('app', 'APP_KID_SPLIT_DATABASE_CONFIG_RULES');
-        $GLOBALS['app_route_datas'] = getConfig('routes');
+        $GLOBALS['app_route_datas'] = self::getConfig('routes');
+        $this->loadConstrants();
+        $this->checkRuntime();
 
         $i18n = new I18n();
-        $this->checkRuntime();
         $action = (isset($_SERVER['argv']) && isset($_SERVER['argv'][1])) ? strtolower($_SERVER['argv'][1]) : '';
         consoleln($this->console_line);
         self::showLogo();
@@ -119,15 +133,12 @@ class Launcher extends \cn\eunionz\core\Kernel
             );
             return;
         } elseif ($action == 'start') {
-            $app_constants_file = APP_PACKAGE_BASE_PATH . 'package' . APP_DS . 'constants' . APP_DS . 'app.constants.php';
-            if (is_file($app_constants_file)) {
-                require_once $app_constants_file;
-            }
             $server_index = (isset($_SERVER['argv']) && isset($_SERVER['argv'][2])) ? $_SERVER['argv'][2] : "";
             if ($server_index) {
+                define("APP_IS_ONLY_ONE_SERVER", true);
                 //仅启动某个服务器
                 try {
-                    $server_cfgs = getConfig('server', 'server_cfgs');
+                    $server_cfgs = self::getConfig('server', 'server_cfgs');
 
                     if (empty($server_cfgs) || !is_array($server_cfgs)) {
                         throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_server_config'));
@@ -159,7 +170,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                         if (!self::$_swoole_main_server) {
                             throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_main_server_create_failure'));
                         }
-                        $main_server_params = getConfig('server', 'main_server_params');
+                        $main_server_params = self::getConfig('server', 'main_server_params');
                         $main_server_set_params = array_merge($main_server_params, $main_server_cfg['server_params']);
                         self::$_swoole_main_server->set($main_server_set_params);
 
@@ -168,7 +179,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                         if (!self::$_swoole_main_server) {
                             throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_main_server_create_failure'));
                         }
-                        $main_server_params = getConfig('server', 'main_server_params');
+                        $main_server_params = self::getConfig('server', 'main_server_params');
                         $main_server_set_params = array_merge($main_server_params, $main_server_cfg['server_params']);
                         self::$_swoole_main_server->set($main_server_set_params);
                     } elseif (strtolower($main_server_cfg['server_type']) == 'websocket') {
@@ -176,7 +187,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                         if (!self::$_swoole_main_server) {
                             throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_main_server_create_failure'));
                         }
-                        $main_server_params = getConfig('server', 'main_server_params');
+                        $main_server_params = self::getConfig('server', 'main_server_params');
                         $main_server_set_params = array_merge($main_server_params, $main_server_cfg['server_params']);
                         self::$_swoole_main_server->set($main_server_set_params);
 
@@ -185,7 +196,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                         if (!self::$_swoole_main_server) {
                             throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_main_server_create_failure'));
                         }
-                        $main_server_params = getConfig('server', 'main_server_params');
+                        $main_server_params = self::getConfig('server', 'main_server_params');
                         $main_server_set_params = array_merge($main_server_params, $main_server_cfg['server_params']);
                         self::$_swoole_main_server->set($main_server_set_params);
 
@@ -408,7 +419,7 @@ class Launcher extends \cn\eunionz\core\Kernel
 
                     if (self::$_swoole_main_server && isset($main_server_cfg['microservice']) && $main_server_cfg['microservice'] && isset($main_server_cfg['microservice']['enable']) && $main_server_cfg['microservice']['enable']) {
                         $consul = new Consul();
-                        $consul_cfg = getConfig('consul');
+                        $consul_cfg = self::getConfig('consul');
 
 
                         if (isset($main_server_cfg['microservice']) && isset($main_server_cfg['microservice']['service_id']) && $main_server_cfg['microservice']['service_id']) {
@@ -449,9 +460,10 @@ class Launcher extends \cn\eunionz\core\Kernel
                     consoleln($err->getMessage(), APP_ERROR);
                 }
             } else {
+                define("APP_IS_ONLY_ONE_SERVER", false);
                 //启动所有服务器
                 try {
-                    $server_cfgs = getConfig('server', 'server_cfgs');
+                    $server_cfgs = self::getConfig('server', 'server_cfgs');
                     if (empty($server_cfgs) || !is_array($server_cfgs)) {
                         throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_server_config'));
                     }
@@ -493,7 +505,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                     if (!self::$_swoole_main_server) {
                         throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_main_server_create_failure'));
                     }
-                    $main_server_params = getConfig('server', 'main_server_params');
+                    $main_server_params = self::getConfig('server', 'main_server_params');
                     $main_server_set_params = array_merge($main_server_params, $main_server_cfg['server_params']);
 
                     //self::$_swoole_main_server->set($main_server_set_params);
@@ -837,7 +849,7 @@ class Launcher extends \cn\eunionz\core\Kernel
 
 
                     $consul = new Consul();
-                    $consul_cfg = getConfig('consul');
+                    $consul_cfg = self::getConfig('consul');
 
 
                     foreach ($server_cfgs as $index => $cfg) {
@@ -887,7 +899,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                             }
                         }
                     }
-                    if($is_microservice_register){
+                    if ($is_microservice_register) {
                         self::consoleln($this->console_line);
                     }
 
@@ -960,6 +972,7 @@ class Launcher extends \cn\eunionz\core\Kernel
 
     }
 
+
     /**
      * Check runtime extension conflict
      *
@@ -968,14 +981,9 @@ class Launcher extends \cn\eunionz\core\Kernel
      */
     public static function checkRuntime(string $minPhp = '7.3', string $minSwoole = '4.4.4'): void
     {
-        // if (!EnvHelper::isCli()) {
-        //     throw new RuntimeException('Server must run in the CLI mode.');
-        // }
-
         if (version_compare(PHP_VERSION, $minPhp, '<')) {
             throw new RuntimeException('Run the server requires PHP version > 7.3! current is ' . PHP_VERSION);
         }
-
         if (!extension_loaded('swoole')) {
             throw new RuntimeException("Run the server, extension 'swoole' is required!");
         }

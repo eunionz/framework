@@ -18,6 +18,8 @@
 require_once("alipay.config.php");
 require_once("lib/alipay_notify.class.php");
 
+$POST = ctx()->post();
+
 //计算得出通知验证结果
 $alipayNotify = new AlipayNotify($alipay_config);
 $verify_result = $alipayNotify->verifyNotify();
@@ -34,11 +36,11 @@ if($verify_result) {//验证成功
 	//注意：该功能PHP5环境及以上支持，需开通curl、SSL等PHP配置环境。建议本地调试时使用PHP开发软件
 	$doc = new DOMDocument();	
 	if ($alipay_config['sign_type'] == 'MD5') {
-		$doc->loadXML($_POST['notify_data']);
+		$doc->loadXML($POST['notify_data']);
 	}
 	
 	if ($alipay_config['sign_type'] == '0001') {
-		$doc->loadXML($alipayNotify->decrypt($_POST['notify_data']));
+		$doc->loadXML($alipayNotify->decrypt($POST['notify_data']));
 	}
 	
 	if( ! empty($doc->getElementsByTagName( "notify" )->item(0)->nodeValue) ) {

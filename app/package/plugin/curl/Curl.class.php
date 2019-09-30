@@ -26,11 +26,12 @@ class Curl extends \cn\eunionz\core\Plugin
     //POST模拟提交
     public function CurlPost($url, $data = null,$headers=null)
     {
+        $SERVER = ctx()->server();
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($curl, CURLOPT_USERAGENT, isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '');
+        curl_setopt($curl, CURLOPT_USERAGENT, isset($SERVER['HTTP_USER_AGENT']) ? $SERVER['HTTP_USER_AGENT'] : '');
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($curl, CURLOPT_AUTOREFERER, 1);
         if($headers) {
@@ -119,7 +120,7 @@ class Curl extends \cn\eunionz\core\Plugin
         if (intval($return_code) == 200) {
             return $return_content;
         }else{
-            $this->loadCore('log')->write(APP_DEBUG,$return_code . ':' . $return_content);
+            $this->loadCore('log')->log(APP_DEBUG,$return_code . ':' . $return_content);
             return false;
         }
     }

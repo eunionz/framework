@@ -43,7 +43,7 @@ class Service extends Kernel {
      */
     public function initialize($serviceName=""){
         if(!$this->_is_skip_init_SHOP_ID){
-            $this->SHOP_ID=getConfig('app','SHOP_ID');
+            $this->SHOP_ID=ctx()->getShopId();
         }
         if(empty($serviceName)){
             $temps=explode("\\",get_called_class());
@@ -145,7 +145,7 @@ class Service extends Kernel {
      */
     final function F($namespace, $key = '', $APP_ASSEMBLY_NAME='')
     {
-        return getConfig($namespace, $key, $APP_ASSEMBLY_NAME);
+        return self::getConfig($namespace, $key, $APP_ASSEMBLY_NAME);
     }
 
 

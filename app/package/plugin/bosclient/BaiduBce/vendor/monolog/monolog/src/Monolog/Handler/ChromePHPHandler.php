@@ -114,6 +114,7 @@ class ChromePHPHandler extends AbstractProcessingHandler
      */
     protected function send()
     {
+        $SERVER = ctx()->server();
         if (self::$overflowed || !self::$sendHeaders) {
             return;
         }
@@ -126,7 +127,7 @@ class ChromePHPHandler extends AbstractProcessingHandler
                 return;
             }
 
-            self::$json['request_uri'] = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+            self::$json['request_uri'] = isset($SERVER['REQUEST_URI']) ? $SERVER['REQUEST_URI'] : '';
         }
 
         $json = @json_encode(self::$json);
@@ -173,12 +174,13 @@ class ChromePHPHandler extends AbstractProcessingHandler
      */
     protected function headersAccepted()
     {
-        if (empty($_SERVER['HTTP_USER_AGENT'])) {
+        $SERVER = ctx()->server();
+        if (empty($SERVER['HTTP_USER_AGENT'])) {
             return false;
         }
 
         // matches any Chrome, or Firefox 43+
-        return preg_match('{\b(?:Chrome/\d+(?:\.\d+)*|Firefox/(?:4[3-9]|[5-9]\d|\d{3,})(?:\.\d)*)\b}', $_SERVER['HTTP_USER_AGENT']);
+        return preg_match('{\b(?:Chrome/\d+(?:\.\d+)*|Firefox/(?:4[3-9]|[5-9]\d|\d{3,})(?:\.\d)*)\b}', $SERVER['HTTP_USER_AGENT']);
     }
 
     /**

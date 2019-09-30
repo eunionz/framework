@@ -18,7 +18,7 @@ return array(
 
 
     //定义请求文件存在但不返回文件内容的文件后缀，小写
-    'APP_PHP_EXTENSIONS' => array('php' , 'inc' , 'shtml'),
+    'APP_PHP_EXTENSIONS' => array('php', 'inc', 'shtml'),
     //当前应用默认时区
     'APP_DEFAULT_TIMEZONE' => 'PRC',
     //当前应用默认脚本执行时间
@@ -26,27 +26,30 @@ return array(
     //当前应用跟踪输出
     'APP_DEV_TRACE_OUTPUT' => true,
     //跨域设置
-    'APP_CROSS_DOMAIN_ALLOW' =>  true,  //是否允许跨域  true--允许  false--禁止
-    'APP_CROSS_DOMAIN_ALLOW_ORIGINS' =>  "*",  //跨域访问时，允许访问的域名，如果允许所有域名则设置为：*，配置格式为：http://www.abcd.com,http://www.abcd1.com
-    'APP_CROSS_DOMAIN_ALLOW_METHODS' =>  "GET, POST, PUT, DELETE, OPTIONS",  //跨域访问时，允许执行的动作
-    'APP_CROSS_DOMAIN_ALLOW_HEADERS' =>  "frontsessionsid,adminsessionsid,clienttype,clientversion,clientplatform,reverseproxyforward,wapdomain,nowxoauth,token,appid,openid,originhost,time",  //跨域访问时，允许访问的头部名称
+    'APP_CROSS_DOMAIN_ALLOW' => true,  //是否允许跨域  true--允许  false--禁止
+    'APP_CROSS_DOMAIN_ALLOW_ORIGINS' => "*",  //跨域访问时，允许访问的域名，如果允许所有域名则设置为：*，配置格式为：http://www.abcd.com,http://www.abcd1.com
+    'APP_CROSS_DOMAIN_ALLOW_METHODS' => "GET, POST, PUT, DELETE, OPTIONS",  //跨域访问时，允许执行的动作
+    'APP_CROSS_DOMAIN_ALLOW_HEADERS' => "frontsessionsid,adminsessionsid,clienttype,clientversion,clientplatform,reverseproxyforward,wapdomain,nowxoauth,token,appid,openid,originhost,time",  //跨域访问时，允许访问的头部名称
 
     //根据请求域名HTTP_HOST设置shop_id的回调方法，格式：字符串全局函数或array("类","方法")
-    'APP_SET_SHOP_ID_BY_HTTP_HOST_CALLBACK' => array("cn\\eunionz\\core\\Context","get_shop_id"),
+    'APP_SET_SHOP_ID_BY_HTTP_HOST_CALLBACK' => array("cn\\eunionz\\core\\Context", "get_shop_id"),
     //特别的0店铺对应的文件夹名称
     'APP_SHOP_ID_ZERO_FOLDER_NAME' => "service",
 
 
-    //定义基于KID分库规则，基于KID分库规则将使用db.config.php相同的配置文件使用基于KID分库 BIGINT
+    //定义基于KID分库规则，基于KID分库规则将使用db.config.php相同的配置文件使用基于KID分库 INT
     'APP_KID_SPLIT_DATABASE_CONFIG_RULES' => array(
         /**
-         *  稿件KID      10010000000 - 10099999999    11位KID，用于基于数据库及前端模版代码形成稿件，稿件数据将复制到新开KID，稿件前端文件将复制到新开KID前端
-         *  子店铺KID    11000000000 - 19999999999    11位KID，用做B2BC平台店铺KID的子店铺KID
-         *  测试店铺KID  10001000000 - 10009999999    11位KID，用做测试 B2C/B2B2C 客户KID
+         *  1、limit array(n,m)
+         *     n--描述该分区最多可以承载的B2C站点KID总个数(此处KID总个数不代表子店铺KID个数)，如果为0表示不限制
+         *     m--描述该分区最多可以承载的B2B2C平台站点KID总个数(此处KID总个数不代表子店铺KID个数)，如果为0表示不限制
+         *  2、range 描述该分区KID范围(包括该分区子店铺KID)
+         *      测试/稿件/子店铺KID     110000000000 - 110999999999        12位KID，测试/稿件的B2C/B2B2C 客户KID/平台KID，以及子店铺KID均位于该分区
+         *      客户平台/子店铺KID      110000000000 - 199999999999        12位KID，用做测试 B2C/B2B2C 客户KID/平台KID以及子店铺KID
          */
-        0 => array(10000000001  ,   20000000000),      //表示KID界于   0---20000000000 之间则使用db0.config.php配置文件(如果为db0.config.php则即默认db.config.php)，主要用于存放稿件以及测试KID
-        1 => array(100000000001  ,  200000000000),     //表示KID界于   100000000001---200000000000 之间则使用db1.config.php配置文件 客户数据库分区
-        2 => array(200000000001  ,   300000000000),     //表示KID界于   200000000001---300000000000 之间则使用db2.config.php配置文件 客户数据库分区
+        0 => array('limit' => array(0, 0), 'range' => array(110000000000, 110999999999)),           //表示KID界于    由前三位决定所属数据库分区，例如110，110-110=0，使用db.config.php分区配置，测试及稿件用KID
+        1 => array('limit' => array(3000, 150), 'range' => array(111000000000, 111999999999)),      //表示KID界于    由前三位决定所属数据库分区，例如111，111-110=1，使用db1.config.php分区配置
+        2 => array('limit' => array(3000, 150), 'range' => array(112000000000, 112999999999)),      //表示KID界于    B2C/B2B2C的平台客户KID与B2B2C子店铺KID必须位于同一分区
     ),
     //定义核心缓存，系统所用一级缓存
     'CORE_CACHE_CONFIG' => array(
@@ -56,11 +59,11 @@ return array(
         'cache_driver_data' => array(
             'cache_dir' => '%RUNTIME%/core_cache',           //仅file模式有效，相对于 storage 文件夹的路径，如果为%RUNTIME%代表当前站点下的runtime文件夹的物理路径
             'redis_servers' => array(              //仅redis模式有效,必须安装redis扩展，用于配置使用redis做核心缓存时的相关参数
-                'isUseCluster'=>false,              //是否启用主从配置(主用于读写，从仅读，并随机选择主从进行读)
-                'isPersistent'=>true,              //是否启用持久链接
-                'connect_timeout'=>5,              //链接超时时间，单位：秒
-                'dbname'=>1,                         //主从redis服务器选择的数据库编号
-                'add_servers'=>array(               //配置从redis服务器
+                'isUseCluster' => false,              //是否启用主从配置(主用于读写，从仅读，并随机选择主从进行读)
+                'isPersistent' => true,              //是否启用持久链接
+                'connect_timeout' => 5,              //链接超时时间，单位：秒
+                'dbname' => 1,                         //主从redis服务器选择的数据库编号
+                'add_servers' => array(               //配置从redis服务器
                     array(//主(写)服务器
                         'server' => '192.168.1.125',         //从redis服务器地址或域名
                         'port' => '6377',                //从redis服务器端口
@@ -126,6 +129,7 @@ return array(
     //当url中控制器前面部份为admin的所有控制器将隶属于admin分区使用这里设置的应用程序分区主题
     'APP_PARTITIONS' => array(
         'admin' => 'admin',
+        'seller' => 'seller',
         'service' => 'pc',
         'home' => 'pc',
         'mobile' => 'wap',
@@ -178,14 +182,14 @@ return array(
     'APP_XSS_FILTERING' => true,
 
 
-    'APP_SESSION_LIFETIME_SECONDS'   => 7200,  //会话生命周期，单位：秒
-    'APP_SESSION_MODE'              => 'redis',  //session，模式：file|redis|sql,使用sql需要将 php.ini 中  session.save_handler = files 修改为 User
+    'APP_SESSION_LIFETIME_SECONDS' => 7200,  //会话生命周期，单位：秒
+    'APP_SESSION_MODE' => 'redis',  //session，模式：file|redis|sql,使用sql需要将 php.ini 中  session.save_handler = files 修改为 User
     //Redis会话配置，仅在APP_SESSION_MODE = redis 有效
     'APP_SESSION_REDIS_CONFIG' => array(
         'server' => '192.168.1.125',     //从redis服务器地址或域名
         'port' => '6377',                //从redis服务器端口
         'auth' => 'zFymUyDG',        //从redis密码
-        'dbname'=>14,                     ////redis服务器选择的数据库编号
+        'dbname' => 14,                     ////redis服务器选择的数据库编号
     ),
 
     // SESSION 目录  file模式有效
@@ -193,7 +197,7 @@ return array(
     'APP_SESSION_DIR' => 'session',
 
     // SESSION 主表  sql模式有效
-    'APP_SESSION_TABLE_NAME' => 'sessions.class',//field: session_id varchar(50) primary, expiry int unsigned ,value text
+    'APP_SESSION_TABLE_NAME' => 'sessions',//field: session_id varchar(50) primary, expiry int unsigned ,value text
     //sql会话配置，仅在APP_SESSION_MODE = sql 有效
     'APP_SESSION_MYSQL_CONFIG' => array(
         'HOST' => '192.168.1.125',  //mysql服务器地址或域名
@@ -206,9 +210,9 @@ return array(
     // SESSION cookie name  APP_SESSION_COOKIE_NAME
     //定义默认SESSION_NAME中传递session_id的HEADER|COOKIE|GET名称，如果对应用分区并未配置指定的SESSION_NAME名称，则使用APP_DEFAULT_SESSION_NAME名称，这个名称需要加入到跨域头部配置中
     //会话ID同时支持优先从header，其次从$_GET，最后从cookie中获取
-    'APP_DEFAULT_SESSION_NAME' => 'frontsessionsid' ,
+    'APP_DEFAULT_SESSION_NAME' => 'frontsessionsid',
     //定义应用程序分区对应的SESSION_NAME名称，可针对不同的应用分区定义不同的SESSION_NAME名称，会话ID同时支持优先从header，其次从$_GET，最后从cookie中获取，这个名称需要加入到跨域头部配置中
-    'APP_SESSION_NAMES' => array('admin'=>'adminsessionsid',) ,
+    'APP_SESSION_NAMES' => array('admin' => 'adminsessionsid', 'seller' => 'sellersessionsid'),
 
     //定义当前环境  release -- 生产环境    beta--线上测试环境   test--内网测试环境    dev--开发环境
     'APP_APPLICATION_DEV' => 'dev',

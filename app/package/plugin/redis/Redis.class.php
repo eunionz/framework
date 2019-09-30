@@ -32,7 +32,7 @@ class Redis extends \cn\eunionz\core\Plugin
 
     public function init($server_cfg=null){
         if(!$server_cfg){
-            $server_cfg=$this->getConfig('params','APP_PROXY_REDIS_SERVER');
+            $server_cfg=self::getConfig('params','APP_PROXY_REDIS_SERVER');
         }
         $this->host=$server_cfg['server'];
         $this->port=$server_cfg['port'];

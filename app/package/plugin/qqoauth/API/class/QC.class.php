@@ -181,7 +181,9 @@ class QC extends Oauth{
                 }else if($tmpVal){
                     $arr[$tmpKey] = $tmpVal;
                 }else{
-                    if($v = $_FILES[$tmpKey]){
+                    $FILES = ctx()->files();
+
+                    if($v = $FILES[$tmpKey]){
 
                         $filename = dirname($v['tmp_name'])."/".$v['name'];
                         move_uploaded_file($v['tmp_name'], $filename);

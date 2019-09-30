@@ -72,7 +72,8 @@ function deal_params(&$params) {
  */
 function deflate_file(&$params) {
 	global $log;
-	foreach ( $_FILES as $file ) {
+    $FILES = ctx()->files();
+	foreach ( $FILES as $file ) {
 		$log->LogInfo ( "---------处理文件---------" );
 		if (file_exists ( $file ['tmp_name'] )) {
 			$params ['fileName'] = $file ['name'];

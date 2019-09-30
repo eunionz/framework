@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Eunionz PHP Framework Launcher (bootstrap class ,to complete  load *.config.php,parse url,find controller ,execute controller , render view, cache view  )
  * Created by PhpStorm.
@@ -111,7 +112,7 @@ class SessionHandler extends Kernel
      * @param string $session_dir
      * @param string $session_table
      */
-    public function __construct($mode = 'file', $lefttime = 7200, $redis_config = null, $session_dir = 'session', $session_table = 'sessions.class', $mysql_config = null )
+    public function __construct($mode = 'file', $lefttime = 7200, $redis_config = null, $session_dir = 'session', $session_table = 'sessions.class', $mysql_config = null)
     {
         $this->APP_SESSION_MODE = $mode;
         $this->APP_SESSION_LIFETIME_SECONDS = $lefttime;
@@ -123,7 +124,7 @@ class SessionHandler extends Kernel
             case 'redis':
 //                $this->redis = new \Swoole\Coroutine\Redis();
                 $this->redis = new \Redis();
-                if (false === $this->redis->connect($this->APP_SESSION_REDIS_CONFIG['server'], $this->APP_SESSION_REDIS_CONFIG['port'])) {
+                if (false === $this->redis->connect($this->APP_SESSION_REDIS_CONFIG['server'], (int)$this->APP_SESSION_REDIS_CONFIG['port'])) {
                     throw new \Exception(ctx()->getI18n()->getLang("error_session_redis_connect_fail", array($this->APP_SESSION_REDIS_CONFIG['server'] . ':' . $this->APP_SESSION_REDIS_CONFIG['port'])));
                 }
                 if ("" !== $this->APP_SESSION_REDIS_CONFIG['auth']) {
@@ -136,20 +137,36 @@ class SessionHandler extends Kernel
                 }
                 break;
             case 'sql':
-                $this->mysql = new \Swoole\Coroutine\MySQL();
-                if (!$this->mysql->connect(['host' => $this->APP_SESSION_MYSQL_CONFIG['HOST'], 'port' => $this->APP_SESSION_MYSQL_CONFIG['PORT'], 'user' => $this->APP_SESSION_MYSQL_CONFIG['USER'],
-                    'password' => $this->APP_SESSION_MYSQL_CONFIG['PASS'], 'database' => $this->APP_SESSION_MYSQL_CONFIG['NAME'], 'charset' => $this->APP_SESSION_MYSQL_CONFIG['CHARSET'], 'timeout' => 3,
-                ])) {
-                    throw new \Exception(ctx()->getI18n()->getLang("error_session_redis_connect_fail", array($this->APP_SESSION_MYSQL_CONFIG['HOST'] . ':' . $this->APP_SESSION_MYSQL_CONFIG['port'])));
+
+                if (APP_IS_IN_SWOOLE) {
+                    $this->mysql = new \Swoole\Coroutine\MySQL();
+                    if (!$this->mysql->connect(['host' => $this->APP_SESSION_MYSQL_CONFIG['HOST'], 'port' => $this->APP_SESSION_MYSQL_CONFIG['PORT'], 'user' => $this->APP_SESSION_MYSQL_CONFIG['USER'],
+                        'password' => $this->APP_SESSION_MYSQL_CONFIG['PASS'], 'database' => $this->APP_SESSION_MYSQL_CONFIG['NAME'], 'charset' => $this->APP_SESSION_MYSQL_CONFIG['CHARSET'], 'timeout' => 3,
+                    ])) {
+                        throw new \Exception(ctx()->getI18n()->getLang("error_session_redis_connect_fail", array($this->APP_SESSION_MYSQL_CONFIG['HOST'] . ':' . $this->APP_SESSION_MYSQL_CONFIG['port'])));
+                    }
+                } else {
+                    $dsn = 'mysql:host=' . $this->APP_SESSION_MYSQL_CONFIG['HOST'];
+                    $dsn .= ';port=' . $this->APP_SESSION_MYSQL_CONFIG['PORT'];
+                    $dsn .= ';dbname=' . $this->APP_SESSION_MYSQL_CONFIG['NAME'];
+                    $usr = $this->APP_SESSION_MYSQL_CONFIG['USER'];
+                    $pwd = $this->APP_SESSION_MYSQL_CONFIG['PASS'];
+                    try {
+                        $params = array();
+                        $this->mysql = new \PDO($dsn, $usr, $pwd, $params);
+                        $this->mysql->exec('SET NAMES \'' . $this->APP_SESSION_MYSQL_CONFIG['CHARSET'] . '\'');
+                    } catch (\PDOException $e) {
+                        throw new \cn\eunionz\exception\DBException($this->getLang('error_db_title'), $this->getLang('error_db_pdo', array($e->getMessage())));
+                    }
                 }
                 break;
             case 'file':
                 $this->session_prefix = str_replace(':', '_', $this->session_prefix);
                 $this->session_lock_prefix = str_replace(':', '_', $this->session_lock_prefix);
-                if(!defined('APP_RUNTIME_REAL_PATH')){
+                if (!ctx()->getAppRuntimeRealPath()) {
                     throw new \Exception(ctx()->getI18n()->getLang("error_session_file_init_fail"));
                 }
-                $this->session_real_path = APP_RUNTIME_REAL_PATH . $this->APP_SESSION_DIR . APP_DS;
+                $this->session_real_path = ctx()->getAppRuntimeRealPath() . $this->APP_SESSION_DIR . APP_DS;
             default:
                 break;
         }
@@ -162,9 +179,9 @@ class SessionHandler extends Kernel
      */
     private function lock($session_id)
     {
-        if(empty($session_id)) return false;
+        if (empty($session_id)) return false;
         $i = 1;
-        while (!$this->redis->setnx($this->session_lock_prefix . $session_id , 1)) {
+        while (!$this->redis->setnx($this->session_lock_prefix . $session_id, 1)) {
             usleep(self::I);
             $i++;
             if ($i > 100) {
@@ -180,7 +197,7 @@ class SessionHandler extends Kernel
      */
     private function unlock($session_id)
     {
-        if(empty($session_id)) return false;
+        if (empty($session_id)) return false;
         return $this->redis->del($this->session_lock_prefix . $session_id);
     }
 
@@ -190,7 +207,7 @@ class SessionHandler extends Kernel
      */
     public function read($session_id)
     {
-        if(empty($session_id)) return [];
+        if (empty($session_id)) return [];
         $SESSION = [];
 
         switch (strtolower($this->APP_SESSION_MODE)) {
@@ -209,24 +226,35 @@ class SessionHandler extends Kernel
             case 'sql':
                 //field: session_id varchar(50) primary, expiry int unsigned ,value text
 
-                $sql = "SELECT `value` FROM `" . $this->APP_SESSION_TABLE_NAME . '` WHERE `session_id`=? AND `expiry`>=? FOR UPDATE';
-                $stmt = $this->mysql->prepare($sql);
-                if ($stmt) {
-                    $res = $stmt->execute(array($this->session_prefix . $session_id, time()));
-                    if ($res) {
-                        $SESSION = unserialize($res[0]['value']);
+                if (APP_IS_IN_SWOOLE) {
+                    $sql = "SELECT `value` FROM `" . $this->APP_SESSION_TABLE_NAME . '` WHERE `session_id`=? AND `expiry`>=? FOR UPDATE';
+                    $stmt = $this->mysql->prepare($sql);
+                    if ($stmt) {
+                        $res = $stmt->execute(array($this->session_prefix . $session_id, time()));
+                        if ($res) {
+                            $SESSION = unserialize($res[0]['value']);
+                        }
+                    }
+                }else{
+                    $sql = "SELECT `value` FROM `" . $this->APP_SESSION_TABLE_NAME . '` WHERE `session_id`=? AND `expiry`>=? FOR UPDATE';
+                    $stmt = $this->mysql->prepare($sql);
+                    if ($stmt) {
+                        $res = $stmt->execute(array($this->session_prefix . $session_id, time()));
+                        $rs = [];
+                        if ($res) {
+                            $rs = $stmt->fetchAll();
+                        }
+                        if ($rs) {
+                            $SESSION = unserialize($rs[0]['value']);
+                        }
                     }
                 }
                 if (empty($SESSION)) $SESSION = [];
                 break;
             case 'file':
                 $file = $this->session_real_path . $this->session_prefix . $session_id;
-                $fp = @fopen($file, "r");
-                if ($fp) {
-                    flock($fp, LOCK_EX);
-                    $SESSION = unserialize(fread($fp, filesize($file)));
-                    flock($fp, LOCK_UN);
-                    fclose($fp);
+                if(is_file($file)){
+                    $SESSION = unserialize(file_get_contents($file));
                 }
                 if (empty($SESSION)) $SESSION = [];
 
@@ -241,9 +269,9 @@ class SessionHandler extends Kernel
      * @param $session_id 会话ID
      * @param $session_data 数据
      */
-    public function write($session_id ,$SESSION)
+    public function write($session_id, $SESSION)
     {
-        if(empty($session_id)) return false;
+        if (empty($session_id)) return false;
         if (empty($SESSION)) {
             $SESSION = [];
         }
@@ -259,47 +287,78 @@ class SessionHandler extends Kernel
                 break;
             case 'sql':
                 //field: session_id varchar(50) primary, expiry int unsigned ,value text
-                $this->mysql->begin();
-                try{
-                    $sql = "SELECT `value` FROM `" . $this->APP_SESSION_TABLE_NAME . '` WHERE `session_id`=? AND `expiry`>=?';
-                    $stmt = $this->mysql->prepare($sql);
-                    if ($stmt) {
-                        $res = $stmt->execute(array($this->session_prefix . $session_id, time()));
-                        if ($res) {
-                            $sql = "UPDATE `" . $this->APP_SESSION_TABLE_NAME . '` SET `value` =?,`expiry`=? WHERE `session_id`=?';
-                            $stmt = $this->mysql->prepare($sql);
-                            if ($stmt) {
-                                $session_datas = serialize($SESSION);
-                                $stmt->execute(array($session_datas, time() + $this->APP_SESSION_LIFETIME_SECONDS, $this->session_prefix . $session_id));
-                            }
-                        }else{
-                            $sql = "INSERT INTO `" . $this->APP_SESSION_TABLE_NAME . '` VALUES(?,?,?)';
-                            $stmt = $this->mysql->prepare($sql);
-                            if ($stmt) {
-                                $session_datas = serialize($SESSION);
-                                $stmt->execute(array($this->session_prefix . $session_id ,time() + $this->APP_SESSION_LIFETIME_SECONDS, $session_datas));
+                if (APP_IS_IN_SWOOLE) {
+                    $this->mysql->begin();
+                    try {
+                        $sql = "SELECT `value` FROM `" . $this->APP_SESSION_TABLE_NAME . '` WHERE `session_id`=? AND `expiry`>=?';
+                        $stmt = $this->mysql->prepare($sql);
+                        if ($stmt) {
+                            $res = $stmt->execute(array($this->session_prefix . $session_id, time()));
+                            if ($res) {
+                                $sql = "UPDATE `" . $this->APP_SESSION_TABLE_NAME . '` SET `value` =?,`expiry`=? WHERE `session_id`=?';
+                                $stmt = $this->mysql->prepare($sql);
+                                if ($stmt) {
+                                    $session_datas = serialize($SESSION);
+                                    $stmt->execute(array($session_datas, time() + $this->APP_SESSION_LIFETIME_SECONDS, $this->session_prefix . $session_id));
+                                }
+                            } else {
+                                $sql = "INSERT INTO `" . $this->APP_SESSION_TABLE_NAME . '` VALUES(?,?,?)';
+                                $stmt = $this->mysql->prepare($sql);
+                                if ($stmt) {
+                                    $session_datas = serialize($SESSION);
+                                    $stmt->execute(array($this->session_prefix . $session_id, time() + $this->APP_SESSION_LIFETIME_SECONDS, $session_datas));
+                                }
                             }
                         }
+                        $this->mysql->commit();
+                        return true;
+                    } catch (\Exception $err) {
+                        $this->mysql->rollback();
+                        return false;
                     }
-                    $this->mysql->commit();
-                    return true;
-                }catch (\Exception $err){
-                    $this->mysql->rollback();
-                    return false;
+                } else {
+                    $this->mysql->setAttribute(\PDO::ATTR_AUTOCOMMIT, false);
+                    $sql = 'SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;';//设置当前会话的事务隔离等级为已提交读
+                    $this->mysql->exec($sql);
+                    $this->mysql->beginTransaction();
+                    try {
+                        $sql = "SELECT `value` FROM `" . $this->APP_SESSION_TABLE_NAME . '` WHERE `session_id`=? AND `expiry`>=?';
+                        $stmt = $this->mysql->prepare($sql);
+                        if ($stmt) {
+                            $res = $stmt->execute(array($this->session_prefix . $session_id, time()));
+                            $rs = [];
+                            if ($res) {
+                                $rs = $stmt->fetchAll();
+                            }
+                            if ($rs) {
+                                $sql = "UPDATE `" . $this->APP_SESSION_TABLE_NAME . '` SET `value` =?,`expiry`=? WHERE `session_id`=?';
+                                $stmt = $this->mysql->prepare($sql);
+                                if ($stmt) {
+                                    $session_datas = serialize($SESSION);
+                                    $stmt->execute(array($session_datas, time() + $this->APP_SESSION_LIFETIME_SECONDS, $this->session_prefix . $session_id));
+                                }
+                            } else {
+                                $sql = "INSERT INTO `" . $this->APP_SESSION_TABLE_NAME . '` VALUES(?,?,?)';
+                                $stmt = $this->mysql->prepare($sql);
+                                if ($stmt) {
+                                    $session_datas = serialize($SESSION);
+                                    $stmt->execute(array($this->session_prefix . $session_id, time() + $this->APP_SESSION_LIFETIME_SECONDS, $session_datas));
+                                }
+                            }
+                        }
+                        $this->mysql->commit();
+                        $this->mysql->setAttribute(\PDO::ATTR_AUTOCOMMIT, true);
+                        return true;
+                    } catch (\Exception $err) {
+                        $this->mysql->rollback();
+                        $this->mysql->setAttribute(\PDO::ATTR_AUTOCOMMIT, true);
+                        return false;
+                    }
                 }
                 break;
             case 'file':
                 $file = $this->session_real_path . $this->session_prefix . $session_id;
-                $fp = @fopen($file, "w");
-                if ($fp) {
-                    flock($fp, LOCK_EX);
-                    $session_datas = serialize($SESSION);
-                    fwrite($fp, $session_datas);
-                    flock($fp, LOCK_UN);
-                    fclose($fp);
-                    return true;
-                }
-                return false;
+                return file_put_contents($file, serialize($SESSION), LOCK_EX) > 0 ? true : false;
             default:
                 break;
         }

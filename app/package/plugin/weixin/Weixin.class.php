@@ -93,7 +93,7 @@ class Weixin extends \cn\eunionz\core\Plugin
 
     public function write_log($log){
         if($this->debug){
-            $filename = APP_RUNTIME_REAL_PATH .date('Y_m_d').'.log.php';
+            $filename = ctx()->getAppRuntimeRealPath() .date('Y_m_d').'.log.php';
             file_put_contents($filename , date('Y-m-d H:i:s') .'：' .  $log .PHP_EOL, FILE_APPEND);
         }
     }
@@ -102,9 +102,11 @@ class Weixin extends \cn\eunionz\core\Plugin
     //验证token
     public function checkSignature($token)
     {
-        $signature = $_GET["signature"];
-        $timestamp = $_GET["timestamp"];
-        $nonce = $_GET["nonce"];
+        $GET = ctx()->get();
+
+        $signature = $GET["signature"];
+        $timestamp = $GET["timestamp"];
+        $nonce = $GET["nonce"];
 
         $tmpArr = array($token, $timestamp, $nonce);
         sort($tmpArr, SORT_STRING);
