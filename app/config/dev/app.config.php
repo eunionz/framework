@@ -213,7 +213,4 @@ return array(
     'APP_DEFAULT_SESSION_NAME' => 'frontsessionsid',
     //定义应用程序分区对应的SESSION_NAME名称，可针对不同的应用分区定义不同的SESSION_NAME名称，会话ID同时支持优先从header，其次从$_GET，最后从cookie中获取，这个名称需要加入到跨域头部配置中
     'APP_SESSION_NAMES' => array('admin' => 'adminsessionsid', 'seller' => 'sellersessionsid'),
-
-    //定义当前环境  release -- 生产环境    beta--线上测试环境   test--内网测试环境    dev--开发环境
-    'APP_APPLICATION_DEV' => 'dev',
 );

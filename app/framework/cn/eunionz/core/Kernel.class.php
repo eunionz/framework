@@ -630,7 +630,7 @@ class Kernel
      */
     public static function setConfig(string $names, string $key, $value): void
     {
-        self::$_app_config_settings[self::getRequestUniqueId()][$names][$key] = $value;
+        self::$_app_config_settings[self::getRequestUniqueId()][APP_APPLICATION_ENV][$names][$key] = $value;
     }
 
     /**
@@ -644,14 +644,14 @@ class Kernel
     public static function getConfig(string $names, string $key = '')
     {
         $config_files = array();
-        if (!isset(self::$_app_config_types[$names])) {
+        if (!isset(self::$_app_config_types[APP_APPLICATION_ENV][$names])) {
             //局部配置文件
-            $local_config_file = APP_PACKAGE_BASE_PATH . 'package' . APP_DS . 'config' . APP_DS . $names . '.config.php';
+            $local_config_file = APP_PACKAGE_BASE_PATH . 'package' . APP_DS . 'config' . APP_DS . APP_APPLICATION_ENV . APP_DS . $names . '.config.php';
             if (!is_file($local_config_file)) {
                 $local_config_file = '';
             }
             //全局配置文件
-            $global_config_file = APP_PACKAGE_BASE_PATH . 'config' . APP_DS . $names . '.config.php';
+            $global_config_file = APP_PACKAGE_BASE_PATH . 'config' . APP_DS . APP_APPLICATION_ENV . APP_DS . $names . '.config.php';
 
             if (!is_file($global_config_file)) {
                 $global_config_file = '';
@@ -667,12 +667,12 @@ class Kernel
             if ($local_config_file) {
                 $config_files[] = $local_config_file;
             }
-            self::$_app_config_types[$names] = $config_files;
+            self::$_app_config_types[APP_APPLICATION_ENV][$names] = $config_files;
         } else {
-            $config_files = self::$_app_config_types[$names];
+            $config_files = self::$_app_config_types[APP_APPLICATION_ENV][$names];
         }
 
-        if (!isset(self::$_app_config_settings[self::getRequestUniqueId()][$names])) {
+        if (!isset(self::$_app_config_settings[self::getRequestUniqueId()][APP_APPLICATION_ENV][$names])) {
             $config_arrs = array();
             foreach ($config_files as $file) {
                 if (is_file($file)) {
@@ -680,14 +680,14 @@ class Kernel
                     $config_arrs = array_merge($config_arrs, $tmp_arr);
                 }
             }
-            self::$_app_config_settings[self::getRequestUniqueId()][$names] = $config_arrs;
+            self::$_app_config_settings[self::getRequestUniqueId()][APP_APPLICATION_ENV][$names] = $config_arrs;
         }
         if (!$key)
-            return self::$_app_config_settings[self::getRequestUniqueId()][$names];
+            return self::$_app_config_settings[self::getRequestUniqueId()][APP_APPLICATION_ENV][$names];
 
-        if (!isset(self::$_app_config_settings[self::getRequestUniqueId()][$names][$key]))
+        if (!isset(self::$_app_config_settings[self::getRequestUniqueId()][APP_APPLICATION_ENV][$names][$key]))
             return '';
-        return self::$_app_config_settings[self::getRequestUniqueId()][$names][$key];
+        return self::$_app_config_settings[self::getRequestUniqueId()][APP_APPLICATION_ENV][$names][$key];
     }
 
 
@@ -701,8 +701,8 @@ class Kernel
      */
     public static function reloadConfig(string $names, string $key = '')
     {
-        unset(self::$_app_config_types[$names]);
-        unset(self::$_app_config_settings[self::getRequestUniqueId()][$names]);
+        unset(self::$_app_config_types[APP_APPLICATION_ENV][$names]);
+        unset(self::$_app_config_settings[self::getRequestUniqueId()][APP_APPLICATION_ENV][$names]);
         return self::getConfig($names, $key);
     }
 

@@ -657,7 +657,7 @@ class Server extends Kernel
                 $websocket_return['status'] = 1;
                 $websocket_return['msg'] = "not get header，call websocket service failure!";
                 $websocket_return['header'] = $header;
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
                 self::destoryContext();
                 return;
             }
@@ -666,7 +666,7 @@ class Server extends Kernel
                 $websocket_return['status'] = 1;
                 $websocket_return['msg'] = "not get body，call websocket service failure!";
                 $websocket_return['header'] = $header;
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
                 self::destoryContext();
                 return;
             }
@@ -678,7 +678,7 @@ class Server extends Kernel
                 $websocket_return['status'] = 1;
                 $websocket_return['msg'] = "not get header shopid，call websocket service failure!";
                 $websocket_return['header'] = $header;
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
                 self::destoryContext();
                 return;
             }
@@ -689,7 +689,7 @@ class Server extends Kernel
                 $websocket_return['status'] = 1;
                 $websocket_return['msg'] = "not get header url，call websocket service failure!";
                 $websocket_return['header'] = $header;
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
                 self::destoryContext();
                 return;
             }
@@ -711,7 +711,7 @@ class Server extends Kernel
                 $websocket_return['status'] = 1;
                 $websocket_return['msg'] = "not get header sessionid，call websocket service failure!";
                 $websocket_return['header'] = $header;
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
                 self::destoryContext();
                 return;
             }
@@ -720,7 +720,7 @@ class Server extends Kernel
                 $websocket_return['status'] = 1;
                 $websocket_return['msg'] = "not get header sessionname，call websocket service failure!";
                 $websocket_return['header'] = $header;
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
                 self::destoryContext();
                 return;
             }
@@ -801,7 +801,7 @@ class Server extends Kernel
             if (is_string($route_datas) && is_file($route_datas)) {
                 //为渲染静态文件，直接结束本次请求
                 $websocket_return['body'] = file_get_contents($route_datas);
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
                 self::destoryContext();
                 return;
             }
@@ -815,7 +815,7 @@ class Server extends Kernel
             if (!class_exists($service_class)) {
                 $websocket_return['status'] = 4;
                 $websocket_return['msg'] = $this->getLang('error_class_not_found', array($service_class));
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
                 self::destoryContext();
                 return;
             }
@@ -826,7 +826,7 @@ class Server extends Kernel
             if (!isset($docs['WEBSOCKET_CLASS'])) {
                 $websocket_return['status'] = 4;
                 $websocket_return['msg'] = $this->getLang('error_websocket_class_not_found', array($service_class));
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
                 self::destoryContext();
                 return;
             }
@@ -871,7 +871,7 @@ class Server extends Kernel
             if (!isset($docs['WEBSOCKET_METHOD'])) {
                 $websocket_return['status'] = 2;
                 $websocket_return['msg'] = $this->getLang('error_websocket_class_method_not_found', array($service_class, '_' . $action));
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
                 self::destoryContext();
                 return;
             }
@@ -883,7 +883,7 @@ class Server extends Kernel
             if (!method_exists($controller, '_' . $action)) {
                 $websocket_return['status'] = 2;
                 $websocket_return['msg'] = $this->getLang('error_class_method_not_found', array($service_class, '_' . $action));
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
                 self::destoryContext();
                 return;
             }
@@ -919,7 +919,7 @@ class Server extends Kernel
             $websocket_return['status'] = 1;
             $websocket_return['msg'] = $err->getMessage();
             $websocket_return['header'] = $header;
-            $server->push($frame->fd, json_encode($websocket_return), $opcode, 1);
+            $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
             self::destoryContext();
             return;
         }

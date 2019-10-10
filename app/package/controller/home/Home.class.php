@@ -317,7 +317,7 @@ class Home extends \cn\eunionz\core\Controller
 //        $rpc_client = $this->rpc_client('rpc_service_test', $rpc_class);
 
 //        $rpc_client = $this->rpcClient("ms_usercenter", $rpc_class);
-        $rpc_client = new RpcClient("192.168.1.135",8899);
+        $rpc_client = new RpcClient("192.168.1.135", 8899);
         if ($rpc_client) {
             $rs = $rpc_client->_add1(23, 4445);
             if ($rs) {
@@ -837,7 +837,7 @@ class Home extends \cn\eunionz\core\Controller
     public function _sayHello_c()
     {
         $grpcClient = $this->grpcClient("ms_usercenter");
-        if($grpcClient){
+        if ($grpcClient) {
             $grpcClient->start();
             $request = new HiUser();
             $request->setName("aa 3444 dd" . $this->get('aaa'));
@@ -860,7 +860,7 @@ class Home extends \cn\eunionz\core\Controller
     public function _sayHello_cn()
     {
         $grpcClient = $this->grpcClient("ms_usercenter");
-        if($grpcClient){
+        if ($grpcClient) {
             $grpcClient->start();
             $request = new HiUser();
             $request->setName("aa 3444 dd" . $this->get('aaa'));
@@ -891,7 +891,7 @@ class Home extends \cn\eunionz\core\Controller
         $request = new HiUser();
         $request->setName("aa 3444 dd" . $this->get('aaa'));
 
-        list($reply, $status) =$this->grpcCall("ms_usercenter", "/grpc.hi", "sayHello", $request, HiReply::class);
+        list($reply, $status) = $this->grpcCall("ms_usercenter", "/grpc.hi", "sayHello", $request, HiReply::class);
         $message = $reply->getMessage();
         $this->write("message = {$message} status = " . $status);
 
@@ -913,50 +913,56 @@ class Home extends \cn\eunionz\core\Controller
 
             $message = $reply->getMessage();
             $this->write("message = {$message} status = " . $status);
-        }else{
+        } else {
             $this->write("message = no Reply status = -1");
         }
     }
 
-    public function _p(){
+    public function _p()
+    {
         $this->write(" <meta charset=\"utf-8\">");
         $this->write($this->loadPlugin('common')->getWeekDay(0));
     }
 
 
-    public function _s(){
+    public function _s()
+    {
         $this->write(" <meta charset=\"utf-8\">");
-        if($this->is_get()){
+        if ($this->is_get()) {
             $this->display();
-        }elseif($this->is_post()){
-            $this->write(print_r($this->post() , true));
+        } elseif ($this->is_post()) {
+            $this->write(print_r($this->post(), true));
         }
     }
 
-    public function _sudo(){
+    public function _sudo()
+    {
         $this->write(" <meta charset=\"utf-8\">");
 //        $rs = exec("sudo /bin/mkdir " . $this->get('path') , $a ,$b);
-        $rs = exec("sudo /bin/rm -rf " . $this->get('path') , $a ,$b);
+        $rs = exec("sudo /bin/rm -rf " . $this->get('path'), $a, $b);
         $this->write(" return : " . $rs . "<br/>");
-        $this->write(" a : " . print_r($a,true) . "<br/>");
+        $this->write(" a : " . print_r($a, true) . "<br/>");
         $this->write(" b : " . $b . "<br/>");
 
     }
 
 
-    public function _activemq(){
+    public function _activemq()
+    {
         $this->write(" <meta charset=\"utf-8\">");
-        $activemq =new Activemq("test" , "admin" , "admin");
-        $arr = ["a"=>3,"b"=>"张三"];
+        $activemq = $this->C('activemq', false)->init("test", "admin", "admin");
+        $activemq = new Activemq("test", "admin", "admin");
+        $arr = ["a" => 3, "b" => "张三"];
         $rs = $activemq->send($arr);
         $this->write($rs . "<br/>");
     }
 
-    public function _activemq_c(){
+    public function _activemq_c()
+    {
         $this->write(" <meta charset=\"utf-8\">");
-        $activemq =new Activemq("test" , "admin" , "admin");
+        $activemq = $this->C('activemq', false)->init("test", "admin", "admin");
         $arr = $activemq->consume();
-        $this->write(print_r($arr , true) . "<br/>");
+        $this->write(print_r($arr, true) . "<br/>");
     }
 
 }
