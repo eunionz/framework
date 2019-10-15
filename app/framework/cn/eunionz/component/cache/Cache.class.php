@@ -136,7 +136,7 @@ class Cache extends Component
             $this->isPersistent = $this->cache_driver_data["redis_servers"]['isPersistent'];
             $connect_timeout = intval($this->cache_driver_data["redis_servers"]['connect_timeout']);
 
-            $connect_func = $this->isPersistent ? "connect" : "pconnect";
+            $connect_func = $this->isPersistent ? "pconnect" : "connect";
 
 //            $this->master_link_id = new \Swoole\Coroutine\Redis();
             $this->master_link_id = new \Redis();
