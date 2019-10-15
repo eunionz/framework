@@ -34,9 +34,6 @@ class AutoPhpUnitTest
         $all_failure_count = 0;
         $failures = array();
         $all_filename_count = count($this->outputs);
-        print_r($this->outputs);
-        exit;
-
         foreach ($this->outputs as $class => $item) {
             $all_test_count += $item['Tests'];
             $all_assertion_count += $item['Assertions'];
@@ -92,7 +89,6 @@ class AutoPhpUnitTest
                         $result = '';
                         $FailuerTests = [];
                         if (is_array($output)) {
-                            print_r($output);
                             $result = end($output);
                             if (strpos($result, 'OK') !== false) {
                                 //单元测试成功 OK (2 tests, 2 assertions)

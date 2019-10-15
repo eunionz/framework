@@ -42,7 +42,6 @@ class AutoPhpUnitTest
                 $failures[] = $item;
             }
         }
-        self::consoleln("23233223", 0);
         $items = array();
         if ($all_failure_count <= 0) {
             $str = "OK (" . $all_filename_count . " TestClasses, " . $all_test_count . " tests, " . $all_assertion_count . " assertions)";
