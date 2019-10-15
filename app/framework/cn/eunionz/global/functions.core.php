@@ -109,7 +109,7 @@ function console(string $msg, int $level = 0): string
  * @param int $level
  * @param $msg
  */
-function consoleln(string $msg, int $level = 0): string
+function consoleln(string $msg = '', int $level = 0): string
 {
     return \cn\eunionz\core\Kernel::consoleln($msg, $level);
 }
@@ -302,7 +302,7 @@ function startsWith(string $string1, string $string2): bool
 /**
  * 加载应用程序中常量文件
  */
-function loadConstrants() : void
+function loadConstrants(): void
 {
     $constants_path = APP_PACKAGE_REAL_PATH . 'constants';
     if (is_dir($constants_path)) {
