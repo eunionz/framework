@@ -34,6 +34,9 @@ class AutoPhpUnitTest
         $all_failure_count = 0;
         $failures = array();
         $all_filename_count = count($this->outputs);
+        print_r($this->outputs);
+        exit;
+
         foreach ($this->outputs as $class => $item) {
             $all_test_count += $item['Tests'];
             $all_assertion_count += $item['Assertions'];
@@ -81,6 +84,7 @@ class AutoPhpUnitTest
                     if (is_file($fullpath) && $this->endsWith($fullpath, ".php")) {
                         $class = str_replace(".php", "", str_replace("/", "\\", str_replace(self::PHP_PHPUNIT_CLASS_PREFIX_PATH, "", $fullpath)));
                         $cmd = self::PHP_CLI_EXE_PATH . ' ' . self::PHP_PHPUNIT_EXE_PATHE_PATH . ' --no-configuration ' . $class . ' ' . $fullpath . ' --teamcity';
+                        $output = '';
                         $r = exec($cmd, $output, $return_var);
                         $Tests = 0;
                         $Assertions = 0;
@@ -88,6 +92,7 @@ class AutoPhpUnitTest
                         $result = '';
                         $FailuerTests = [];
                         if (is_array($output)) {
+                            print_r($output);
                             $result = end($output);
                             if (strpos($result, 'OK') !== false) {
                                 //单元测试成功 OK (2 tests, 2 assertions)

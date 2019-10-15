@@ -82,6 +82,7 @@ class AutoPhpUnitTest
                     if (is_file($fullpath) && $this->endsWith($fullpath, ".php")) {
                         $class = str_replace(".php", "", str_replace("/", "//", str_replace(self::PHP_PHPUNIT_CLASS_PREFIX_PATH, "", $fullpath)));
                         $cmd = self::PHP_CLI_EXE_PATH . ' ' . self::PHP_PHPUNIT_EXE_PATHE_PATH . ' --no-configuration ' . $class . ' ' . $fullpath . ' --teamcity';
+                        $output = '';
                         $r = exec($cmd, $output, $return_var);
                         $Tests = 0;
                         $Assertions = 0;
