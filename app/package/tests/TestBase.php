@@ -50,6 +50,10 @@ define('APP_PHP_REQUEST_ORDER', 'PGC');
 //定义 URL后缀
 define('URL_HTML_SUFFIX' , '.shtml');
 
+//定义当前应用程序环境  release -- 生产环境    pre--预发布环境   test--内网测试环境    dev--开发环境
+define('APP_APPLICATION_ENV' , 'dev');
+
+
 //包含全局函数以及注册类加载器
 require_once APP_FRAMEWORK_REAL_PATH . 'cn' . APP_DS . 'eunionz' . APP_DS . 'global' . APP_DS . 'functions.core.php';
 
