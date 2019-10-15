@@ -774,7 +774,7 @@ class Kernel
      * @param int $level
      * @param $msg
      */
-    public static function consoleln(string $msg, int $level = 0): string
+    public static function consoleln(string $msg = '', int $level = 0): string
     {
         return self::console($msg, $level, PHP_EOL);
     }
