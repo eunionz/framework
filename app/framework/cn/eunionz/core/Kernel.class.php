@@ -77,6 +77,11 @@ class Kernel
      */
     protected static $request_fds = array();
 
+    /**
+     * 分布式锁单例对像
+     * @var null
+     */
+    private static $deploy_lock_object = null;
 
     /**
      * eunionz log
@@ -872,4 +877,33 @@ class Kernel
         return $sum > 2 ? true : false;
     }
 
+    /**
+     * 加锁
+     * @param [type] $name      锁的标识名
+     * @param integer $timeout 循环获取锁的等待超时时间，在此时间内会一直尝试获取锁直到超时，为0表示失败后直接返回不等待
+     * @param integer $expire 当前锁的最大生存时间(秒)，必须大于0，如果超过生存时间锁仍未被释放，则系统会自动强制释放
+     * @param integer $waitIntervalUs 获取锁失败后挂起再试的时间间隔(微秒)
+     * @return [type]         [description]
+     */
+    public function lock($name, $timeout = 10, $expire = 15, $waitIntervalUs = 100000)
+    {
+        if (!self::$deploy_lock_object) {
+            self::$deploy_lock_object = new RedisLock();
+        }
+        return self::$deploy_lock_object->redis_lock($name, $timeout, $expire, $waitIntervalUs);
+    }
+
+    /**
+     * 解锁
+     * @param [type] $name [description]
+     * @return [type]    [description]
+     */
+
+    public function unlock($name)
+    {
+        if (!self::$deploy_lock_object) {
+            self::$deploy_lock_object = new RedisLock();
+        }
+        return self::$deploy_lock_object->redis_unlock($name);
+    }
 }

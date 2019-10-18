@@ -87,21 +87,7 @@ class SessionHandler extends Kernel
     private $session_prefix = 'session:';
 
 
-    /**
-     * redis会话锁前缀,如果为1--已加排它锁，0--释放锁
-     * @var string
-     */
-    private $session_lock_prefix = 'session_lock:';
 
-    /**
-     * 排它锁阻塞衰减时间，单位：毫秒
-     */
-    const I = 10;
-
-    /**
-     * Redis排它锁超时时间，单位：秒
-     */
-    const REDIS_X_LOCK_TIMEOUT = 3;
 
     /**
      * Session会话构造函数
@@ -174,53 +160,32 @@ class SessionHandler extends Kernel
 
 
     /**
-     * 加锁，最多重试次数100次，
-     * @param $session_id 会话ID
-     */
-    private function lock($session_id)
-    {
-        if (empty($session_id)) return false;
-        $i = 1;
-        while (!$this->redis->setnx($this->session_lock_prefix . $session_id, 1)) {
-            usleep(self::I);
-            $i++;
-            if ($i > 100) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * 释放锁
-     * @param $session_id 会话ID
-     */
-    private function unlock($session_id)
-    {
-        if (empty($session_id)) return false;
-        return $this->redis->del($this->session_lock_prefix . $session_id);
-    }
-
-    /**
      * 从会话中读数据
      * @param $session_id 会话ID
      */
     public function read($session_id)
     {
         if (empty($session_id)) return [];
+        $sessin_redis_name  = $this->session_prefix . $session_id;
         $SESSION = [];
 
         switch (strtolower($this->APP_SESSION_MODE)) {
             case 'redis':
-                if (!$this->lock($session_id)) {
-                    throw new \Exception("Redis session lock fail. ");
+                try{
+                    if ($this->lock($sessin_redis_name)) {
+                        if ($this->redis->get($sessin_redis_name)) {
+                            $SESSION = unserialize($this->redis->get($sessin_redis_name));
+                        } else {
+                            $SESSION = [];
+                        }
+                    }else{
+                        throw new \Exception("Redis session lock fail. ");
+                    }
+                }catch (\Exception $err){
+                    throw $err;
+                }finally{
+                    $this->unlock($sessin_redis_name);
                 }
-                if ($this->redis->get($this->session_prefix . $session_id)) {
-                    $SESSION = unserialize($this->redis->get($this->session_prefix . $session_id));
-                } else {
-                    $SESSION = [];
-                }
-                $this->unlock($session_id);
                 if (empty($SESSION)) $SESSION = [];
                 break;
             case 'sql':
@@ -275,14 +240,21 @@ class SessionHandler extends Kernel
         if (empty($SESSION)) {
             $SESSION = [];
         }
+        $sessin_redis_name  = $this->session_prefix . $session_id;
         switch (strtolower($this->APP_SESSION_MODE)) {
             case 'redis':
-                if (!$this->lock($session_id)) {
-                    throw new \Exception("Redis session lock fail. ");
+                try{
+                    if ($this->lock($sessin_redis_name)) {
+                        $session_datas = serialize($SESSION);
+                        $this->redis->setex($sessin_redis_name, intval($this->APP_SESSION_LIFETIME_SECONDS), $session_datas);
+                    }else{
+                        throw new \Exception("Redis session lock fail. ");
+                    }
+                }catch (\Exception $err){
+                    throw $err;
+                }finally{
+                    $this->unlock($sessin_redis_name);
                 }
-                $session_datas = serialize($SESSION);
-                $this->redis->setex($this->session_prefix . $session_id, intval($this->APP_SESSION_LIFETIME_SECONDS), $session_datas);
-                $this->unlock($session_id);
                 return true;
                 break;
             case 'sql':
