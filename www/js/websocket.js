@@ -28,11 +28,11 @@ var EunionzWebsocket = {
     getUrl: function () {
         return this.url;
     },
-    onopen: function () {
+    onopen: function (e) {
         console.log("connected to " + wsuri);
     },
-    onclose: function () {
-        onsole.log("connection closed (" + e.code + ")");
+    onclose: function (e) {
+        console.log("connection closed (" + e.code + ")");
     },
     onmessage: function (e) {
         alert("收到数据：" + e.data);
