@@ -65,7 +65,7 @@ class RedisLock extends Kernel
         }
         $this->server = self::getConfig($this->config_name , 'server');
         $this->port = self::getConfig($this->config_name , 'port');
-        $this->auth = self::getConfig($this->config_name , 'auth');
+        $this->auth = self::getConfig($this->config_name , 'password');
         $this->dbname = self::getConfig($this->config_name , 'dbname');
 
         if (false === $this->redis->connect($this->server, (int)$this->port)) {
