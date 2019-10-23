@@ -139,20 +139,28 @@ class Blade extends \cn\eunionz\core\Component
 
             $compiler = new \Xiaoler\Blade\Compilers\BladeCompiler($cachePath);
 
-            // 如过有需要，你可以添加自定义关键字
+            // 获取当前时间方法
             $compiler->directive('datetime', function ($timestamp) {
                 return preg_replace('/\((.+?)\)/', '<?php echo date("Y-m-d H:i:s", $1); ?>', $timestamp);
             });
 
-            // 如过有需要，你可以添加自定义关键字
+            // 获取语言包方法
             $compiler->directive('getLang', function ($key) {
                 return str_replace('#29;', ')', str_replace('#28;', '(', preg_replace('/\((.+?)\)/', '<?php echo $core->getLang($1); ?>', $key)));
             });
 
-            // 如过有需要，你可以添加自定义关键字
+            // 生成csrf token方法
             $compiler->directive('csrftoken', function () {
                 return '<?php echo $core->csrftoken(); ?>';
             });
+
+            // 加载视图配置方法
+            $compiler->directive('loadConfig', function ($file) {
+                $file =  '/' . trim($file , "()'\"\\/");
+                return  '<?php include $core->_view_vars["APP_THEME_REALPATH"] . "' . $file .'.config.php"; ?>';
+            });
+
+
 
             $engine = new \Xiaoler\Blade\Engines\CompilerEngine($compiler);
             $finder = new \Xiaoler\Blade\FileViewFinder($view_dirs);

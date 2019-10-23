@@ -59,9 +59,6 @@ clientversion={{$GET['clientversion'] or 0}}
 @endwhile
 <hr/>
 APP_PACKAGE_BASE_PATH = {{APP_PACKAGE_BASE_PATH}}
-<hr/>
-@include('home/home/a', ['aaa'=>APP_PACKAGE_BASE_PATH])
-<hr/>
 <?PHP
     print_r($SESSION);
     print_r($COOKIE);
@@ -71,7 +68,9 @@ print_r($GET);
 print_r($POST);
 print_r($REQUEST);
 print_r($FILES);
+
 ?>
+
 
 <hr/>
 @getLang('error_webservice_operation','333')
@@ -84,7 +83,7 @@ print_r($FILES);
 <script type="text/javascript" src="{{APP_PATH}}www/js/websocket.js"></script>
 
 <script type="text/javascript">
-    var wsuri = "ws://192.168.1.135:9999/websocket/home/index/44/6.shtml?a=44&b=44";
+    var wsuri = "wss://www.ihltx.com/websocket/home/index/44/6.shtml?a=44&b=44";
     EunionzWebsocket.onmessage=function (e) {
         alert('接收到的数据为：' + e.data);
     };
@@ -99,5 +98,15 @@ print_r($FILES);
     <input type="text" id="message">
     <a href="javascript:send()">发送数据</a>
 </div>
+<hr/>====================================================<hr/>
+@loadConfig('conf/1')
+<hr/><hr/><hr/><hr/>
+
+@for($i = 0; $i < $b; $i++)
+<h1>{{$i}}</h1>
+@include('home/home/a', ['aaa'=>APP_PACKAGE_BASE_PATH])
+@endfor
+<hr/><hr/><hr/><hr/>
+
 @endsection
 
