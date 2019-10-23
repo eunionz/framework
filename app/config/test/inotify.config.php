@@ -41,9 +41,10 @@ return array(
      * @var array
      */
     'APP_INOFITY_FOLDER_LISTS' => array(APP_PACKAGE_BASE_PATH),
+
     /**
-     * 是否阻塞模式  0--非阻塞模式  1--阻塞模式
-     * @var int
+     * 是否阻塞模式  false--非阻塞模式  true--阻塞模式
+     * @var bool
      */
-    'APP_INOFITY_BLOCKING_MODE' => 1,
+    'APP_INOFITY_BLOCKING_MODE' => true,
 );

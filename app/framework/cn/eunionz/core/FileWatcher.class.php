@@ -50,10 +50,10 @@ class FileWatcher extends Kernel
     private static $APP_INOFITY_FOLDER_LISTS = array();
 
     /**
-     * 是否阻塞模式  0--非阻塞模式  1--阻塞模式
+     * 是否阻塞模式  false--非阻塞模式  true--阻塞模式
      * @var int
      */
-    private static $APP_INOFITY_BLOCKING_MODE = 1;
+    private static $APP_INOFITY_BLOCKING_MODE = true;
 
     //定义主进程ID文件存储文件夹
     private static $APP_SWOOLE_MASTER_PID_DIR = APP_REAL_PATH . APP_STORAGE_NAME . APP_DS . 'pids' . APP_DS;
