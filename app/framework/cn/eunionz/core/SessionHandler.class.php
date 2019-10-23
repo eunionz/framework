@@ -113,8 +113,8 @@ class SessionHandler extends Kernel
                 if (false === $this->redis->connect($this->APP_SESSION_REDIS_CONFIG['server'], (int)$this->APP_SESSION_REDIS_CONFIG['port'])) {
                     throw new \Exception(ctx()->getI18n()->getLang("error_session_redis_connect_fail", array($this->APP_SESSION_REDIS_CONFIG['server'] . ':' . $this->APP_SESSION_REDIS_CONFIG['port'])));
                 }
-                if ("" !== $this->APP_SESSION_REDIS_CONFIG['auth']) {
-                    if (!$this->redis->auth($this->APP_SESSION_REDIS_CONFIG['auth'])) {
+                if ("" !== $this->APP_SESSION_REDIS_CONFIG['password']) {
+                    if (!$this->redis->auth($this->APP_SESSION_REDIS_CONFIG['password'])) {
                         throw new \Exception(ctx()->getI18n()->getLang("error_session_redis_auth_fail", array($this->APP_SESSION_REDIS_CONFIG['server'] . ':' . $this->APP_SESSION_REDIS_CONFIG['port'])));
                     }
                 }
