@@ -28,13 +28,13 @@ return array(
                 'service_id' => 'ms_usercenter_1',       //微服务ID
                 'service_name' => 'ms_usercenter',       //微服务名称
                 'service_address' => '192.168.1.135',    //微服务IP地址
-                'service_port' => 81,                    //微服务端口
+                'service_port' => 80,                    //微服务端口
                 'service_tags' => ['http'],              //微服务标签
                 'service_metas' => ['version' => "1.0"],      //微服务元数据
                 'service_health_check' => [              //微服务心跳检查配置
                     'id' => 'ms_usercenter_1_check',
-                    'name' => '"HTTP API ON PORT 81',
-                    'http' => 'http://192.168.1.135:81/health.shtml',
+                    'name' => '"HTTP API ON PORT 80',
+                    'http' => 'http://192.168.1.135:80/health.shtml',
                     'Interval' => '10s',
                     'timeout' => '1s',
                 ],
@@ -75,7 +75,7 @@ return array(
              * 监听小于1024端口需要root权限
              * 如果此端口被占用server->start时会失败
              */
-            'port' => 81,
+            'port' => 80,
 
             /**
              * 是否支持 https 协议
@@ -195,6 +195,19 @@ return array(
 
 
             /**
+             *  WebSocket服务器可设置on_open事件回调, 当WebSocket客户端与服务器建立连接并完成握手后会回调此函数
+             *  $req 是一个Http请求对象，包含了客户端发来的握手请求信息
+             *  onOpen事件函数中可以调用push向客户端发送数据或者调用close关闭连接
+             *  onOpen事件回调是可选的
+             * 回调方法格式：  function($server, $request, $cfg){}
+             * $server  -- 服务器对象
+             * $request  --请求对象
+             * $cfg--为当前服务器配置
+             */
+            'on_open' => array('\\package\\application\\HttpServer', 'onOpen'),
+
+
+            /**
              * WebSocket服务器可设置on_message事件回调，当且仅当 open_websocket_protocol 参数为 true时有效，当WebSocket服务器收到来自客户端的数据帧时会回调此事件
              * 回调方法格式：  function($server, $frame, $cfg){}
              * $server  --Server对象
@@ -241,7 +254,7 @@ return array(
                 /**
                  * 启用HTTP2协议解析，需要依赖--enable-http2编译选项。默认为false
                  */
-                'open_http2_protocol' => true,
+                'open_http2_protocol' => false,
 
                 /**
                  * 启用websocket协议处理，Swoole\WebSocket\Server会自动启用此选项。设置为false表示关闭websocket协议处理。
@@ -270,7 +283,7 @@ return array(
                 'service_health_check' => [              //微服务心跳检查配置
                     'id' => 'ms_usercenter_https_1_check',
                     'name' => '"HTTP API ON PORT 8443',
-                    'http' => 'https://192.168.1.135/health.shtml',
+                    'http' => 'https://192.168.1.135:8443/health.shtml',
                     'Interval' => '10s',
                     'timeout' => '1s',
                 ],
@@ -429,6 +442,19 @@ return array(
 //             */
 //            'on_handshake'=> array('\\package\\application\\HttpServer', 'onHandShake'),
 
+
+//            /**
+//             *  WebSocket服务器可设置on_open事件回调, 当WebSocket客户端与服务器建立连接并完成握手后会回调此函数
+//             *  $req 是一个Http请求对象，包含了客户端发来的握手请求信息
+//             *  onOpen事件函数中可以调用push向客户端发送数据或者调用close关闭连接
+//             *  onOpen事件回调是可选的
+//             * 回调方法格式：  function($server, $request, $cfg){}
+//             * $server  -- 服务器对象
+//             * $request  --请求对象
+//             * $cfg--为当前服务器配置
+//             */
+            'on_open' => array('\\package\\application\\HttpServer', 'onOpen'),
+
             /**
              * WebSocket服务器可设置on_message事件回调，当且仅当 open_websocket_protocol 参数为 true时有效，当WebSocket服务器收到来自客户端的数据帧时会回调此事件
              * 回调方法格式：  function($server, $frame, $cfg){}
@@ -445,7 +471,7 @@ return array(
              *
              * $cfg--为当前服务器配置
              */
-//            'on_message' => array('\\package\\application\\HttpServer', 'onMessage'),
+            'on_message' => array('\\package\\application\\HttpServer', 'onMessage'),
 
             /**
              * Udp服务器可设置 on_packet 事件回调，接收到UDP数据包时回调此函数，发生在worker进程中
@@ -477,17 +503,17 @@ return array(
                  * 启用websocket协议处理，Swoole\WebSocket\Server会自动启用此选项。设置为false表示关闭websocket协议处理。
                  * 设置open_websocket_protocol选项为true后，会自动设置open_http_protocol协议也为true。
                  */
-                'open_websocket_protocol' => false,
+                'open_websocket_protocol' => true,
 
                 /**
                  * 同上
                  */
-                'ssl_cert_file' => APP_REAL_PATH . 'ssl/xizangjiancai.cn.crt',
+                'ssl_cert_file' => APP_REAL_PATH . 'ssl/www.ihltx.com.crt',
 
                 /**
                  * 同上
                  */
-                'ssl_key_file' => APP_REAL_PATH . 'ssl/xizangjiancai.cn.key',
+                'ssl_key_file' => APP_REAL_PATH . 'ssl/www.ihltx.com.key',
             ),
         ),
         /**
@@ -534,7 +560,7 @@ return array(
              * 服务器配置启用/禁用
              * true--启用  false--禁用
              */
-            'enable' => true,
+            'enable' => false,
 
             /**
              * 服务器监听主机
@@ -766,7 +792,7 @@ return array(
              * 服务器配置启用/禁用
              * true--启用  false--禁用
              */
-            'enable' => true,
+            'enable' => false,
 
             /**
              * 服务器监听主机
@@ -1002,7 +1028,7 @@ return array(
              * 服务器配置启用/禁用
              * true--启用  false--禁用
              */
-            'enable' => true,
+            'enable' => false,
             /**
              * 服务器监听主机
              * 参数用来指定监听的ip地址，如127.0.0.1，或者外网地址，或者0.0.0.0监听全部地址
@@ -1226,7 +1252,7 @@ return array(
              * 服务器配置启用/禁用
              * true--启用  false--禁用
              */
-            'enable' => true,
+            'enable' => false,
             /**
              * 服务器监听主机
              * 参数用来指定监听的ip地址，如127.0.0.1，或者外网地址，或者0.0.0.0监听全部地址
@@ -1437,7 +1463,7 @@ return array(
              * 服务器配置启用/禁用
              * true--启用  false--禁用
              */
-            'enable' => true,
+            'enable' => false,
             /**
              * 服务器监听主机
              * 参数用来指定监听的ip地址，如127.0.0.1，或者外网地址，或者0.0.0.0监听全部地址
@@ -2165,7 +2191,7 @@ return array(
          * $serv->set(array('chroot' => '/data/server/'));
          * 此配置在swoole-1.7.9以上版本可用
          */
-      'chroot' => '/dev/null/',
+      //'chroot' => '/dev/null/',
 
         /**
          * 在Server启动时自动将master进程的PID写入到文件，在Server关闭时自动删除PID文件。

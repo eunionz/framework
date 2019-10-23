@@ -372,6 +372,7 @@ class Kernel
         // reflect call
         $controller = new $classes;
         // compress output
+        ctx()->getResponse()->_is_ob_start = true;
         if (ctx()->getResponse()->_is_ob_start) {
             ctx()->getResponse()->ob_start();
         }

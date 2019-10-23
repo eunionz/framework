@@ -188,8 +188,8 @@ return array(
     'APP_SESSION_REDIS_CONFIG' => array(
         'server' => '192.168.1.125',     //从redis服务器地址或域名
         'port' => '6377',                //从redis服务器端口
-        'auth' => 'zFymUyDG',        //从redis密码
-        'dbname' => 14,                     ////redis服务器选择的数据库编号
+        'password' => 'zFymUyDG',        //从redis密码
+        'dbname' => 0,                     ////redis服务器选择的数据库编号
     ),
 
     // SESSION 目录  file模式有效

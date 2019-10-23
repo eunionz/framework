@@ -201,6 +201,11 @@ class Server extends Kernel
      */
     public function onRequest($request, $response, $cfg)
     {
+        $open_http2_protocol = false;
+        $output_html = '';
+        if(isset($cfg['server_params']) && isset($cfg['server_params']['open_http2_protocol'])){
+            $open_http2_protocol = $cfg['server_params']['open_http2_protocol'];
+        }
 
         @libxml_disable_entity_loader(true);
 
@@ -271,11 +276,25 @@ class Server extends Kernel
             //初始化运行时文件夹
             if (!is_dir(ctx()->getAppRuntimeRealPath())) {
                 @mkdir(ctx()->getAppRuntimeRealPath());
-                @mkdir(ctx()->getAppRuntimeRealPath() . 'cache');
-                @mkdir(ctx()->getAppRuntimeRealPath() . 'html');
-                @mkdir(ctx()->getAppRuntimeRealPath() . 'logs');
-                @mkdir(ctx()->getAppRuntimeRealPath() . 'session');
+            }
+            if (!is_dir(ctx()->getAppRuntimeRealPath(). 'cache')) {
+                @mkdir(ctx()->getAppRuntimeRealPath(). 'cache');
+            }
+            if (!is_dir(ctx()->getAppRuntimeRealPath(). 'html')) {
+                @mkdir(ctx()->getAppRuntimeRealPath(). 'html');
+            }
+            if (!is_dir(ctx()->getAppRuntimeRealPath(). 'logs')) {
+                @mkdir(ctx()->getAppRuntimeRealPath(). 'logs');
+            }
+            if (!is_dir(ctx()->getAppRuntimeRealPath(). 'session')) {
+                @mkdir(ctx()->getAppRuntimeRealPath(). 'session');
                 @mkdir(ctx()->getAppRuntimeRealPath() . 'uploads');
+                @mkdir(ctx()->getAppRuntimeRealPath() . 'templates_c');
+            }
+            if (!is_dir(ctx()->getAppRuntimeRealPath(). 'uploads')) {
+                @mkdir(ctx()->getAppRuntimeRealPath(). 'uploads');
+            }
+            if (!is_dir(ctx()->getAppRuntimeRealPath(). 'templates_c')) {
                 @mkdir(ctx()->getAppRuntimeRealPath() . 'templates_c');
             }
 
@@ -347,15 +366,12 @@ class Server extends Kernel
                 return;
             }
 
-
             //检查是否cli模式
             if (strtolower(php_sapi_name()) == 'cli') {
                 ctx()->setIsCli(true);
             }
 
-
             @ini_set("session.gc_maxlifetime", strval(self::getConfig('app', 'APP_SESSION_LIFETIME_SECONDS')));
-
 
             // parse controller
             $route_datas = $this->loadCore('Router')->parse_controller();
@@ -365,8 +381,6 @@ class Server extends Kernel
                 self::destoryContext();
                 return;
             }
-
-
 
             // fire hook event
             if (!$this->loadCore('Hook')->call_hook('override_router')) {
@@ -383,9 +397,13 @@ class Server extends Kernel
             $controller = new $classes;
 
             // compress output
-            if (!isset($controller->_is_ob_start) || !$controller->_is_ob_start) {
-                ctx()->getResponse()->_is_ob_start = false;
-            }
+            ctx()->getResponse()->_is_ob_start = true;
+//            if (!isset($controller->_is_ob_start) || !$controller->_is_ob_start) {
+//                ctx()->getResponse()->_is_ob_start = false;
+//            }
+//            if($open_http2_protocol){
+//                ctx()->getResponse()->_is_ob_start = true;
+//            }
             if (ctx()->getResponse()->_is_ob_start) {
                 ctx()->getResponse()->ob_start();
             }
@@ -552,11 +570,13 @@ class Server extends Kernel
                 if (!$controller->_is_json_return) {
                     $trace_html = ctx()->outputTrace($controller, true);
                 }
-                ctx()->getResponse()->write($html . $trace_html);
+                $output_html = $html . $trace_html;
+                //ctx()->getResponse()->write($html . $trace_html);
             } else {
                 if (!$controller->_is_json_return) {
                     $trace_html = ctx()->outputTrace($controller, true);
-                    ctx()->getResponse()->write($trace_html);
+                    $output_html = $trace_html;
+                    //ctx()->getResponse()->write($trace_html);
                 }
             }
         } catch (\Exception $err) {
@@ -602,9 +622,10 @@ class Server extends Kernel
             );
             $html = $this->loadComponent('blade')->display('error/error_' . $client_type . '_' . $error_code, $arr, true);
             $trace_html = ctx()->outputTrace($this->loadComponent('blade'), true);
-            ctx()->getResponse()->write($html . $trace_html);
+            $output_html = $html . $trace_html;
+//            ctx()->getResponse()->write($html . $trace_html);
         }
-        ctx()->getResponse()->end();
+        ctx()->getResponse()->end($output_html);
         self::destoryContext();
     }
 
@@ -632,8 +653,6 @@ class Server extends Kernel
             'msg' => '',
             'header' => [],
         ];
-
-
         @libxml_disable_entity_loader(true);
         //初始化请求对像及响应对像，有状态对像必须为短暂生命周期对像，无状态对像可为单例生命周期对像
         self::setRequestFd($frame->fd);
@@ -646,6 +665,10 @@ class Server extends Kernel
         self::setContext($ctx);
         $header = [];
         try {
+
+            //设置脚本最大执行时间
+            set_time_limit(self::getConfig('app', 'APP_DEFAULT_SCRIPT_EXECUTE_TIMEOUT_SECONDS'));
+
             $data = json_decode($frame->data, true);
             $opcode = $frame->opcode;
             $finish = $frame->finish;
@@ -672,17 +695,6 @@ class Server extends Kernel
             }
 
 
-            //当前店铺ID，如果店铺为-1,则返回错误
-            $shop_id = (isset($header['shopid']) && $header['shopid']) ? $header['shopid'] : -1;
-            if ($shop_id < 0) {
-                $websocket_return['status'] = 1;
-                $websocket_return['msg'] = "not get header shopid，call websocket service failure!";
-                $websocket_return['header'] = $header;
-                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
-                self::destoryContext();
-                return;
-            }
-
 
             $url = (isset($header['url']) && $header['url']) ? $header['url'] : '';
             if (!$url) {
@@ -703,7 +715,45 @@ class Server extends Kernel
                     ctx()->getRequest()->request($arr_values[0], isset($arr_values[1]) ? $arr_values[1] : '');
                 }
             }
+            if(isset($urls['scheme'])){
+                $host = $urls['host'];
+                if(strtolower($urls['scheme'])=='wss'){
+                    //安全协议
+                    $port = $urls['port']??443;
+                    ctx()->getRequest()->server("HTTP_HOST",$host . ($port==443?'':(':' . $urls['port'])));
+                }else{
+                    $port = $urls['port']??80;
+                    ctx()->getRequest()->server("HTTP_HOST",$host . ($port==80?'':(':' . $urls['port'])));
+                }
+            }
 
+            //获取当前SHOP_ID
+            $shop_id = 0;
+            if (self::getConfig('app', 'APP_SET_SHOP_ID_BY_HTTP_HOST_CALLBACK')) {
+                $CALLBACK = self::getConfig('app', 'APP_SET_SHOP_ID_BY_HTTP_HOST_CALLBACK');
+                if (is_string($CALLBACK)) {
+                    if (function_exists($CALLBACK)) {
+                        $shop_id = $CALLBACK(ctx()->getRequest()->server("HTTP_HOST"));
+                    }
+                } elseif (is_array($CALLBACK)) {
+                    if (class_exists($CALLBACK[0]) && method_exists($CALLBACK[0], $CALLBACK[1])) {
+                        $obj = new $CALLBACK[0]();
+                        $method = $CALLBACK[1];
+                        $shop_id = $obj->$method(ctx()->getRequest()->server("HTTP_HOST"));
+                    }
+                }
+            }
+
+            //当前店铺ID，如果店铺为-1,则返回错误
+//            $shop_id = (isset($header['shopid']) && $header['shopid']) ? $header['shopid'] : -1;
+            if ($shop_id < 0) {
+                $websocket_return['status'] = 1;
+                $websocket_return['msg'] = "not get header shopid，call websocket service failure!";
+                $websocket_return['header'] = $header;
+                $server->push($frame->fd, json_encode($websocket_return), $opcode, true);
+                self::destoryContext();
+                return;
+            }
 
             //当前会话ID，如果为空则将生成新会话，否则基于会话ID连接已经存在的会话
             $session_id = (isset($header['sessionid']) && $header['sessionid']) ? $header['sessionid'] : '';

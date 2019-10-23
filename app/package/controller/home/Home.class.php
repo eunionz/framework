@@ -38,6 +38,8 @@ use Symfony\Component\Yaml\Yaml;
 class Home extends \cn\eunionz\core\Controller
 {
 
+    public $_is_ob_start = true;
+
     /**
      * is cache view result
      * @var bool

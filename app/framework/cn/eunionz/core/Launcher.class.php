@@ -13,6 +13,7 @@ namespace cn\eunionz\core;
 use cn\eunionz\component\consul\Consul;
 use cn\eunionz\exception\ControllerNotFoundException;
 use cn\eunionz\exception\MethodNotFoundException;
+use phpDocumentor\Reflection\Types\Integer;
 use RuntimeException;
 
 defined('APP_IN') or exit('Access Denied');
@@ -164,9 +165,9 @@ class Launcher extends \cn\eunionz\core\Kernel
                     cli_set_process_title($server_process_name);
                     file_put_contents($server_pid_file, $pid);
 
-
+                    $main_server_set_params = null;
                     if (strtolower($main_server_cfg['server_type']) == 'http') {
-                        self::$_swoole_main_server = new \Swoole\Http\Server($main_server_cfg['host'], $main_server_cfg['port'], $main_server_cfg['mode'], $main_server_cfg['sock_type']);
+                        self::$_swoole_main_server = new \Swoole\WebSocket\Server($main_server_cfg['host'], $main_server_cfg['port'], $main_server_cfg['mode'], $main_server_cfg['sock_type']);
                         if (!self::$_swoole_main_server) {
                             throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_main_server_create_failure'));
                         }
@@ -175,7 +176,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                         self::$_swoole_main_server->set($main_server_set_params);
 
                     } elseif (strtolower($main_server_cfg['server_type']) == 'https') {
-                        self::$_swoole_main_server = new \Swoole\Http\Server($main_server_cfg['host'], $main_server_cfg['port'], $main_server_cfg['mode'], $main_server_cfg['sock_type']);
+                        self::$_swoole_main_server = new \Swoole\WebSocket\Server($main_server_cfg['host'], $main_server_cfg['port'], $main_server_cfg['mode'], $main_server_cfg['sock_type']);
                         if (!self::$_swoole_main_server) {
                             throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_main_server_create_failure'));
                         }
@@ -183,7 +184,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                         $main_server_set_params = array_merge($main_server_params, $main_server_cfg['server_params']);
                         self::$_swoole_main_server->set($main_server_set_params);
                     } elseif (strtolower($main_server_cfg['server_type']) == 'websocket') {
-                        self::$_swoole_main_server = new \Swoole\WebSocket\Server($main_server_cfg['host'], $main_server_cfg['port']);
+                        self::$_swoole_main_server = new \Swoole\WebSocket\Server($main_server_cfg['host'], $main_server_cfg['port'], $main_server_cfg['mode'], $main_server_cfg['sock_type']);
                         if (!self::$_swoole_main_server) {
                             throw new \cn\eunionz\exception\BaseException($i18n->getLang('error_main_server_create_failure'));
                         }
@@ -209,7 +210,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                         self::$_swoole_main_server->set($main_server_set_params);
 
                     }
-
+                    $main_server_cfg['server_params'] = $main_server_set_params;
 
                     consoleln(date('Y-m-d H:i:s') . "  主服务器【" . $server_index . '(' . $main_server_cfg['server_type'] . ")】启动：  Host: " . $main_server_cfg['host'] . " Port: " . $main_server_cfg['port']);
 
@@ -443,7 +444,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                         self::consoleln($this->console_line);
                     }
 
-                    self::$_swoole_main_server->start();
+                    @self::$_swoole_main_server->start();
 
                     if (isset($main_server_cfg['on_end']) && $main_server_cfg['on_end']) {
                         list($class, $method) = $main_server_cfg['on_end'];
@@ -507,6 +508,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                     }
                     $main_server_params = self::getConfig('server', 'main_server_params');
                     $main_server_set_params = array_merge($main_server_params, $main_server_cfg['server_params']);
+                    $main_server_cfg['server_params'] = $main_server_set_params;
 
                     //self::$_swoole_main_server->set($main_server_set_params);
 
@@ -520,6 +522,7 @@ class Launcher extends \cn\eunionz\core\Kernel
                                 if (in_array(strtolower($main_server_cfg['server_type']), ['rpc', 'grpc'])) {
                                     $service_params = $cfg['server_params'];
                                 }
+                                $server_cfgs[$index]['server_params'] = $service_params;
                                 self::$_swoole_other_servers[$index]->set($service_params);
                             }
                         }

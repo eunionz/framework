@@ -65,9 +65,9 @@ return array(
                 'dbname' => 1,                         //主从redis服务器选择的数据库编号
                 'add_servers' => array(               //配置从redis服务器
                     array(//主(写)服务器
-                        'server' => '192.168.1.125',         //从redis服务器地址或域名
-                        'port' => '6377',                //从redis服务器端口
-                        'password' => 'zFymUyDG',          //从redis密码
+                        'server' => '127.0.0.1',         //从redis服务器地址或域名
+                        'port' => '6379',                //从redis服务器端口
+                        'password' => '123456',          //从redis密码
                     ),
 //                    array(
 //                        'server' => '127.0.0.1',         //从redis服务器地址或域名
@@ -186,10 +186,10 @@ return array(
     'APP_SESSION_MODE' => 'redis',  //session，模式：file|redis|sql,使用sql需要将 php.ini 中  session.save_handler = files 修改为 User
     //Redis会话配置，仅在APP_SESSION_MODE = redis 有效
     'APP_SESSION_REDIS_CONFIG' => array(
-        'server' => '192.168.1.125',     //从redis服务器地址或域名
-        'port' => '6377',                //从redis服务器端口
-        'auth' => 'zFymUyDG',        //从redis密码
-        'dbname' => 14,                     ////redis服务器选择的数据库编号
+        'server' => '127.0.0.1',     //从redis服务器地址或域名
+        'port' => '6379',                //从redis服务器端口
+        'password' => '123456',        //从redis密码
+        'dbname' => 0,                     ////redis服务器选择的数据库编号
     ),
 
     // SESSION 目录  file模式有效
