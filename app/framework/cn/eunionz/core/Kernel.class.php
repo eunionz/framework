@@ -811,8 +811,11 @@ class Kernel
     public function http_get_call(string $serice_conf_name, string $url, array $params = array(), bool $is_admin = false, array $add_headers = array())
     {
         $config = self::getConfig('http', $serice_conf_name);
-        $httpclient = new \package\application\HttpClient($config['host'], $config['port'], $config['is_ssl'], $config['timeout']);
-        return $httpclient->http_get($url, $params, $is_admin, $add_headers);
+        if(isset($config['host']) && isset($config['port']) && isset($config['is_ssl']) && isset($config['timeout'])){
+            $httpclient = new \package\application\HttpClient($config['host'], $config['port'], $config['is_ssl'], $config['timeout']);
+            return $httpclient->http_get($url, $params, $is_admin, $add_headers);
+        }
+        return "";
     }
 
     /**
@@ -829,8 +832,11 @@ class Kernel
     public function http_post_call(string $serice_conf_name, string $url, array $params = array(), bool $is_admin = false, array $add_headers = array(), array $files = array())
     {
         $config = self::getConfig('http', $serice_conf_name);
-        $httpclient = new \package\application\HttpClient($config['host'], $config['port'], $config['is_ssl'], $config['timeout']);
-        return $httpclient->http_post($url, $params, $is_admin, $add_headers, $files);
+        if(isset($config['host']) && isset($config['port']) && isset($config['is_ssl']) && isset($config['timeout'])){
+            $httpclient = new \package\application\HttpClient($config['host'], $config['port'], $config['is_ssl'], $config['timeout']);
+            return $httpclient->http_post($url, $params, $is_admin, $add_headers, $files);
+        }
+        return "";
     }
 
 
