@@ -41,15 +41,16 @@ return array(
     'APP_KID_SPLIT_DATABASE_CONFIG_RULES' => array(
         /**
          *  1、limit array(n,m)
-         *     n--描述该分区最多可以承载的B2C站点KID总个数(此处KID总个数不代表子店铺KID个数)，如果为0表示不限制
-         *     m--描述该分区最多可以承载的B2B2C平台站点KID总个数(此处KID总个数不代表子店铺KID个数)，如果为0表示不限制
-         *  2、range 描述该分区KID范围(包括该分区子店铺KID)
-         *      测试/稿件/子店铺KID     110000000000 - 110999999999        12位KID，测试/稿件的B2C/B2B2C 客户KID/平台KID，以及子店铺KID均位于该分区
-         *      客户平台/子店铺KID      110000000000 - 199999999999        12位KID，用做测试 B2C/B2B2C 客户KID/平台KID以及子店铺KID
+         *     n--描述该分区最多可以承载的B2C站点KID总个数，如果为0表示不限制
+         *     m--描述该分区最多可以承载的B2B2C平台站点KID总个数，如果为0表示不限制
+         *  2、range 描述该分区KID范围
+         *      KID     1090000000 - 1099999999         9位KID，稿件B2C/B2B2C KID，该部份站点因为访问量少因此被全部定义在同一个数据库分区比如db.config.php中，通过标识分区是
+         *      KID     1000000000 - 1999999999        10位KID，B2C/B2B2C 客户KID/平台KID，客户/冒烟测试/分公司 KID，通过标识区分是客户KID、冒烟测试KID、分公司KID
          */
-        0 => array('limit' => array(0, 0), 'range' => array(110000000000, 110999999999)),           //表示KID界于    由前三位决定所属数据库分区，例如110，110-110=0，使用db.config.php分区配置，测试及稿件用KID
-        1 => array('limit' => array(3000, 150), 'range' => array(111000000000, 111999999999)),      //表示KID界于    由前三位决定所属数据库分区，例如111，111-110=1，使用db1.config.php分区配置
-        2 => array('limit' => array(3000, 150), 'range' => array(112000000000, 112999999999)),      //表示KID界于    B2C/B2B2C的平台客户KID与B2B2C子店铺KID必须位于同一分区
+        0 => array('limit' => array(90000,90000), 'range' => array(1010000000, 1099999999)),            //表示KID界于    由前两位决定所属数据库分区，例如10，10-10=0，使用db.config.php分区配置
+        1 => array('limit' => array( 6000,  150), 'range' => array(1100000000, 1199999999)),            //表示KID界于    由前两位决定所属数据库分区，例如10，10-10=1，使用db1.config.php分区配置
+        2 => array('limit' => array( 3000,  150), 'range' => array(1200000000, 1299999999)),            //表示KID界于    由前两位决定所属数据库分区，例如11，11-10=2，使用db2.config.php分区配置
+        3 => array('limit' => array( 3000,  150), 'range' => array(1300000000, 1399999999)),            //表示KID界于    由前两位决定所属数据库分区，例如12，12-10=3，使用db3.config.php分区配置
     ),
     //定义核心缓存，系统所用一级缓存
     'CORE_CACHE_CONFIG' => array(
